@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "config:best-practices",
     "customManagers:dockerfileVersions"
   ],
   "terraform": {
@@ -41,10 +41,16 @@
       "enabled": false
     },
     {
-      "description": "Claude Code はほぼ毎日リリースされるので、週 1 回・公開から 3 日経ったものだけにする",
+      "description": "Claude Code はほぼ毎日リリースされるので、週 1 回にする（公開から 3 日待つのは best-practices の npm 向け設定で入る）",
       "matchPackageNames": ["@anthropic-ai/claude-code"],
-      "minimumReleaseAge": "3 days",
       "schedule": ["* 0-8 * * 1"]
+    },
+    {
+      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものを自動マージする。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出るが、automerge はここの設定が効く",
+      "matchFileNames": ["hands-on/**"],
+      "groupName": "hands-on",
+      "minimumReleaseAge": "3 days",
+      "automerge": true
     }
   ]
 }
