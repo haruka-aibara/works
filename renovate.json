@@ -47,10 +47,10 @@
       "schedule": ["* 0-8 * * 1"]
     },
     {
-      "description": "hands-on は動かさない学習用サンプルなので、月 1 回 1 本にまとめて自動マージする。脆弱性修正 PR は schedule と group を無視して個別に出るが、automerge はここの設定が効く",
+      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものを自動マージする。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出るが、automerge はここの設定が効く",
       "matchFileNames": ["hands-on/**"],
       "groupName": "hands-on",
-      "schedule": ["* 0-8 1 * *"],
+      "minimumReleaseAge": "3 days",
       "automerge": true
     }
   ]
