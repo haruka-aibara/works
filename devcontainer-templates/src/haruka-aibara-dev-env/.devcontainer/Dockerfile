@@ -13,7 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # from their official multi-arch images, pinned by tag + digest. Renovate's dockerfile manager
 # tracks both, so no per-arch SHA256 needs to be maintained here.
 COPY --from=ghcr.io/tofuutils/tenv:4.14.8@sha256:c4d6c6bc59a0e3266d9393f4470d4d43fcf45386f4035379410f92df0898bfcf /usr/local/bin/tenv /usr/bin/tenv
-COPY --from=ghcr.io/astral-sh/uv:0.11.21@sha256:ff07b86af50d4d9391d9daf4ff89ce427bc544f9aae87057e69a1cc0aa369946 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.19@sha256:04d046b13e60d6bcec73cbc5e1cad25d680dea90c8573340950a0ac2d1aef424 /uv /uvx /usr/local/bin/
 
 # Installing minimal set of essential system tools for development
 # Grouped in a single RUN command to reduce image layers
