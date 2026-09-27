@@ -2,9 +2,6 @@
 
 Amazon Bedrock Agents（classic）のエージェントを、Amazon Q Developer in chat applications（旧 AWS Chatbot）の Slack チャンネル設定につなぎ、Slack から会話できるようにするモジュール。
 
-旧リポジトリ `bedrock-slack-ai-agent` を履歴ごと取り込んだもの。
-過去の経緯は `git log -- modules/bedrock-agent-classic-slack` で辿れる。
-
 ## Bedrock Agents は classic 扱い
 
 このモジュールが使う Amazon Bedrock Agents（2023年11月リリース）は **Amazon Bedrock Agents Classic** に改称され、2026-07-30 からメンテナンスモードに入っている。

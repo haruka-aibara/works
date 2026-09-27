@@ -2,9 +2,6 @@
 
 AWS Budgets の日次コストが閾値を超えたら、Slack に通知するモジュール。
 
-旧リポジトリ `terraform-aws-budget-slack-notifier` を履歴ごと取り込んだもの。
-過去の経緯は `git log -- modules/aws-budget-slack-notifier` で辿れる。
-
 参考記事: https://zenn.dev/takehiro1111/articles/budget_slack_notify
 
 ## なぜこの作りか

@@ -2,9 +2,6 @@
 
 IAM Access Analyzer のポリシー生成を試すためのモジュール。
 
-旧リポジトリ `iam-access-analyzer-policy-generate` を履歴ごと取り込んだもの。
-過去の経緯は `git log -- modules/iam-access-analyzer-policy-generate` で辿れる。
-
 ## apply 後
 
 ポリシー生成そのものは Terraform ではやらない。

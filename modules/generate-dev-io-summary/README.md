@@ -4,9 +4,6 @@ DevelopersIO に前日投稿された記事を要約して、毎朝 Slack へ通
 
 ![image](https://github.com/user-attachments/assets/1aa0052e-ce90-41da-be98-f320f598cadb)
 
-旧リポジトリ `generate-dev-io-summary` を履歴ごと取り込んだもの。
-過去の経緯は `git log -- modules/generate-dev-io-summary` で辿れる。
-
 参考記事: https://dev.classmethod.jp/articles/generate-dev-io-summary/
 
 ## コードの外にある前提
