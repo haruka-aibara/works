@@ -162,7 +162,7 @@ blockquote p{margin:.4rem 0}
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　「このアプリ、もう要らないので消しておいて」と頼まれました。クラスタを見て、消すべきものが分かりますか。</p>
+<p class="q"><b>確認問題</b> 「このアプリ、もう要らないので消しておいて」と頼まれました。クラスタを見て、消すべきものが分かりますか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -223,16 +223,16 @@ blockquote p{margin:.4rem 0}
   <text x="36" y="282" font-size="10" fill="var(--muted)">（共通の 80 行はここに 1 度だけ）</text>
 
   <g font-size="10" fill="var(--ink)">
-    <rect x="350" y="206" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="222">values-dev.yaml　replicaCount: 1</text>
-    <rect x="350" y="234" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="250">values-staging.yaml　replicaCount: 2</text>
-    <rect x="350" y="262" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="278">values-prod.yaml　replicaCount: 6</text>
+    <rect x="350" y="206" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="222">values-dev.yaml replicaCount: 1</text>
+    <rect x="350" y="234" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="250">values-staging.yaml replicaCount: 2</text>
+    <rect x="350" y="262" width="330" height="24" rx="6" fill="var(--lane)"/><text x="364" y="278">values-prod.yaml replicaCount: 6</text>
   </g>
 </svg>
 <figcaption>環境差は「ファイルの複製」から「値の一覧」になります。この時点で差分レビューの対象が 80 行の YAML ではなく数行の値になる、というのが実務での効き目です。</figcaption>
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　テンプレートと値を分けました。これで「アプリ一式を他のチームに渡す」ことはできるようになったでしょうか。</p>
+<p class="q"><b>確認問題</b> テンプレートと値を分けました。これで「アプリ一式を他のチームに渡す」ことはできるようになったでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -309,7 +309,7 @@ blockquote p{margin:.4rem 0}
 <p>違うのは状態の持ち方です。Terraform は tfstate をどこに置くか自分で決めますが、Helm は次のステップで見るとおり、前回送った内容をクラスタ内に自動で貯めます。また <code>terraform plan</code> に当たる標準コマンドはなく、<code>helm template</code> で生成結果を読むか helm-diff プラグインを足すことになります。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　<code>helm install</code> したあと <code>kubectl get deployment</code> で見えるのは、普通の Deployment ですか。それとも Helm 専用の何かですか。</p>
+<p class="q"><b>確認問題</b> <code>helm install</code> したあと <code>kubectl get deployment</code> で見えるのは、普通の Deployment ですか。それとも Helm 専用の何かですか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -372,7 +372,7 @@ blockquote p{margin:.4rem 0}
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　<code>helm upgrade</code> したら、前まであった Ingress がクラスタから消えていました。バグでしょうか。</p>
+<p class="q"><b>確認問題</b> <code>helm upgrade</code> したら、前まであった Ingress がクラスタから消えていました。バグでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -445,7 +445,7 @@ blockquote p{margin:.4rem 0}
     <rect x="20" y="206" width="440" height="22" rx="4" fill="var(--card)" stroke="var(--c2)"/>
     <text x="34" y="221" fill="var(--c2)">--set image.tag=1.4.1</text>
     <rect x="20" y="232" width="440" height="22" rx="4" fill="var(--card)" stroke="var(--line)"/>
-    <text x="34" y="247" fill="var(--ink)">-f values-prod.yaml　（-f が複数なら後ろのファイルが勝つ）</text>
+    <text x="34" y="247" fill="var(--ink)">-f values-prod.yaml （-f が複数なら後ろのファイルが勝つ）</text>
     <rect x="20" y="258" width="440" height="22" rx="4" fill="var(--card)" stroke="var(--line)"/>
     <text x="34" y="273" fill="var(--ink)">チャート同梱の values.yaml（既定値）</text>
   </g>
@@ -466,7 +466,7 @@ blockquote p{margin:.4rem 0}
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　他人のチャートを <code>helm pull</code> で落とし、中の <code>values.yaml</code> を直接書き換えて運用しています。何が起きますか。</p>
+<p class="q"><b>確認問題</b> 他人のチャートを <code>helm pull</code> で落とし、中の <code>values.yaml</code> を直接書き換えて運用しています。何が起きますか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">

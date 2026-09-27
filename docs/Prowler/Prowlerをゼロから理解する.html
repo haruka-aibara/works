@@ -125,7 +125,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <rect x="175" y="228" width="430" height="50" rx="10" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="2"/>
 <text x="390" y="259" text-anchor="middle" fill="var(--stop)" font-weight="700" font-size="14">どちらもエラーは出ない・通知も来ない</text></svg><figcaption>右側の 3 つは、それ自体が攻撃されたわけではありません。誰かが正しい権限で、正しい手順で作った状態です。だから監視やアラートの対象にもならず、次に誰かが見に行くまで残り続けます。</figcaption></figure>
 <p>では手で確認すればよいか。対象は「アカウント × リージョン × サービス × リソース」です。1 アカウント 100 リソースなら何とかなりますが、アカウントが 20 個あればもう現実的ではありません。そして一度確認しても、それは<strong>その日を写した写真</strong>にすぎません。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　「作るときにレビューする」というルールを徹底すれば、この問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決しません。</strong> 作成時のレビューは作成時点しか見ていないからです。時間が経って変わった状態は捉えられませんし、レビューを通さずに作られたリソースも残ります。必要なのは「いまどうなっているか」を繰り返し確かめる仕組みです。ただし、ここで次の問題にぶつかります——<strong>何をもって「正しい」とするのか</strong>です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 「作るときにレビューする」というルールを徹底すれば、この問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決しません。</strong> 作成時のレビューは作成時点しか見ていないからです。時間が経って変わった状態は捉えられませんし、レビューを通さずに作られたリソースも残ります。必要なのは「いまどうなっているか」を繰り返し確かめる仕組みです。ただし、ここで次の問題にぶつかります——<strong>何をもって「正しい」とするのか</strong>です。</p></div></details></div>
 
 <h2>STEP 2：「正しい」の基準を外から借りる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>設定ミスは誰も教えてくれない</li><li class="now"><span class="n">STEP 2</span>「正しい」の基準を外から借りる</li><li><span class="n">STEP 3</span>基準を実行する道具＝Prowler</li><li><span class="n">STEP 4</span>出てきた結果をどう扱うか</li><li><span class="n">STEP 5</span>入れる判断と、増える手間</li></ol></nav>
@@ -153,7 +153,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <rect x="540" y="243" width="135" height="42" rx="7" fill="var(--card)" stroke="var(--line)"/><text x="607" y="269" text-anchor="middle" fill="var(--ink)" font-size="10">RDS の暗号化</text>
 <text x="390" y="325" text-anchor="middle" fill="var(--muted)" font-size="12">同じチェックが、複数のフレームワークから別の番号で参照される</text></svg><figcaption>この 2 層が分かると、「CIS 対応」と「PCI DSS 対応」が別々の作業ではないと分かります。叩く API も判定も同じで、違うのは<strong>どれを選び、何番として報告するか</strong>だけ。つまり監査対応は、点検そのものではなくラベル付けの問題に近づきます。</figcaption></figure>
 <p>点検内容を機械可読な形で配る、という考え方そのものは Prowler に固有のものではありません。標準仕様としてまとめたものが SCAP です（<a href="../SCAP/SCAPをゼロから理解する.html">SCAP をゼロから理解する</a>）。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　CIS Benchmark の文書を手に入れました。これで点検できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>できません。</strong> 配布されているのは人が読む前提の文書で、「確認手順：<code>aws iam get-account-summary</code> を実行し、返り値を確認する」といった調子で書かれているからです。数百項目を人が一つずつ叩くのは、STEP 1 と同じ話に戻ります。基準を<strong>そのまま実行できる形にした道具</strong>が要ります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> CIS Benchmark の文書を手に入れました。これで点検できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>できません。</strong> 配布されているのは人が読む前提の文書で、「確認手順：<code>aws iam get-account-summary</code> を実行し、返り値を確認する」といった調子で書かれているからです。数百項目を人が一つずつ叩くのは、STEP 1 と同じ話に戻ります。基準を<strong>そのまま実行できる形にした道具</strong>が要ります。</p></div></details></div>
 
 <h2>STEP 3：基準を実行する道具＝Prowler</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>設定ミスは誰も教えてくれない</li><li class="done"><span class="n">STEP 2 ✓</span>「正しい」の基準を外から借りる</li><li class="now"><span class="n">STEP 3</span>基準を実行する道具＝Prowler</li><li><span class="n">STEP 4</span>出てきた結果をどう扱うか</li><li><span class="n">STEP 5</span>入れる判断と、増える手間</li></ol></nav>
@@ -190,7 +190,7 @@ prowler aws</code></pre>
 <text x="683" y="218" text-anchor="middle" fill="var(--stop)" font-size="12">作成・変更・削除の</text>
 <text x="683" y="240" text-anchor="middle" fill="var(--stop)" font-size="12">矢印はひとつもない</text></svg><figcaption>右上の矢印が <code>Describe</code> / <code>List</code> しかないことが、そのまま導入の説得材料になります。本番アカウントに渡すのは読み取り権限だけで、Prowler 側が環境を壊すことはありえない、と権限で示せます。</figcaption></figure>
 <p>対応するのは AWS だけではありません。Azure・Google Cloud・Kubernetes・Microsoft 365・GitHub など 20 を超えるプロバイダに対応していて、AWS だけでも 600 を超えるチェック、フレームワークは全体で 50 以上あります。同じコマンド体系・同じ出力形式で扱えるのが、単一クラウド向けのツールとの大きな違いです。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　AWS には Trusted Advisor も Config も Security Hub CSPM もあります。設定ミスに気づくだけなら、Prowler は要らないのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>もっともな疑問で、多くの場合そのとおりです。</strong> CIS や FSBP のチェック内容はかなり重なります。違いは 2 つあります。<strong>使い始めるのに何が要るか</strong>と、もっと大きいのが<strong>そもそも何を見ているか</strong>です。純正の仕組みが最初から見ていない領域があります。この比較は STEP 5 で正面から扱います。その前に、もっと手前の問題があります——<strong>実行したら FAIL が数百件出ました。どうしますか。</strong></p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> AWS には Trusted Advisor も Config も Security Hub CSPM もあります。設定ミスに気づくだけなら、Prowler は要らないのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>もっともな疑問で、多くの場合そのとおりです。</strong> CIS や FSBP のチェック内容はかなり重なります。違いは 2 つあります。<strong>使い始めるのに何が要るか</strong>と、もっと大きいのが<strong>そもそも何を見ているか</strong>です。純正の仕組みが最初から見ていない領域があります。この比較は STEP 5 で正面から扱います。その前に、もっと手前の問題があります——<strong>実行したら FAIL が数百件出ました。どうしますか。</strong></p></div></details></div>
 
 <h2>STEP 4：出てきた結果をどう扱うか</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>設定ミスは誰も教えてくれない</li><li class="done"><span class="n">STEP 2 ✓</span>「正しい」の基準を外から借りる</li><li class="done"><span class="n">STEP 3 ✓</span>基準を実行する道具＝Prowler</li><li class="now"><span class="n">STEP 4</span>出てきた結果をどう扱うか</li><li><span class="n">STEP 5</span>入れる判断と、増える手間</li></ol></nav>
@@ -225,7 +225,7 @@ prowler aws</code></pre>
 prowler aws --service s3 --service iam
 prowler aws --list-compliance   # 指定できるフレームワークの一覧</code></pre>
 <p>最後の「意図的な設定を除外」にあたるのが <strong>Mutelist</strong> です。「このリソースのこのチェックは意図してこうしている」を YAML に書いておくと、次回から FAIL として数えなくなります。静的サイト配信用の S3 バケットは公開されているのが正しい、といったケースがこれにあたります。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　Mutelist に書けば余計な FAIL は静かになります。これで運用に乗るでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>乗りません。</strong> Mutelist は「検討して受容した」と「面倒だから消した」を、同じ見た目にしてしまうからです。誰がいつ何の理由で除外したのかを残さないと、半年後の担当者にはどちらか区別できません。そしてもう一つ根本的な問題があります——<strong>直す人が決まっていなければ、どれだけきれいに並べ替えても環境は何も変わりません。</strong></p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> Mutelist に書けば余計な FAIL は静かになります。これで運用に乗るでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>乗りません。</strong> Mutelist は「検討して受容した」と「面倒だから消した」を、同じ見た目にしてしまうからです。誰がいつ何の理由で除外したのかを残さないと、半年後の担当者にはどちらか区別できません。そしてもう一つ根本的な問題があります——<strong>直す人が決まっていなければ、どれだけきれいに並べ替えても環境は何も変わりません。</strong></p></div></details></div>
 
 <h2>STEP 5：入れる判断と、増える手間</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>設定ミスは誰も教えてくれない</li><li class="done"><span class="n">STEP 2 ✓</span>「正しい」の基準を外から借りる</li><li class="done"><span class="n">STEP 3 ✓</span>基準を実行する道具＝Prowler</li><li class="done"><span class="n">STEP 4 ✓</span>出てきた結果をどう扱うか</li><li class="now"><span class="n">STEP 5</span>入れる判断と、増える手間</li></ol></nav>
@@ -336,7 +336,7 @@ prowler aws --list-compliance   # 指定できるフレームワークの一覧<
 <tr><td>マルチクラウド対応の点検ツールを入れる</td><td>AWS も Azure も同じものさしで並べて、どちらが手薄かを比較できる</td></tr>
 <tr><td>読み取り専用の権限で実行する</td><td>本番環境に書き込む権限を渡さずに済むので、導入そのもののリスクがほぼない</td></tr>
 </tbody></table></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　「無償だし、とりあえず入れて定期的に回しておけば結果が溜まる」——これは導入理由になるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>なりません。</strong> 誰がその一覧を見て、誰が直すのかが決まっていなければ、FAIL の山が積み上がって誰も開かなくなります。「次の監査までに CIS の critical をゼロにする」「引き継いだアカウント 5 つの現状を今月中に把握する」のように、<strong>出口を先に決めてから入れます</strong>。用途が決まっていない道具は、入れた瞬間から負債です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 「無償だし、とりあえず入れて定期的に回しておけば結果が溜まる」——これは導入理由になるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>なりません。</strong> 誰がその一覧を見て、誰が直すのかが決まっていなければ、FAIL の山が積み上がって誰も開かなくなります。「次の監査までに CIS の critical をゼロにする」「引き継いだアカウント 5 つの現状を今月中に把握する」のように、<strong>出口を先に決めてから入れます</strong>。用途が決まっていない道具は、入れた瞬間から負債です。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>Prowler は、クラウドの設定が基準どおりかを点検するオープンソースのツールです。読み取り専用の権限で API を叩き、チェックごとに PASS / FAIL を出します。AWS・Azure・Google Cloud・Kubernetes などに対応していて、CIS Benchmark や PCI DSS といったフレームワーク単位でレポートを出せます。クラウド側で何かを有効化する必要がないので、引き継いだアカウントの棚卸しや、監査・取引先照会への回答に向いています。加えて、環境変数やユーザーデータに秘密が直書きされていないかといった、純正のマネージドルールにはない検査が最初から入っています。同じことを Config のカスタムルールで自作すると、チェックの数だけ Lambda を書いて保守することになります。</p></blockquote>

@@ -184,7 +184,7 @@ blockquote p{margin:.4rem 0}
 <p>だから ID の作り方に要件が出ます。連番や「ユーザ ID ＋ 時刻」から組み立てた ID が危険なのは、他人の値を<em>計算で</em>作れてしまうからです。暗号論的な擬似乱数で十分な長さを取ること、そして自作せずフレームワークの実装を使うこと。この 2 つです。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　自分のセッション ID が漏れたことに気づきました。パスワードを変更すれば安全でしょうか。</p>
+<p class="q"><b>確認問題</b> 自分のセッション ID が漏れたことに気づきました。パスワードを変更すれば安全でしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -291,7 +291,7 @@ blockquote p{margin:.4rem 0}
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　Cookie の属性（<code>Secure</code> や <code>HttpOnly</code>）をすべて正しく付けました。これでセッションフィクセーションも防げるでしょうか。</p>
+<p class="q"><b>確認問題</b> Cookie の属性（<code>Secure</code> や <code>HttpOnly</code>）をすべて正しく付けました。これでセッションフィクセーションも防げるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -362,7 +362,7 @@ blockquote p{margin:.4rem 0}
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　それなら、値を受け取った入口で <code>'</code> や <code>&lt;</code> をまとめて潰しておけば、3 つとも一度に防げるのではないでしょうか。</p>
+<p class="q"><b>確認問題</b> それなら、値を受け取った入口で <code>'</code> や <code>&lt;</code> をまとめて潰しておけば、3 つとも一度に防げるのではないでしょうか。</p>
 <details>
 <summary>考えた結果を確認する</summary>
 <div class="ans">
@@ -478,7 +478,7 @@ cur.execute("SELECT * FROM users WHERE name = %s", (name,))</code></pre>
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　テンプレートエンジンの HTML エスケープを、すべての出力に漏れなくかけました。これで XSS は防げるでしょうか。</p>
+<p class="q"><b>確認問題</b> テンプレートエンジンの HTML エスケープを、すべての出力に漏れなくかけました。これで XSS は防げるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -593,7 +593,7 @@ cur.execute("SELECT * FROM users WHERE name = %s", (name,))</code></pre>
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　WAF を入れれば、見つかった脆弱性の改修は後回しにできるでしょうか。</p>
+<p class="q"><b>確認問題</b> WAF を入れれば、見つかった脆弱性の改修は後回しにできるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">

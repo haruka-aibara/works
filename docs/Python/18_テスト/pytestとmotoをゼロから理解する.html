@@ -139,7 +139,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 </svg><figcaption>右の列がこの記事の出発点です。分岐そのものは単純なのに、それを本物の AWS 上で発生させる手段が「待つ」か「わざと危険な状態を作る」しかありません。</figcaption></figure>
 <p>よくやってしまうのが、確認のために S3 バケットをわざと公開設定にしてみる、という手です。実害のある状態を意図的に作ったうえで、検出されるまで待ち、それで見られるのは 3 分岐のうち 1 つだけです。</p>
 <p>つまり問題は「動かして確かめること」ではなく、<strong>確かめたい状態を自分で作れないこと</strong>です。欲しいのは「検出がこうで、台帳がこうだったら、どう動くか」を好きなだけ並べられる仕組みです。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　では検証用の AWS アカウントにテスト用のリソースを一式作って、そこに好きな状態を入れればよいのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>半分しか作れません。</strong> 台帳（DynamoDB）は自分のテーブルなので好きな状態を入れられます。しかし Trusted Advisor の検出結果は AWS が出すもので、こちらから書き込めません。3 分岐のうち入口の半分が依然として手に入らないままです。</p><p>そもそも、この Lambda の判断は「検出」と「台帳」という 2 つの値を見て決まっているだけです。<strong>値を渡して結果を見るだけなら、AWS は要らないのでは？</strong> ——その「渡して見る」を仕組みにしたのが次の話です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> では検証用の AWS アカウントにテスト用のリソースを一式作って、そこに好きな状態を入れればよいのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>半分しか作れません。</strong> 台帳（DynamoDB）は自分のテーブルなので好きな状態を入れられます。しかし Trusted Advisor の検出結果は AWS が出すもので、こちらから書き込めません。3 分岐のうち入口の半分が依然として手に入らないままです。</p><p>そもそも、この Lambda の判断は「検出」と「台帳」という 2 つの値を見て決まっているだけです。<strong>値を渡して結果を見るだけなら、AWS は要らないのでは？</strong> ——その「渡して見る」を仕組みにしたのが次の話です。</p></div></details></div>
 
 <h2>STEP 2：pytest は呼んで確かめるだけ</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>確かめたい動きが本物では作れない</li><li class="now"><span class="n">STEP 2</span>pytest は呼んで確かめるだけ</li><li><span class="n">STEP 3</span>外に出ていく線を数える</li><li><span class="n">STEP 4</span>偽物には 2 種類ある</li><li><span class="n">STEP 5</span>moto で AWS をプロセスの中に置く</li></ol></nav>
@@ -201,7 +201,7 @@ def test_検出と台帳の組み合わせで分岐が決まる(detected, ledger
     assert classify(detected, ledger, NOW) == expected
 </code></pre>
 <p>4 行足すだけで、3 日待つ話も、わざとバケットを公開する話も消えました。境界（ちょうど 3 日目は通知するのか）も 1 行です。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　ここまでで <code>classify</code> は確かめられました。では同じ調子で、Lambda の入口である <code>handler</code> をそのまま呼べば全部まとめて確認できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>呼べますが、本物の AWS につながります。</strong> <code>handler</code> の中では boto3 が Trusted Advisor と DynamoDB を呼び、Slack に POST します。手元では自分の認証情報で本当にアクセスし、CI にはそもそも認証情報がないので落ちます。</p><p>ここで一度、<strong>この関数のどこが「外」とつながっているのか</strong>を数えてみる必要があります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> ここまでで <code>classify</code> は確かめられました。では同じ調子で、Lambda の入口である <code>handler</code> をそのまま呼べば全部まとめて確認できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>呼べますが、本物の AWS につながります。</strong> <code>handler</code> の中では boto3 が Trusted Advisor と DynamoDB を呼び、Slack に POST します。手元では自分の認証情報で本当にアクセスし、CI にはそもそも認証情報がないので落ちます。</p><p>ここで一度、<strong>この関数のどこが「外」とつながっているのか</strong>を数えてみる必要があります。</p></div></details></div>
 
 <h2>STEP 3：外に出ていく線を数える</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>確かめたい動きが本物では作れない</li><li class="done"><span class="n">STEP 2 ✓</span>pytest は呼んで確かめるだけ</li><li class="now"><span class="n">STEP 3</span>外に出ていく線を数える</li><li><span class="n">STEP 4</span>偽物には 2 種類ある</li><li><span class="n">STEP 5</span>moto で AWS をプロセスの中に置く</li></ol></nav>
@@ -232,7 +232,7 @@ def test_検出と台帳の組み合わせで分岐が決まる(detected, ledger
 <li>検出が大量にあってページングされたとき、2 ページ目も拾えているか</li>
 </ul>
 <p>これらは「外とやり取りする線」そのものの話なので、判断を切り出しても消えません。<strong>線を減らすのではなく、線の向こう側を差し替える</strong>しかありません。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　では 3 本の線の向こう側を「偽物」に差し替えればよさそうです。偽物はどう作るのがよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>ここで分かれ道になります。</strong> 「呼ばれたらこの値を返す」と決め打ちした偽物を置くのが最も手軽です。実際それで足りる線もあります。</p><p>ただしこのやり方には、テストが緑でも本番が落ちるという特有の失敗があります。偽物には性質の違う 2 種類があり、線ごとに選び分ける必要があります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> では 3 本の線の向こう側を「偽物」に差し替えればよさそうです。偽物はどう作るのがよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>ここで分かれ道になります。</strong> 「呼ばれたらこの値を返す」と決め打ちした偽物を置くのが最も手軽です。実際それで足りる線もあります。</p><p>ただしこのやり方には、テストが緑でも本番が落ちるという特有の失敗があります。偽物には性質の違う 2 種類があり、線ごとに選び分ける必要があります。</p></div></details></div>
 
 <h2>STEP 4：偽物には 2 種類ある</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>確かめたい動きが本物では作れない</li><li class="done"><span class="n">STEP 2 ✓</span>pytest は呼んで確かめるだけ</li><li class="done"><span class="n">STEP 3 ✓</span>外に出ていく線を数える</li><li class="now"><span class="n">STEP 4</span>偽物には 2 種類ある</li><li><span class="n">STEP 5</span>moto で AWS をプロセスの中に置く</li></ol></nav>
@@ -262,7 +262,7 @@ def test_検出と台帳の組み合わせで分岐が決まる(detected, ledger
 </svg><figcaption>優劣ではなく用途の差です。相手の仕様を自分がすでに正確に知っているならモックで足り、知っているつもりで間違えうるならフェイクにします。</figcaption></figure>
 <p>モックの弱点は具体的です。DynamoDB の <code>get_item</code> の返り値を、自分の記憶で <code>{"Item": {"arn": ARN}}</code> と書いたとします。本物は型を明示した <code>{"Item": {"arn": {"S": ARN}}}</code> です。テストは緑になり、本番だけ落ちます。<strong>モックが確かめているのは本物の仕様ではなく、自分の思い込みです。</strong></p>
 <p>台帳のように「書いた結果が次の読み出しに効く」相手も、モックでは表現しづらくなります。put の呼ばれ方を記録できても、「put したから scan で返るようになった」というつながりは再現できません。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　では DynamoDB のフェイクを自分で書けばよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>現実的ではありません。</strong> キーの型チェック、条件付き書き込み、ページネーション、エラーの返り方——それらしく動かすだけで本業になります。しかもその実装が正しいかどうかを、また誰かが確かめる必要があります。</p><p>この「AWS のフェイク」を、Python のプロセスの中で動く形で用意したものが moto です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> では DynamoDB のフェイクを自分で書けばよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>現実的ではありません。</strong> キーの型チェック、条件付き書き込み、ページネーション、エラーの返り方——それらしく動かすだけで本業になります。しかもその実装が正しいかどうかを、また誰かが確かめる必要があります。</p><p>この「AWS のフェイク」を、Python のプロセスの中で動く形で用意したものが moto です。</p></div></details></div>
 
 <h2>STEP 5：moto で AWS をプロセスの中に置く</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>確かめたい動きが本物では作れない</li><li class="done"><span class="n">STEP 2 ✓</span>pytest は呼んで確かめるだけ</li><li class="done"><span class="n">STEP 3 ✓</span>外に出ていく線を数える</li><li class="done"><span class="n">STEP 4 ✓</span>偽物には 2 種類ある</li><li class="now"><span class="n">STEP 5</span>moto で AWS をプロセスの中に置く</li></ol></nav>
@@ -366,8 +366,8 @@ test_handler.py::test_解消した項目は通知せず台帳から消える PAS
 <text x="626" y="152" text-anchor="middle" fill="var(--c3)" font-size="12" font-weight="700">台帳：0 件</text>
 <text x="390" y="186" text-anchor="middle" fill="var(--muted)" font-size="12">この 3 段階はどのテストでも同じ形になる</text>
 </svg><figcaption>①で作った状態が③に効いていること自体が、フェイクを使う理由です。モックなら③は「delete_item が呼ばれた」の確認止まりで、キーを間違えていても気づけません。</figcaption></figure>
-<div class="note"><p><strong>最初に踏む落とし穴</strong>　boto3 のクライアントを<strong>モジュールの先頭で作る</strong>と、moto が起動する前に作られるため差し替えが効かず、本物の AWS に飛びます（Lambda では使い回しのために先頭で作るのが定石なので、よく踏みます）。クライアントは <code>handler</code> の中で作るか、フィクスチャから渡します。</p></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　このテストが全部緑なら、この Lambda は本番でも動くと言えるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>言えません。</strong> moto は API の応答をまねますが、<strong>その API を呼ぶ権限があるか</strong>は見ていません。実行ロールに <code>dynamodb:DeleteItem</code> を書き忘れていても、moto は素直に消してくれます。タイムアウト、メモリ、VPC からの到達性、サービスクォータも同じく範囲外です。AWS 自身も、設定や IAM まで含めた正確な確認はクラウド上でのテストだと言っています。</p><p>moto が消したのは「分岐を確かめるために現実が変わるのを待つ」部分です。権限と設定の確認は、デプロイ後に別途行うものとして残ります。<strong>何を消して何が残ったかを言えること</strong>が、この記事のゴールです。</p></div></details></div>
+<div class="note"><p><strong>最初に踏む落とし穴</strong> boto3 のクライアントを<strong>モジュールの先頭で作る</strong>と、moto が起動する前に作られるため差し替えが効かず、本物の AWS に飛びます（Lambda では使い回しのために先頭で作るのが定石なので、よく踏みます）。クライアントは <code>handler</code> の中で作るか、フィクスチャから渡します。</p></div>
+<div class="quiz"><p class="q"><b>確認問題</b> このテストが全部緑なら、この Lambda は本番でも動くと言えるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>言えません。</strong> moto は API の応答をまねますが、<strong>その API を呼ぶ権限があるか</strong>は見ていません。実行ロールに <code>dynamodb:DeleteItem</code> を書き忘れていても、moto は素直に消してくれます。タイムアウト、メモリ、VPC からの到達性、サービスクォータも同じく範囲外です。AWS 自身も、設定や IAM まで含めた正確な確認はクラウド上でのテストだと言っています。</p><p>moto が消したのは「分岐を確かめるために現実が変わるのを待つ」部分です。権限と設定の確認は、デプロイ後に別途行うものとして残ります。<strong>何を消して何が残ったかを言えること</strong>が、この記事のゴールです。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>pytest は Python のテストを走らせる道具です。<code>test_</code> で始まる関数を集めて呼び、<code>assert</code> が通れば緑にする、それだけの仕組みです。moto はそこに足すライブラリで、boto3 が AWS にリクエストを送る直前で折り返し、同じプロセスの中で AWS のふりをして応答します。コードは boto3 のまま変えません。おかげで「台帳にこの項目が残っている状態」のような、本物では待つしかない状況をテストの中で作れます。AWS アカウントもネットワークも要りません。</p></blockquote>

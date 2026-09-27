@@ -171,7 +171,7 @@ blockquote p{margin:.4rem 0}
 <p>ここで注目してほしいのは、ブラウザが接続先を決めた根拠が <strong>DNS の答えただ一点</strong>だということです。ブラウザは「203.0.113.10 が本当に example.com のサーバか」を自分で確かめていません。DNS がそう答えたから、そこへ行っただけです。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　サーバを別のデータセンターに引っ越して IP が変わったとき、世界中のユーザーに何か作業をお願いする必要がありますか。</p>
+<p class="q"><b>確認問題</b> サーバを別のデータセンターに引っ越して IP が変わったとき、世界中のユーザーに何か作業をお願いする必要がありますか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -241,7 +241,7 @@ blockquote p{margin:.4rem 0}
 <p>逆に言うと、<strong>オレンジ雲にしていないレコードには Cloudflare の機能は何も効きません。</strong>「WAF を有効にしたのにブロックされない」「キャッシュが効かない」の原因の多くはこれです。通っていないものは守れません。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　代理サーバが東京に 1 台だけあるとします。ロンドンのユーザーにとって、この構成は速くなるでしょうか。</p>
+<p class="q"><b>確認問題</b> 代理サーバが東京に 1 台だけあるとします。ロンドンのユーザーにとって、この構成は速くなるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -323,7 +323,7 @@ blockquote p{margin:.4rem 0}
 <p>ただし Cloudflare は既定では <code>.js</code> や <code>.css</code>、画像など<strong>拡張子で判断できる静的ファイルだけ</strong>をキャッシュします。HTML や API のレスポンスは既定ではキャッシュされません。ユーザーごとに中身が違う可能性があるからです。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　「全部キャッシュすれば最速になるのでは？」という発想には何が抜けているでしょうか。</p>
+<p class="q"><b>確認問題</b> 「全部キャッシュすれば最速になるのでは？」という発想には何が抜けているでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -436,7 +436,7 @@ blockquote p{margin:.4rem 0}
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　WAF でブロックされるはずのリクエストが、たまたまキャッシュ済みの URL 宛てだったとします。キャッシュから応答が返ってしまうでしょうか。</p>
+<p class="q"><b>確認問題</b> WAF でブロックされるはずのリクエストが、たまたまキャッシュ済みの URL 宛てだったとします。キャッシュから応答が返ってしまうでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -506,7 +506,7 @@ blockquote p{margin:.4rem 0}
 <p>そして Cloudflare の他の製品も、すべてこの図の変形として読めます。社内アプリの前に通り道を置いて認証を挟めば <strong>Zero Trust</strong>（Access）になり、オリジンから外向きに接続を張れば <strong>Tunnel</strong>、通り道に置くファイル置き場が <strong>R2</strong> です。<strong>入口は常に「DNS の答えを差し替えて、通り道になる」の一点</strong>です。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題（考察）</b>　ある日サイトが表示されなくなりました。オリジンは正常に動いています。DNS のレコードを一時的にグレー雲（プロキシ無効）に戻すと、何が起きて、何が起きなくなるでしょうか。</p>
+<p class="q"><b>確認問題（考察）</b> ある日サイトが表示されなくなりました。オリジンは正常に動いています。DNS のレコードを一時的にグレー雲（プロキシ無効）に戻すと、何が起きて、何が起きなくなるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
