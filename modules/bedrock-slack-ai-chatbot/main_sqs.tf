@@ -17,6 +17,8 @@ resource "aws_sqs_queue" "slack_ai_chatbot" {
   # handler's own deadline, which can say so in the thread instead of going quiet.
   message_retention_seconds = 900
   sqs_managed_sse_enabled   = true
+
+  tags = var.tags
 }
 
 resource "aws_sqs_queue" "slack_ai_chatbot_dlq" {
@@ -25,6 +27,8 @@ resource "aws_sqs_queue" "slack_ai_chatbot_dlq" {
   # for the SQS maximum (14 days) instead of discarding the evidence after a minute.
   message_retention_seconds = 1209600
   sqs_managed_sse_enabled   = true
+
+  tags = var.tags
 }
 
 resource "aws_sqs_queue_redrive_allow_policy" "slack_ai_chatbot_redrive_allow_policy" {

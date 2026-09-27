@@ -11,19 +11,14 @@ locals {
   oauth_token_id = data.tfe_oauth_client.this.oauth_token_id
 
   # provider "aws" の default_tags に入れる、全 AWS リソース共通のタグ。
-  # Project はここに入れない。入れると全リソースが同じ Project で
-  # コスト配分されるので、アプリごとの alias 付き provider で付ける。
+  # Project はここに入れない。default_tags はモジュール単位で分けられず、
+  # 入れると全リソースが同じ Project でコスト配分されるため、
+  # モジュールの tags 変数で付ける。
   aws_default_tags = {
     Owner      = "haruka-aibara"
     Terraform  = true
     Repository = "https://github.com/haruka-aibara/works"
   }
-
-  # bedrock-slack-ai-chatbot モジュール専用の provider "aws" に入れるタグ。
-  bedrock_slack_ai_chatbot_default_tags = merge(local.aws_default_tags, {
-    Environment = "production"
-    Project     = "bedrock-slack-ai-chatbot"
-  })
 
   # Terraform repositories that should receive the CI caller workflow.
   # Add a line here to onboard a new repo.

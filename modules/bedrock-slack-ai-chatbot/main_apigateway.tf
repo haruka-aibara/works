@@ -2,6 +2,8 @@ resource "aws_apigatewayv2_api" "slack_ai_chatbot" {
   name          = "${local.project_name}-api-gateway"
   protocol_type = "HTTP"
   description   = "HTTP API for ${local.project_name}"
+
+  tags = var.tags
 }
 
 resource "aws_apigatewayv2_integration" "slack_ai_chatbot" {
@@ -36,6 +38,8 @@ resource "aws_apigatewayv2_stage" "slack_ai_chatbot" {
       integrationError = "$context.integrationErrorMessage"
     })
   }
+
+  tags = var.tags
 }
 
 resource "aws_lambda_permission" "slack_ai_chatbot" {

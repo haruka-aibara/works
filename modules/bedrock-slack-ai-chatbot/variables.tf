@@ -15,3 +15,9 @@ variable "bedrock_max_tokens" {
   type        = number
   default     = 1000
 }
+
+variable "tags" {
+  description = "Tags for this module's resources, on top of the provider's default_tags (e.g. Project for cost allocation)"
+  type        = map(string)
+  default     = {}
+}

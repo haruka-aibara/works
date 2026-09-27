@@ -1,6 +1,8 @@
 resource "aws_iam_role" "slack_ai_chatbot" {
   name               = "${local.project_name}_role"
   assume_role_policy = data.aws_iam_policy_document.slack_ai_chatbot_lambda_assume_role.json
+
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "slack_ai_chatbot_lambda_assume_role" {
@@ -47,6 +49,8 @@ data "aws_iam_policy_document" "slack_ai_chatbot" {
 resource "aws_iam_policy" "slack_ai_chatbot" {
   name   = "${local.project_name}_policy"
   policy = data.aws_iam_policy_document.slack_ai_chatbot.json
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "slack_ai_chatbot" {
@@ -57,6 +61,8 @@ resource "aws_iam_role_policy_attachment" "slack_ai_chatbot" {
 resource "aws_iam_role" "bedrock_backend" {
   name               = "${local.project_name}_bedrock-backend-role"
   assume_role_policy = data.aws_iam_policy_document.bedrock_backend_lambda_assume_role.json
+
+  tags = var.tags
 }
 
 data "aws_iam_policy_document" "bedrock_backend_lambda_assume_role" {
@@ -149,6 +155,8 @@ data "aws_iam_policy_document" "bedrock_backend" {
 resource "aws_iam_policy" "bedrock_backend" {
   name   = "${local.project_name}_bedrock-backend-policy"
   policy = data.aws_iam_policy_document.bedrock_backend.json
+
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_bedrock_backend" {
