@@ -35,7 +35,7 @@ jobs:
       contents: write
     steps:
       # bump コミットを push するので認証情報は残す。
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0 # zizmor: ignore[artipacked]
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
         with:
           # bump コミットを main に rebase して push するため、浅いクローンでは足りない。
           fetch-depth: 0
