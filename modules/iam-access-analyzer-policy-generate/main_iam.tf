@@ -1,4 +1,4 @@
-# IAM Access Analyzer サービスロール　許可ポリシー
+# IAM Access Analyzer サービスロール 許可ポリシー
 data "aws_iam_policy_document" "iam_access_analyzer_service_role_permission" {
   statement {
     actions   = ["cloudtrail:GetTrail"]
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "iam_access_analyzer_service_role_permission" {
 
 }
 
-# IAM Access Analyzer サービスロール　信頼ポリシー
+# IAM Access Analyzer サービスロール 信頼ポリシー
 data "aws_iam_policy_document" "iam_access_analyzer_service_role_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
