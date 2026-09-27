@@ -15,13 +15,25 @@ provider "tfe" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs
-# For the bedrock-slack-ai-chatbot module. Authenticates via HCP Terraform's
+# Default AWS provider. Authenticates via HCP Terraform's
 # dynamic provider credentials (OIDC) instead of static keys: the
 # TFC_AWS_PROVIDER_AUTH / TFC_AWS_RUN_ROLE_ARN workspace variables are set in
 # the UI (they aren't secrets themselves, but the AWS-side IAM OIDC provider
 # and role they point at were set up by hand, so there's nothing to import
 # here).
 provider "aws" {
+  region = "ap-northeast-1"
+  default_tags {
+    tags = local.aws_default_tags
+  }
+}
+
+# Same account/region/auth as the default provider, but default_tags adds
+# Project = "bedrock-slack-ai-chatbot". default_tags can't be scoped per module,
+# so each app that needs its own Project tag gets its own aliased provider,
+# passed in through the module's providers argument.
+provider "aws" {
+  alias  = "bedrock_slack_ai_chatbot"
   region = "ap-northeast-1"
   default_tags {
     tags = local.bedrock_slack_ai_chatbot_default_tags
