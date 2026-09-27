@@ -143,8 +143,8 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <rect x="40" y="46" width="300" height="182" rx="12" fill="var(--card)" stroke="var(--c1)" stroke-width="2"/>
 <text x="190" y="72" text-anchor="middle" fill="var(--muted)" font-size="12">let s = String::from("hello");</text>
 <rect x="62" y="86" width="256" height="38" rx="7" fill="var(--lane)" stroke="var(--line)"/><text x="190" y="110" text-anchor="middle" fill="var(--ink)" font-size="13">ポインタ（実体の場所）</text>
-<rect x="62" y="130" width="256" height="38" rx="7" fill="var(--lane)" stroke="var(--line)"/><text x="190" y="154" text-anchor="middle" fill="var(--ink)" font-size="13">長さ　5</text>
-<rect x="62" y="174" width="256" height="38" rx="7" fill="var(--lane)" stroke="var(--line)"/><text x="190" y="198" text-anchor="middle" fill="var(--ink)" font-size="13">容量　5</text>
+<rect x="62" y="130" width="256" height="38" rx="7" fill="var(--lane)" stroke="var(--line)"/><text x="190" y="154" text-anchor="middle" fill="var(--ink)" font-size="13">長さ 5</text>
+<rect x="62" y="174" width="256" height="38" rx="7" fill="var(--lane)" stroke="var(--line)"/><text x="190" y="198" text-anchor="middle" fill="var(--ink)" font-size="13">容量 5</text>
 <rect x="440" y="46" width="300" height="182" rx="12" fill="var(--card)" stroke="var(--c2)" stroke-width="2"/>
 <text x="590" y="100" text-anchor="middle" fill="var(--muted)" font-size="12">実体（5 バイト）</text>
 <rect x="470" y="118" width="48" height="48" rx="6" fill="var(--lane)" stroke="var(--c2)"/><text x="494" y="148" text-anchor="middle" fill="var(--ink)" font-size="15">h</text>
@@ -157,7 +157,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 
 <p>返すタイミングを間違えると、次の 3 つが起きます。<strong>返し忘れ</strong>（リーク。長時間動くプロセスがじわじわ太る）、<strong>二重に返す</strong>（管理情報が壊れる）、そして<strong>返したあとに使う</strong>（use-after-free。解放済みの領域を読み書きしてしまう）。3 つ目が特に厄介なのは、<strong>たいていの場合その場では落ちないこと</strong>です。運が良ければ古い値が読めてしまい、運が悪ければ攻撃者が仕込んだ値が読めます。</p>
 
-<div class="quiz"><p class="q"><b>確認問題</b>　「確保したら必ず解放をセットで書く」というルールをレビューで徹底すれば、この問題はなくなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>なくなりません。</strong> 確保と解放が同じ関数の中で完結するなら守れますが、現実のコードでは値が関数から関数へ渡り、構造体に格納され、複数の場所から参照されます。そうなると「いま誰がこの値を持っていて、最後に使い終わるのは誰か」がソースコードのどこにも書かれていない状態になります。早期リターン・例外・エラー分岐で経路が増えれば、どれか 1 本で解放が漏れます。</p><p>つまり必要なのは注意力ではなく、<strong>「誰がいつ返すか」を仕組みとして決める方法</strong>です。これには歴史的に 2 つの答えがありました。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 「確保したら必ず解放をセットで書く」というルールをレビューで徹底すれば、この問題はなくなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>なくなりません。</strong> 確保と解放が同じ関数の中で完結するなら守れますが、現実のコードでは値が関数から関数へ渡り、構造体に格納され、複数の場所から参照されます。そうなると「いま誰がこの値を持っていて、最後に使い終わるのは誰か」がソースコードのどこにも書かれていない状態になります。早期リターン・例外・エラー分岐で経路が増えれば、どれか 1 本で解放が漏れます。</p><p>つまり必要なのは注意力ではなく、<strong>「誰がいつ返すか」を仕組みとして決める方法</strong>です。これには歴史的に 2 つの答えがありました。</p></div></details></div>
 
 <h2>STEP 2：これまでの 2 つの答え</h2>
 
@@ -183,27 +183,27 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="145" y="74" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="15">手動で管理する</text>
 <text x="145" y="96" text-anchor="middle" fill="var(--muted)" font-size="12">C / C++</text>
 <line x1="50" y1="110" x2="240" y2="110" stroke="var(--line)" stroke-width="1"/>
-<text x="145" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは　人間</text>
-<text x="145" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ　　　　書くとき</text>
-<text x="145" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償　漏れる・壊れる</text>
+<text x="145" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは 人間</text>
+<text x="145" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ    書くとき</text>
+<text x="145" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償 漏れる・壊れる</text>
 <rect x="275" y="44" width="230" height="186" rx="12" fill="var(--card)" stroke="var(--c4)" stroke-width="2"/>
 <text x="390" y="74" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="15">GC にまかせる</text>
 <text x="390" y="96" text-anchor="middle" fill="var(--muted)" font-size="12">Java / Go / Python</text>
 <line x1="295" y1="110" x2="485" y2="110" stroke="var(--line)" stroke-width="1"/>
-<text x="390" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは　ランタイム</text>
-<text x="390" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ　　　　実行中</text>
-<text x="390" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償　時間と土台が要る</text>
+<text x="390" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは ランタイム</text>
+<text x="390" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ    実行中</text>
+<text x="390" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償 時間と土台が要る</text>
 <rect x="520" y="44" width="230" height="186" rx="12" fill="var(--card)" stroke="var(--c3)" stroke-width="2.5"/>
 <text x="635" y="74" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="15">所有権で決める</text>
 <text x="635" y="96" text-anchor="middle" fill="var(--muted)" font-size="12">Rust</text>
 <line x1="540" y1="110" x2="730" y2="110" stroke="var(--line)" stroke-width="1"/>
-<text x="635" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは　コンパイラ</text>
-<text x="635" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ　　　　ビルド時</text>
-<text x="635" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償　書き方の制約</text>
+<text x="635" y="136" text-anchor="middle" fill="var(--ink)" font-size="12">決めるのは コンパイラ</text>
+<text x="635" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">いつ    ビルド時</text>
+<text x="635" y="196" text-anchor="middle" fill="var(--stop)" font-size="12">代償 書き方の制約</text>
 <rect x="150" y="248" width="480" height="42" rx="10" fill="var(--lane)" stroke="var(--line)"/>
 <text x="390" y="275" text-anchor="middle" fill="var(--ink)" font-weight="700" font-size="14">同じ問いへの 3 つの答え。Rust だけが実行前に答えを出す</text></svg><figcaption>3 列目は「1 列目と 2 列目のいいとこ取り」ではありません。判定をビルド時に済ませるということは、<strong>コンパイラに判定できる書き方しか許さない</strong>ということです。その制約こそが、Rust を学ぶときに最初にぶつかる壁の正体です。</figcaption></figure>
 
-<div class="quiz"><p class="q"><b>確認問題</b>　GC があれば STEP 1 の 3 つの問題は解決します。では、なぜ 3 つ目の答えが必要なのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>GC が「実行時に判断する」という前提を置いているからです。</strong> その前提が払えない場所があります。停止時間が許されない領域（OS・組み込み・高頻度の取引処理）、ランタイムを載せられない領域（カーネル・ファームウェア・WebAssembly の小さなバイナリ）、そして他言語から呼ばれるライブラリなどです。これらの領域はこれまで C / C++ しか選択肢がなく、その結果として use-after-free が残り続けてきました。</p><p>そこで Rust は、<strong>解放のタイミングを実行時ではなくコンパイル時に確定させる</strong>という道を採ります。そのために言語へ持ち込まれた規則が「所有権」です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> GC があれば STEP 1 の 3 つの問題は解決します。では、なぜ 3 つ目の答えが必要なのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>GC が「実行時に判断する」という前提を置いているからです。</strong> その前提が払えない場所があります。停止時間が許されない領域（OS・組み込み・高頻度の取引処理）、ランタイムを載せられない領域（カーネル・ファームウェア・WebAssembly の小さなバイナリ）、そして他言語から呼ばれるライブラリなどです。これらの領域はこれまで C / C++ しか選択肢がなく、その結果として use-after-free が残り続けてきました。</p><p>そこで Rust は、<strong>解放のタイミングを実行時ではなくコンパイル時に確定させる</strong>という道を採ります。そのために言語へ持ち込まれた規則が「所有権」です。</p></div></details></div>
 
 <h2>STEP 3：所有権 — 持ち主は 1 人</h2>
 
@@ -244,7 +244,7 @@ println!("{s1}");     // ← コンパイルエラー</code></pre>
 <rect x="225" y="98" width="110" height="44" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="2"/><text x="280" y="126" text-anchor="middle" fill="var(--ink)" font-size="14">"hello"</text>
 <line x1="169" y1="120" x2="217" y2="120" stroke="var(--wire)" stroke-width="2.5" marker-end="url(#a3)"/>
 <rect x="420" y="44" width="330" height="152" rx="12" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
-<rect x="445" y="70" width="120" height="42" rx="8" fill="none" stroke="var(--stop)" stroke-width="2" stroke-dasharray="6 4"/><text x="505" y="96" text-anchor="middle" fill="var(--stop)" font-size="13">s1　使用不可</text>
+<rect x="445" y="70" width="120" height="42" rx="8" fill="none" stroke="var(--stop)" stroke-width="2" stroke-dasharray="6 4"/><text x="505" y="96" text-anchor="middle" fill="var(--stop)" font-size="13">s1 使用不可</text>
 <rect x="445" y="130" width="120" height="42" rx="8" fill="var(--lane)" stroke="var(--c3)" stroke-width="2"/><text x="505" y="157" text-anchor="middle" fill="var(--ink)" font-size="14">s2</text>
 <rect x="615" y="98" width="110" height="44" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="2"/><text x="670" y="126" text-anchor="middle" fill="var(--ink)" font-size="14">"hello"</text>
 <line x1="569" y1="148" x2="607" y2="130" stroke="var(--wire)" stroke-width="2.5" marker-end="url(#a3)"/>
@@ -262,7 +262,7 @@ fn show(text: String) {
     println!("{text}");
 }                         // ここで text の実体が解放される</code></pre>
 
-<div class="quiz"><p class="q"><b>確認問題</b>　文字列を受け取って長さを返す関数を書き、同じ文字列を 3 回測りたくなりました。上のやり方で書くと、どうなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>1 回目で持ち主を失い、2 回目が書けません。</strong> 関数の最後で毎回 <code>String</code> を返して受け取り直せば動きますが、読むだけの関数にまで返り値が生えることになり、現実的ではありません。</p><p>ここで足りていないのは、<strong>「持ち主は変えずに、中身を見せるだけ」という手段</strong>です。それが借用です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 文字列を受け取って長さを返す関数を書き、同じ文字列を 3 回測りたくなりました。上のやり方で書くと、どうなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>1 回目で持ち主を失い、2 回目が書けません。</strong> 関数の最後で毎回 <code>String</code> を返して受け取り直せば動きますが、読むだけの関数にまで返り値が生えることになり、現実的ではありません。</p><p>ここで足りていないのは、<strong>「持ち主は変えずに、中身を見せるだけ」という手段</strong>です。それが借用です。</p></div></details></div>
 
 <h2>STEP 4：借用 — 貸し出しの規則</h2>
 
@@ -302,16 +302,16 @@ fn length(text: &amp;String) -> usize {
 <rect x="212" y="42" width="78" height="36" rx="7" fill="var(--card)" stroke="var(--c1)" stroke-width="2"/><text x="251" y="66" text-anchor="middle" fill="var(--ink)" font-size="13">&amp;s</text>
 <line x1="298" y1="60" x2="386" y2="60" stroke="var(--wire)" stroke-width="2.5" marker-end="url(#a4)"/>
 <rect x="394" y="38" width="110" height="44" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="2"/><text x="449" y="66" text-anchor="middle" fill="var(--ink)" font-size="14">値</text>
-<text x="536" y="66" fill="var(--c3)" font-weight="700" font-size="14">○　読むだけなら何本でも</text>
+<text x="536" y="66" fill="var(--c3)" font-weight="700" font-size="14">○ 読むだけなら何本でも</text>
 <rect x="36" y="122" width="120" height="36" rx="7" fill="var(--card)" stroke="var(--c4)" stroke-width="2"/><text x="96" y="146" text-anchor="middle" fill="var(--ink)" font-size="13">&amp;mut s</text>
 <line x1="164" y1="140" x2="386" y2="140" stroke="var(--wire)" stroke-width="2.5" marker-end="url(#a4)"/>
 <rect x="394" y="118" width="110" height="44" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="2"/><text x="449" y="146" text-anchor="middle" fill="var(--ink)" font-size="14">値</text>
-<text x="536" y="146" fill="var(--c3)" font-weight="700" font-size="14">○　書き換えは 1 本だけ</text>
+<text x="536" y="146" fill="var(--c3)" font-weight="700" font-size="14">○ 書き換えは 1 本だけ</text>
 <rect x="36" y="202" width="78" height="36" rx="7" fill="var(--card)" stroke="var(--c1)" stroke-width="2"/><text x="75" y="226" text-anchor="middle" fill="var(--ink)" font-size="13">&amp;s</text>
 <rect x="124" y="202" width="120" height="36" rx="7" fill="var(--card)" stroke="var(--c4)" stroke-width="2"/><text x="184" y="226" text-anchor="middle" fill="var(--ink)" font-size="13">&amp;mut s</text>
 <line x1="252" y1="220" x2="386" y2="220" stroke="var(--stop)" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#a4)"/>
 <rect x="394" y="198" width="110" height="44" rx="8" fill="var(--lane)" stroke="var(--c2)" stroke-width="2"/><text x="449" y="226" text-anchor="middle" fill="var(--ink)" font-size="14">値</text>
-<text x="536" y="226" fill="var(--stop)" font-weight="700" font-size="14">×　同時には持てない</text></svg><figcaption>3 行目を禁止しているのは行儀の問題ではありません。「読んでいる最中に、他の誰かが書き換えられない」ことが保証されると、読んだ内容が途中で変わる状況そのものが消えます。この保証は、次のような一見おとなしいコードでも効いてきます。</figcaption></figure>
+<text x="536" y="226" fill="var(--stop)" font-weight="700" font-size="14">× 同時には持てない</text></svg><figcaption>3 行目を禁止しているのは行儀の問題ではありません。「読んでいる最中に、他の誰かが書き換えられない」ことが保証されると、読んだ内容が途中で変わる状況そのものが消えます。この保証は、次のような一見おとなしいコードでも効いてきます。</figcaption></figure>
 
 <pre><code>let mut v = vec![1, 2, 3];
 let first = &amp;v[0];    // 読むための借用
@@ -335,7 +335,7 @@ println!("{first}");</code></pre>
 <rect x="150" y="186" width="480" height="44" rx="10" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="2"/>
 <text x="390" y="214" text-anchor="middle" fill="var(--stop)" font-weight="700" font-size="14">Rust はこのコードをコンパイルしない</text></svg><figcaption>C 系の言語では、これは書けてしまううえに、その場では動いてしまうことすらあります。壊れるのは、解放された領域が別の用途に再利用されたあとです。バグの発生地点と症状が出る地点が離れるため、調査が難しくなります。</figcaption></figure>
 
-<div class="quiz"><p class="q"><b>確認問題</b>　借用の規則は、1 つのスレッドで動くプログラムのための規則でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>違います。むしろ複数スレッドで本領を発揮します。</strong> データ競合とは「複数のスレッドが同じデータに同時に触り、少なくとも 1 つが書き換える」ことで起きる問題です。これは借用の規則が禁止している組み合わせ、そのものです。</p><p>つまり所有権と借用を導入した時点で、メモリ管理の問題とデータ競合の問題が<strong>同じ 1 つの規則で同時に片づいています</strong>。Rust で「恐れなしの並行性（fearless concurrency）」と言われるのはこのためです。ではここまでの規則を持った言語は、書いていてどういう感じになるのでしょうか。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 借用の規則は、1 つのスレッドで動くプログラムのための規則でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>違います。むしろ複数スレッドで本領を発揮します。</strong> データ競合とは「複数のスレッドが同じデータに同時に触り、少なくとも 1 つが書き換える」ことで起きる問題です。これは借用の規則が禁止している組み合わせ、そのものです。</p><p>つまり所有権と借用を導入した時点で、メモリ管理の問題とデータ競合の問題が<strong>同じ 1 つの規則で同時に片づいています</strong>。Rust で「恐れなしの並行性（fearless concurrency）」と言われるのはこのためです。ではここまでの規則を持った言語は、書いていてどういう感じになるのでしょうか。</p></div></details></div>
 
 <h2>STEP 5：Rust を書く</h2>
 
@@ -429,7 +429,7 @@ $ cargo test           # テストを実行する</code></pre>
 
 <p>ただし誇張は禁物です。<strong>AI の計算そのものが Rust になったわけではありません。</strong>GPU 上で動く計算の本体はいまも C++ と CUDA で書かれており、Rust が取っているのは<strong>その周りの CPU 側の配管</strong>——データの読み込み・前処理・トークナイズ・スケジューリング・API サーバといった部分です。ここは「Python で書くと遅いが、C++ で書くと保守できない」という隙間で、Rust が最も選ばれやすい場所でもあります。なお「AI がコードを書く量が増えるほど、コンパイラが機械的に誤りを弾ける言語が有利になる」という議論もありますが、こちらはまだ効果が測られた話ではありません。</p>
 
-<div class="quiz"><p class="q"><b>確認問題（考察）</b>　あなたが担当しているものの中で、Rust に置き換えて割に合うのはどれでしょうか。置き換えないほうがよいものは、なぜそうでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p>判断の軸は 2 つです。1 つは<strong>メモリ安全性の問題が実際に被害になるか</strong>。攻撃者が入力を送れる場所で長時間動き続けるもの（ネットワークを受けるデーモン、パーサ、暗号や署名を扱う処理）は割に合いやすい領域です。もう 1 つは<strong>停止時間やランタイムの制約があるか</strong>。組み込み・カーネルモジュール・WebAssembly など、GC を持ち込めない場所では選択肢がそもそも限られます。</p><p>逆に、使い捨てのスクリプト、データ分析、社内の管理ツールのように、落ちてもやり直せばよく既存のエコシステムが充実しているものは、前払いのコストに見合わないことが多くなります。言語を選ぶ判断は「安全かどうか」ではなく、<strong>前払いする価値があるかどうか</strong>です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題（考察）</b> あなたが担当しているものの中で、Rust に置き換えて割に合うのはどれでしょうか。置き換えないほうがよいものは、なぜそうでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p>判断の軸は 2 つです。1 つは<strong>メモリ安全性の問題が実際に被害になるか</strong>。攻撃者が入力を送れる場所で長時間動き続けるもの（ネットワークを受けるデーモン、パーサ、暗号や署名を扱う処理）は割に合いやすい領域です。もう 1 つは<strong>停止時間やランタイムの制約があるか</strong>。組み込み・カーネルモジュール・WebAssembly など、GC を持ち込めない場所では選択肢がそもそも限られます。</p><p>逆に、使い捨てのスクリプト、データ分析、社内の管理ツールのように、落ちてもやり直せばよく既存のエコシステムが充実しているものは、前払いのコストに見合わないことが多くなります。言語を選ぶ判断は「安全かどうか」ではなく、<strong>前払いする価値があるかどうか</strong>です。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 

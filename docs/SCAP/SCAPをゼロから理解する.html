@@ -188,7 +188,7 @@ blockquote p{margin:.4rem 0}
 <g stroke="var(--wire)" stroke-width="2" marker-end="url(#a1)"><line x1="565" y1="177" x2="470" y2="200"/><line x1="585" y1="177" x2="585" y2="200"/><line x1="605" y1="177" x2="700" y2="200"/></g>
 <g><rect x="415" y="208" width="95" height="50" rx="8" fill="var(--card)" stroke="var(--c4)"/><text x="462" y="239" text-anchor="middle" fill="var(--ink)">端末</text><rect x="538" y="208" width="95" height="50" rx="8" fill="var(--card)" stroke="var(--c4)"/><text x="585" y="239" text-anchor="middle" fill="var(--ink)">端末</text><rect x="661" y="208" width="95" height="50" rx="8" fill="var(--card)" stroke="var(--c4)"/><text x="708" y="239" text-anchor="middle" fill="var(--ink)">端末</text></g>
 <text x="585" y="288" text-anchor="middle" fill="var(--c3)">全台に同じ判定・何度でも繰り返せる</text></svg><figcaption>この作業を調べ始めるきっかけは、たいてい監査や取引先からの照会です。「今どうなっているか」を毎回集め直さずに答えられる状態が、そもそもの目的になります。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　点検手順を丁寧な手順書にまとめて配れば、この問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決しません。</strong> 手順書は人が読んで解釈するもので、解釈の差も実行の手間も残るからです。機械が読んで実行できる形にする必要があります。そこでまず引っかかるのが、「何を指しているのか」が文書ごとにばらばらだという問題です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 点検手順を丁寧な手順書にまとめて配れば、この問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決しません。</strong> 手順書は人が読んで解釈するもので、解釈の差も実行の手間も残るからです。機械が読んで実行できる形にする必要があります。そこでまず引っかかるのが、「何を指しているのか」が文書ごとにばらばらだという問題です。</p></div></details></div>
 
 <h2>STEP 2：呼び名をそろえる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>一台ずつ人が確かめる限界</li><li class="now"><span class="n">STEP 2</span>呼び名をそろえる</li><li><span class="n">STEP 3</span>深刻度を同じものさしで測る</li><li><span class="n">STEP 4</span>点検手順を機械に読ませる</li><li><span class="n">STEP 5</span>SCAP として組み立てる</li></ol></nav>
@@ -207,14 +207,14 @@ blockquote p{margin:.4rem 0}
 <tr><td>設定項目</td><td><strong>CCE</strong></td><td><code>CCE-80901-2</code>（「root の SSH ログインを禁止する」など）</td></tr>
 </tbody></table></div>
 <p>これで「どの製品の、どの脆弱性か」「どの設定項目か」を、文書やツールをまたいで同じ言葉で書けるようになりました。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　脆弱性に共通の番号が付きました。これで対応の優先順位を決められるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>決められません。</strong> 番号は「どれか」を指すだけで、「どれくらい危ないか」は表さないからです。検出件数が数千になったとき、どこから手を付けるかの基準が要ります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 脆弱性に共通の番号が付きました。これで対応の優先順位を決められるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>決められません。</strong> 番号は「どれか」を指すだけで、「どれくらい危ないか」は表さないからです。検出件数が数千になったとき、どこから手を付けるかの基準が要ります。</p></div></details></div>
 
 <h2>STEP 3：深刻度を同じものさしで測る</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>一台ずつ人が確かめる限界</li><li class="done"><span class="n">STEP 2 ✓</span>呼び名をそろえる</li><li class="now"><span class="n">STEP 3</span>深刻度を同じものさしで測る</li><li><span class="n">STEP 4</span>点検手順を機械に読ませる</li><li><span class="n">STEP 5</span>SCAP として組み立てる</li></ol></nav>
 <p>ベンダーはそれぞれ「緊急」「重要」「警告」といった区分を付けますが、判断基準は各社で違います。区分の名前だけを並べても比較になりません。</p>
 <p>そこで、攻撃の条件と影響を決まった項目で評価し、0.0〜10.0 の数値に変換します。これが <strong>CVSS</strong> です。評価するのは、たとえば「ネットワーク越しに攻撃できるか、手元でしか無理か」「攻撃に権限が要るか」「利用者の操作が必要か」「機密性・完全性・可用性のどれがどれだけ損なわれるか」です。同じ計算式を通すので、別のベンダーの脆弱性でも同じ土俵に並べられます。</p>
 <div class="note"><strong>CVSS の点数は、そのまま対応順位ではありません。</strong> 基本値が表すのは製品そのものの性質です。その端末がインターネットに面しているか、実際に攻撃が観測されているか（CISA の悪用確認済み脆弱性カタログなど）を重ねて、自組織での優先度を決めます。</div>
-<div class="quiz"><p class="q"><b>確認問題</b>　名前（CVE）と点数（CVSS）がそろいました。これで自動点検はできるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>できません。</strong> 「この端末が CVE-2021-44228 に該当するか」「この設定は基準どおりか」を<strong>どうやって調べるか</strong>が、まだどこにも書かれていないからです。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 名前（CVE）と点数（CVSS）がそろいました。これで自動点検はできるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>できません。</strong> 「この端末が CVE-2021-44228 に該当するか」「この設定は基準どおりか」を<strong>どうやって調べるか</strong>が、まだどこにも書かれていないからです。</p></div></details></div>
 
 <h2>STEP 4：点検手順を機械に読ませる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>一台ずつ人が確かめる限界</li><li class="done"><span class="n">STEP 2 ✓</span>呼び名をそろえる</li><li class="done"><span class="n">STEP 3 ✓</span>深刻度を同じものさしで測る</li><li class="now"><span class="n">STEP 4</span>点検手順を機械に読ませる</li><li><span class="n">STEP 5</span>SCAP として組み立てる</li></ol></nav>
@@ -233,7 +233,7 @@ blockquote p{margin:.4rem 0}
 <line x1="585" y1="242" x2="585" y2="272" stroke="var(--wire)" stroke-width="2" marker-end="url(#a4)"/>
 <rect x="465" y="276" width="240" height="52" rx="10" fill="var(--warn-bg)" stroke="var(--warn-line)" stroke-width="2"/><text x="585" y="308" text-anchor="middle" fill="var(--stop)" font-weight="700">fail：値が yes だった</text></svg><figcaption>XCCDF には「サーバー向け」「開発端末向け」のように、どのルールを適用するかの組み合わせ（プロファイル）も書けます。同じ点検表から、対象に応じて適用範囲を変えられます。</figcaption></figure>
 <p>CIS Benchmark や DISA STIG といった有名な設定基準は、この形式でも配布されています。だから、基準の文書を人が読んで一台ずつ確認するのではなく、そのままツールに読み込ませて全台に同じ判定をかけられます。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　点検表と判定手順が機械可読になりました。まだ足りないものは何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p>これらを<strong>ひとまとめにして受け渡す形</strong>と、「この仕様一式に従う」という取り決めです。識別子・評価・言語がそれぞれ独立したままだと、ツールごとに対応範囲がばらつき、結局コンテンツを作り直すことになります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 点検表と判定手順が機械可読になりました。まだ足りないものは何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p>これらを<strong>ひとまとめにして受け渡す形</strong>と、「この仕様一式に従う」という取り決めです。識別子・評価・言語がそれぞれ独立したままだと、ツールごとに対応範囲がばらつき、結局コンテンツを作り直すことになります。</p></div></details></div>
 
 <h2>STEP 5：SCAP として組み立てる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>一台ずつ人が確かめる限界</li><li class="done"><span class="n">STEP 2 ✓</span>呼び名をそろえる</li><li class="done"><span class="n">STEP 3 ✓</span>深刻度を同じものさしで測る</li><li class="done"><span class="n">STEP 4 ✓</span>点検手順を機械に読ませる</li><li class="now"><span class="n">STEP 5</span>SCAP として組み立てる</li></ol></nav>
@@ -264,7 +264,7 @@ blockquote p{margin:.4rem 0}
 <tr><td>SCAP 形式のコンテンツで設定点検を自動化する</td><td>「基準どおり設定されているか」の確認を人の手作業から外し、毎日回せる状態にする</td></tr>
 <tr><td>CVE と CVSS で脆弱性を管理する</td><td>監査や取引先からの照会に、その都度調べ直さずに答えられる</td></tr>
 </tbody></table></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　SCAP 対応スキャナを入れれば準拠状況を自動で確認できます。導入の前に決めておくべきことは何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どの基準に、どの範囲のシステムを合わせるのか。そして fail が出たとき、誰がどう直すのか</strong>です。プロファイルを選ばずに全ルールを流すと大量の fail が出て、「見なかったことにする」運用になります。使い道が決まってから入れます。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> SCAP 対応スキャナを入れれば準拠状況を自動で確認できます。導入の前に決めておくべきことは何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どの基準に、どの範囲のシステムを合わせるのか。そして fail が出たとき、誰がどう直すのか</strong>です。プロファイルを選ばずに全ルールを流すと大量の fail が出て、「見なかったことにする」運用になります。使い道が決まってから入れます。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>SCAP は、セキュリティの点検を機械に任せられるようにするための共通仕様の集まりで、NIST が策定しています。脆弱性を CVE、製品を CPE、設定項目を CCE という共通の識別子で表し、深刻度を CVSS の数値で測ります。点検表を XCCDF、その判定手順を OVAL という機械可読の書式で書きます。SCAP 対応ツールにこれらのコンテンツを読み込ませれば、同じ基準で全台を点検できます。</p></blockquote>

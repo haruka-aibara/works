@@ -133,7 +133,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <line x1="610" y1="84" x2="650" y2="126" stroke="var(--c3)" stroke-width="1.5" marker-end="url(#am1)"/><text x="700" y="108" fill="var(--c3)" font-size="12">参照は分散</text>
 <text x="583" y="268" text-anchor="middle" fill="var(--stop)" font-size="13">書き込みの天井は 1 台のまま</text>
 </svg><figcaption>Aurora のようにストレージ側を大きく作り直したサービスでも、書き込みを受け付けるインスタンスが 1 台という構造は同じです。容量の天井は上がっても、書き込み性能の天井は残ります。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　書き込み先が 1 台なのが問題なら、データを会員 ID で 4 つに分けて、4 台の MySQL に書けば解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>書き込みの天井は上がります。代わりに別の仕事が大量に生まれます。</strong> 分けた瞬間から、どのデータがどの DB にあるかを誰かが管理しなければなりません。それを引き受けるのは多くの場合アプリです——これが次の話です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 書き込み先が 1 台なのが問題なら、データを会員 ID で 4 つに分けて、4 台の MySQL に書けば解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>書き込みの天井は上がります。代わりに別の仕事が大量に生まれます。</strong> 分けた瞬間から、どのデータがどの DB にあるかを誰かが管理しなければなりません。それを引き受けるのは多くの場合アプリです——これが次の話です。</p></div></details></div>
 
 <h2>STEP 2：自前で分割すると何が起きるか</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>データベース 1 台の限界</li><li class="now"><span class="n">STEP 2</span>自前で分割すると何が起きるか</li><li><span class="n">STEP 3</span>小さく切って 3 つずつ持つ</li><li><span class="n">STEP 4</span>SQL の層と保存の層を分ける</li><li><span class="n">STEP 5</span>TiDB として組み立てる</li></ol></nav>
@@ -156,7 +156,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="40" y="280">✕ シャード 4 を足すと、振り分け表の書き換えとデータの引っ越しが要る</text></g>
 </svg><figcaption>Vitess のように振り分けをミドルウェアへ切り出す方法もあります。アプリのコードは減りますが、「何をキーに分けるか」を人が設計し、分け方が合わなくなったら直すという仕事は残ります。</figcaption></figure>
 <p>つまり欲しいのは、<strong>中では勝手に分かれていて、外からは 1 台の MySQL に見えるデータベース</strong>です。分けるのも、引っ越しも、またぐトランザクションも、データベース側がやってくれるもの。そのために必要な部品を、ここから 1 つずつ組み立てます。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　台数を増やしてデータを分けると、書き込み以外に新しく心配になることがあります。何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どこか 1 台が壊れる確率が上がることです。</strong> 1 台なら年に一度の故障でも、30 台あればどれかが頻繁に壊れます。分けたデータの一部が消えたり読めなくなったりしては困るので、「分ける」と同時に「複製して持つ」仕組みが要ります。これが次のステップです。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 台数を増やしてデータを分けると、書き込み以外に新しく心配になることがあります。何でしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どこか 1 台が壊れる確率が上がることです。</strong> 1 台なら年に一度の故障でも、30 台あればどれかが頻繁に壊れます。分けたデータの一部が消えたり読めなくなったりしては困るので、「分ける」と同時に「複製して持つ」仕組みが要ります。これが次のステップです。</p></div></details></div>
 
 <h2>STEP 3：小さく切って 3 つずつ持つ</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>データベース 1 台の限界</li><li class="done"><span class="n">STEP 2 ✓</span>自前で分割すると何が起きるか</li><li class="now"><span class="n">STEP 3</span>小さく切って 3 つずつ持つ</li><li><span class="n">STEP 4</span>SQL の層と保存の層を分ける</li><li><span class="n">STEP 5</span>TiDB として組み立てる</li></ol></nav>
@@ -208,7 +208,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="583" y="214" text-anchor="middle" fill="var(--c3)" font-size="13">残り 2 つで過半数。数秒で選び直して続行</text>
 </svg><figcaption>確定したデータは必ず過半数のマシンにあるので、1 台が消えても失われません。逆に 3 つ中 2 つが同時に止まると、その Region は書き込めなくなります。</figcaption></figure>
 <p>この「Region に切って、Raft で 3 つずつ持つ」保存の仕組みが <strong>TiKV</strong> です。中身は、キーと値の組を保存する分散ストア（キーバリューストア）です。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　TiKV が扱うのはキーと値の組だけです。では、アプリが送ってくる <code>SELECT ... JOIN ... WHERE ...</code> は誰が解釈するのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>まだ誰もいません。</strong> 保存の仕組みはできましたが、SQL を受け取って「どのキーを読めばいいか」に翻訳する役がいない状態です。しかもその役は、Region がどのマシンにあるかを知っていなければなりません。この 2 つの役を足すのが次のステップです。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> TiKV が扱うのはキーと値の組だけです。では、アプリが送ってくる <code>SELECT ... JOIN ... WHERE ...</code> は誰が解釈するのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>まだ誰もいません。</strong> 保存の仕組みはできましたが、SQL を受け取って「どのキーを読めばいいか」に翻訳する役がいない状態です。しかもその役は、Region がどのマシンにあるかを知っていなければなりません。この 2 つの役を足すのが次のステップです。</p></div></details></div>
 
 <h2>STEP 4：SQL の層と保存の層を分ける</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>データベース 1 台の限界</li><li class="done"><span class="n">STEP 2 ✓</span>自前で分割すると何が起きるか</li><li class="done"><span class="n">STEP 3 ✓</span>小さく切って 3 つずつ持つ</li><li class="now"><span class="n">STEP 4</span>SQL の層と保存の層を分ける</li><li><span class="n">STEP 5</span>TiDB として組み立てる</li></ol></nav>
@@ -252,7 +252,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <div><b>3</b> PD から確定時刻の番号をもらい、代表の 1 キーを確定させる。この瞬間に全体が確定したことになる</div>
 </div>
 <p>時刻の番号を PD の 1 か所で発行するのが要点です。マシンごとの時計のずれに関係なく、全トランザクションの前後関係が一列に決まります。アプリから見れば、いつもの <code>BEGIN</code> … <code>COMMIT</code> のままです。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　TiDB サーバーを 3 台並べたとき、アプリはどれに接続すればよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どれでもかまいません。</strong> TiDB サーバーはデータを持たないので、どこに繋いでも同じ TiKV を見ています。前にロードバランサーを置いて振り分けるのが普通の構成です。1 台が落ちても接続し直すだけで済み、STEP 2 の「どの ID はどのシャードか」をアプリが知る必要はありません。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> TiDB サーバーを 3 台並べたとき、アプリはどれに接続すればよいでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>どれでもかまいません。</strong> TiDB サーバーはデータを持たないので、どこに繋いでも同じ TiKV を見ています。前にロードバランサーを置いて振り分けるのが普通の構成です。1 台が落ちても接続し直すだけで済み、STEP 2 の「どの ID はどのシャードか」をアプリが知る必要はありません。</p></div></details></div>
 
 <h2>STEP 5：TiDB として組み立てる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>データベース 1 台の限界</li><li class="done"><span class="n">STEP 2 ✓</span>自前で分割すると何が起きるか</li><li class="done"><span class="n">STEP 3 ✓</span>小さく切って 3 つずつ持つ</li><li class="done"><span class="n">STEP 4 ✓</span>SQL の層と保存の層を分ける</li><li class="now"><span class="n">STEP 5</span>TiDB として組み立てる</li></ol></nav>
@@ -292,7 +292,7 @@ ALTER TABLE orders SET TIFLASH REPLICA 2;</code></pre>
 </table></div>
 <p>表の 1 行目が示すとおり、<strong>1 台で足りるなら TiDB を選ぶ理由は薄い</strong>です。最小でも TiDB・TiKV・PD の複数台構成になり、1 件の書き込みにもマシン間の往復が挟まるので、小さな規模では MySQL 1 台より遅く高くつきます。</p>
 <div class="note"><p><strong>「MySQL 互換」は「MySQL と同じ」ではない。</strong> ストアドプロシージャやトリガーなど一部の機能は使えず、<code>AUTO_INCREMENT</code> の値も連番になる保証がありません。移行するなら、アプリが使っている機能を互換性の一覧と突き合わせてからにします。</p></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　注文 ID を 1, 2, 3 … と連番で振っているテーブルに、書き込みが殺到しました。TiKV を増やしても速くなりません。なぜでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>新しい行がすべて「いちばん後ろの Region」に入るからです。</strong> STEP 3 のとおり Region はキーの順に切られているので、連番の新規行は常に末尾の 1 Region に集中し、そのリーダー 1 台が STEP 1 と同じ天井になります。TiDB には、ID の上位ビットをばらけさせて Region を散らす <code>AUTO_RANDOM</code> という列属性が用意されています。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 注文 ID を 1, 2, 3 … と連番で振っているテーブルに、書き込みが殺到しました。TiKV を増やしても速くなりません。なぜでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>新しい行がすべて「いちばん後ろの Region」に入るからです。</strong> STEP 3 のとおり Region はキーの順に切られているので、連番の新規行は常に末尾の 1 Region に集中し、そのリーダー 1 台が STEP 1 と同じ天井になります。TiDB には、ID の上位ビットをばらけさせて Region を散らす <code>AUTO_RANDOM</code> という列属性が用意されています。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>TiDB は、外からは MySQL に見える分散データベースです。MySQL は書き込みを受け付けるのが 1 台だけなので、そこが天井になります。自前でシャーディングすれば天井は上がりますが、分け方の管理やまたぐ処理をアプリが背負います。TiDB はデータを自動で細かく切って複数台に 3 つずつ持ち、分割も引っ越しもまたぐトランザクションもデータベース側でやります。アプリは MySQL のドライバで繋ぐだけです。</p></blockquote>

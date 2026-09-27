@@ -76,7 +76,7 @@ a{color:var(--c1)}
 
   <rect x="0" y="158" width="700" height="52" rx="7" fill="var(--card)" stroke="var(--c3)" stroke-width="1.5"/>
   <text x="16" y="180" font-size="11.5" font-weight="600" fill="var(--ink)">関数を抜ける直前：置いたカナリアと今の値を比べる</text>
-  <text x="16" y="199" font-size="11" fill="var(--muted)">一致 → そのまま戻る　／　不一致 → その場で異常終了（乗っ取られる前に落とす）</text>
+  <text x="16" y="199" font-size="11" fill="var(--muted)">一致 → そのまま戻る ／ 不一致 → その場で異常終了（乗っ取られる前に落とす）</text>
 </svg>
 <figcaption>カナリアの値は起動のたびに変わるので、あらかじめ「正しい値」を書き込んでおくことはできない。検知した時点でプログラムは落ちる——つまり任意コード実行がサービス停止に置き換わる。乗っ取られるよりはるかにましだが、落ちること自体は防げない。</figcaption>
 </figure>

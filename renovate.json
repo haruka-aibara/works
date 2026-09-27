@@ -11,10 +11,6 @@
   "devcontainer": {
     "enabled": false
   },
-  "html": {
-    "description": "docs/ の記事は依存を持たず、全角スペース（U+3000）が hidden Unicode 警告になるだけなので読ませない。ignorePaths は上書きになるので node_modules も書き直す",
-    "ignorePaths": ["**/node_modules/**", "docs/**"]
-  },
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
   ],

@@ -137,7 +137,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="499" y="190" text-anchor="middle" fill="var(--ink)" font-size="11.5">過去の類似障害を探す</text>
 <text x="334" y="228" text-anchor="middle" fill="var(--c2)" font-size="12.5" font-weight="600">仮説を立てて、潰して、また立てる</text>
 </svg><figcaption>復旧作業そのものは「ロールバックする」「上限を上げる」など短時間で終わることが多く、比率は現場によって変わります。変わらないのは、直し方が分かった後より、分かるまでのほうが長いという点です。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　では、アラームをもっと細かく作り込めば、この時間は短くなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>短くなりません。むしろ増えます。</strong> アラームが教えるのは症状であって原因ではないので、細かくすればするほど「同時に鳴った 8 つのアラームのうち、どれが原因でどれが結果か」を仕分ける仕事が増えます。詰まっているのは検知ではなく、<strong>散らばった材料を突き合わせる作業</strong>です。では、その材料はどこにあるのでしょうか。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> では、アラームをもっと細かく作り込めば、この時間は短くなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>短くなりません。むしろ増えます。</strong> アラームが教えるのは症状であって原因ではないので、細かくすればするほど「同時に鳴った 8 つのアラームのうち、どれが原因でどれが結果か」を仕分ける仕事が増えます。詰まっているのは検知ではなく、<strong>散らばった材料を突き合わせる作業</strong>です。では、その材料はどこにあるのでしょうか。</p></div></details></div>
 
 <h2>STEP 2：調査の材料は最初から散らばっている</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>障害対応で本当に時間を食うところ</li><li class="now"><span class="n">STEP 2</span>調査の材料は最初から散らばっている</li><li><span class="n">STEP 3</span>調べる仕事を回すエージェント</li><li><span class="n">STEP 4</span>起点・記録・人の承認</li><li><span class="n">STEP 5</span>AWS DevOps Agent として組み立てる</li></ol></nav>
@@ -165,7 +165,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="530" y="200" text-anchor="middle" fill="var(--c4)" font-size="11.5">同じ例外を含むログ</text>
 <text x="400" y="272" text-anchor="middle" fill="var(--muted)" font-size="12">この「並べ直し」を毎回、手作業でやっている</text>
 </svg><figcaption>並べ直しの実体は 3 つの作業です。時刻をそろえる、依存関係をたどって上流に遡る、変化点（デプロイ・設定変更）を探す。ツールが分かれているせいで、この 3 つが人間の頭の中でしか起きません。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　材料が散らばっているのが問題なら、全部を 1 枚のダッシュボードに集めれば解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>見る場所は減りますが、仕事は減りません。</strong> ダッシュボードは決めた指標を並べるだけで、「今回はどこを深掘りするか」を判断してくれません。障害のたびに見るべき場所は変わるので、結局その場でクエリを書いて絞り込むことになります。足りないのは表示ではなく、<strong>次に何を調べるかを決める判断</strong>です。それを人以外にやらせられるでしょうか。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 材料が散らばっているのが問題なら、全部を 1 枚のダッシュボードに集めれば解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>見る場所は減りますが、仕事は減りません。</strong> ダッシュボードは決めた指標を並べるだけで、「今回はどこを深掘りするか」を判断してくれません。障害のたびに見るべき場所は変わるので、結局その場でクエリを書いて絞り込むことになります。足りないのは表示ではなく、<strong>次に何を調べるかを決める判断</strong>です。それを人以外にやらせられるでしょうか。</p></div></details></div>
 
 <h2>STEP 3：調べる仕事を回すエージェント</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>障害対応で本当に時間を食うところ</li><li class="done"><span class="n">STEP 2 ✓</span>調査の材料は最初から散らばっている</li><li class="now"><span class="n">STEP 3</span>調べる仕事を回すエージェント</li><li><span class="n">STEP 4</span>起点・記録・人の承認</li><li><span class="n">STEP 5</span>AWS DevOps Agent として組み立てる</li></ol></nav>
@@ -192,7 +192,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="532" y="176" fill="var(--muted)" font-size="11">※ 変更する権限は渡さない</text>
 <text x="390" y="238" text-anchor="middle" fill="var(--muted)" font-size="12">人が張り付いていなくてもループは進む</text>
 </svg><figcaption>ループが安全なのは、呼べるツールを読み取りだけに絞れるからです。間違った仮説を立てても、結果は空振りの検索が 1 回増えるだけで、環境は壊れません。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　同じことは、生成 AI のチャットにログを貼り付けて相談しても実現できるのでは？</p><details><summary>答えを見る</summary><div class="ans"><p><strong>途中までは同じですが、起点が違います。</strong> チャットに貼るには「どのログを貼るか」を人が先に決める必要があり、その判断こそが STEP 2 で詰まっていた部分です。エージェントは自分でツールを呼べるので、材料を集めるところから始められます。ただし、そのためには <strong>何を起点に動き出すか</strong>と、<strong>どこまで自分で決めてよいか</strong>を先に決めておく必要があります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 同じことは、生成 AI のチャットにログを貼り付けて相談しても実現できるのでは？</p><details><summary>答えを見る</summary><div class="ans"><p><strong>途中までは同じですが、起点が違います。</strong> チャットに貼るには「どのログを貼るか」を人が先に決める必要があり、その判断こそが STEP 2 で詰まっていた部分です。エージェントは自分でツールを呼べるので、材料を集めるところから始められます。ただし、そのためには <strong>何を起点に動き出すか</strong>と、<strong>どこまで自分で決めてよいか</strong>を先に決めておく必要があります。</p></div></details></div>
 
 <h2>STEP 4：起点・記録・人の承認</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>障害対応で本当に時間を食うところ</li><li class="done"><span class="n">STEP 2 ✓</span>調査の材料は最初から散らばっている</li><li class="done"><span class="n">STEP 3 ✓</span>調べる仕事を回すエージェント</li><li class="now"><span class="n">STEP 4</span>起点・記録・人の承認</li><li><span class="n">STEP 5</span>AWS DevOps Agent として組み立てる</li></ol></nav>
@@ -218,7 +218,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <rect x="700" y="86" width="66" height="48" rx="8" fill="var(--lane)" stroke="var(--c3)" stroke-width="1.5"/><text x="733" y="115" text-anchor="middle" fill="var(--ink)" font-size="11.5">実行</text>
 <text x="480" y="180" text-anchor="middle" fill="var(--muted)" font-size="12">調査は自動、環境を変える操作は承認の後ろ</text>
 </svg><figcaption>この境界の引き方は好みではなく、権限設計そのものです。調査に使う権限と、対処に使う権限を別のロールに分けておけば、承認前に環境が変わることは仕組みとして起きません。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　原因まで特定できるなら、そのまま自動で直させたほうが復旧は速いのでは？</p><details><summary>答えを見る</summary><div class="ans"><p><strong>速いのは、原因の判定が正しかった場合だけです。</strong> 間違っていれば、障害中の本番環境に見当違いの変更が入り、状況はさらに読めなくなります。調査は空振りしても損失が小さく、対処は外すと損失が大きい——非対称なので、自動化する範囲も左右で変えます。ここまでの 4 ステップが、そのまま AWS のサービスとして組み上がったものが次の話です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 原因まで特定できるなら、そのまま自動で直させたほうが復旧は速いのでは？</p><details><summary>答えを見る</summary><div class="ans"><p><strong>速いのは、原因の判定が正しかった場合だけです。</strong> 間違っていれば、障害中の本番環境に見当違いの変更が入り、状況はさらに読めなくなります。調査は空振りしても損失が小さく、対処は外すと損失が大きい——非対称なので、自動化する範囲も左右で変えます。ここまでの 4 ステップが、そのまま AWS のサービスとして組み上がったものが次の話です。</p></div></details></div>
 
 <h2>STEP 5：AWS DevOps Agent として組み立てる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>障害対応で本当に時間を食うところ</li><li class="done"><span class="n">STEP 2 ✓</span>調査の材料は最初から散らばっている</li><li class="done"><span class="n">STEP 3 ✓</span>調べる仕事を回すエージェント</li><li class="done"><span class="n">STEP 4 ✓</span>起点・記録・人の承認</li><li class="now"><span class="n">STEP 5</span>AWS DevOps Agent として組み立てる</li></ol></nav>
@@ -265,7 +265,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <p>ここまでは障害が起きた後の話ですが、DevOps Agent にはもう一方の使い方があります。過去のインシデントの傾向を横断で見て、<strong>可観測性の穴・構成の弱点・デプロイパイプラインの改善点</strong>を推奨として出す機能です。「毎回このメトリクスがなくて調査が止まる」という事実は、調査を積み重ねた側にしか見えません。</p>
 <p>料金は<strong>エージェントが働いた時間に対する秒課金</strong>で、GA 時点では 1 エージェント秒あたり 0.0083 USD（約 0.5 USD/分）です。有効にしておくだけでは課金されず、調査 1 回が数分なら数 USD という単位になります。利用できるリージョンは 6 つで、東京リージョンが含まれます。</p>
 <div class="note"><p><strong>権限設計を先に決める。</strong> 調査用ロールに与える読み取り権限の範囲が、そのままエージェントに見える範囲になります。逆に、昇格ロールを登録しなければ「調べるだけで何も変えない」状態に固定できます。まずこの状態から始めて、どこまで任せるかは実績を見てから広げるほうが安全です。</p></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　DevOps Agent を有効にすれば、それだけで障害対応の時間は短くなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>材料がつながっていなければ短くなりません。</strong> エージェントが見られるのは、人が見られるものと同じです。ログが出ていない、リソースの関係が分からない、デプロイ履歴が AWS 側から追えない——そういう状態では、人と同じところで行き詰まります。効果が出る前提は STEP 2 の材料がそろっていることで、そこが弱いなら、まず整えるべきは可観測性のほうです。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> DevOps Agent を有効にすれば、それだけで障害対応の時間は短くなるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>材料がつながっていなければ短くなりません。</strong> エージェントが見られるのは、人が見られるものと同じです。ログが出ていない、リソースの関係が分からない、デプロイ履歴が AWS 側から追えない——そういう状態では、人と同じところで行き詰まります。効果が出る前提は STEP 2 の材料がそろっていることで、そこが弱いなら、まず整えるべきは可観測性のほうです。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>AWS DevOps Agent は、障害の一次調査を代わりにやる AWS のマネージドサービスです。アラームや Webhook を起点に自分で動き出し、メトリクス・ログ・トレース・変更履歴・デプロイ履歴を横断して突き合わせ、根本原因の候補と緩和計画を出します。ただし環境は自分では変えません。実行するかどうかは人が決めます。料金はエージェントが働いた秒に対してかかり、置いておくだけなら無料です。</p></blockquote>

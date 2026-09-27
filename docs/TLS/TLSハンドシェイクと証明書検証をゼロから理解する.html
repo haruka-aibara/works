@@ -183,7 +183,7 @@ blockquote p{margin:.4rem 0}
 </blockquote>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　パスワードを強力に暗号化して送れば、それだけで安全と言えるでしょうか。</p>
+<p class="q"><b>確認問題</b> パスワードを強力に暗号化して送れば、それだけで安全と言えるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -274,7 +274,7 @@ blockquote p{margin:.4rem 0}
 </div>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　公開鍵は誰でも手に入ります。それなら攻撃者も、公開鍵を使って暗号文を復号できてしまうのではないでしょうか。</p>
+<p class="q"><b>確認問題</b> 公開鍵は誰でも手に入ります。それなら攻撃者も、公開鍵を使って暗号文を復号できてしまうのではないでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -363,7 +363,7 @@ blockquote p{margin:.4rem 0}
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　サーバから送られてきた署名を、手元の公開鍵で検証できました。これで「相手は本物の <code>example.com</code> だ」と言えるでしょうか。</p>
+<p class="q"><b>確認問題</b> サーバから送られてきた署名を、手元の公開鍵で検証できました。これで「相手は本物の <code>example.com</code> だ」と言えるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -466,7 +466,7 @@ blockquote p{margin:.4rem 0}
 </figure>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　ルート CA 証明書は自己署名で、誰にも保証されていません。それなのに信頼できるのはなぜでしょうか。そして、この構造にはどんな弱点があるでしょうか。</p>
+<p class="q"><b>確認問題</b> ルート CA 証明書は自己署名で、誰にも保証されていません。それなのに信頼できるのはなぜでしょうか。そして、この構造にはどんな弱点があるでしょうか。</p>
 <details>
 <summary>考えた結果を確認する</summary>
 <div class="ans">
@@ -661,7 +661,7 @@ blockquote p{margin:.4rem 0}
 <p>成立の条件は、名前の <strong>E（ephemeral、一時的）</strong>にあります。<code>a</code> と <code>b</code> は接続ごとに選び直し、<strong>使い終わったら捨てます</strong>。捨てるからこそ、後から誰が何を手に入れても再現できません。逆に同じ <code>a</code> を使い回す実装なら、その <code>a</code> が漏れた時点でそれを使った全接続が復号できます。E の付かない DH に前方秘匿性がないのは、この一点の差です。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　攻撃者が今日の通信を丸ごと記録して保存しました。5 年後にサーバの秘密鍵を手に入れたとして、その通信を読めるでしょうか。</p>
+<p class="q"><b>確認問題</b> 攻撃者が今日の通信を丸ごと記録して保存しました。5 年後にサーバの秘密鍵を手に入れたとして、その通信を読めるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">
@@ -694,7 +694,7 @@ blockquote p{margin:.4rem 0}
 <p>ハンドシェイクが終わってからのデータを扱うのが <strong>Record プロトコル</strong>です。<strong>扱える大きさに分割し、改ざん検知用の MAC を付け、セッション鍵で暗号化し、ヘッダを付けて TCP に渡します。</strong>暗号文は読めなくてもビットを反転させることはできるので、<strong>「読めない」と「変えられない」は別物</strong>です。後者を担うのが MAC で、詳細は <a href="Recordプロトコル.html">Record プロトコル</a>にあります。</p>
 
 <div class="quiz">
-<p class="q"><b>確認問題</b>　①の ClientHello は平文です。攻撃者がこれを書き換えて、弱い暗号スイートだけが載っているように見せかけたとします。この攻撃はどこで気づけるでしょうか。</p>
+<p class="q"><b>確認問題</b> ①の ClientHello は平文です。攻撃者がこれを書き換えて、弱い暗号スイートだけが載っているように見せかけたとします。この攻撃はどこで気づけるでしょうか。</p>
 <details>
 <summary>答えを見る</summary>
 <div class="ans">

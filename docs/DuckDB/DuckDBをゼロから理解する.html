@@ -134,7 +134,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="600" y="258" text-anchor="middle" fill="var(--muted)" font-size="12">1 億行</text>
 <text x="740" y="258" text-anchor="end" fill="var(--muted)" font-size="12">データ量 →</text>
 </svg><figcaption>限界の位置はマシンによって前後します。重要なのは順番で、データが増えるほど選べる手段が減り、最後に SQL が残るという点は変わりません。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　では PostgreSQL を 1 台立ててこの CSV を取り込めば、問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決はします。ただし割に合いません。</strong> この分析のためだけにサーバーを用意し、8 GB を取り込む時間をかけ、来月また別のファイルで同じことをやります。使いたいのは SQL であって、サーバーの運用ではありません。「SQL は使いたいが、サーバーは立てたくない」——これが次の話です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> では PostgreSQL を 1 台立ててこの CSV を取り込めば、問題は解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>解決はします。ただし割に合いません。</strong> この分析のためだけにサーバーを用意し、8 GB を取り込む時間をかけ、来月また別のファイルで同じことをやります。使いたいのは SQL であって、サーバーの運用ではありません。「SQL は使いたいが、サーバーは立てたくない」——これが次の話です。</p></div></details></div>
 
 <h2>STEP 2：サーバーを立てないデータベース</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>大きなデータの集計で詰まる場所</li><li class="now"><span class="n">STEP 2</span>サーバーを立てないデータベース</li><li><span class="n">STEP 3</span>列で持ち、まとめて処理する</li><li><span class="n">STEP 4</span>ファイルをそのままテーブルにする</li><li><span class="n">STEP 5</span>DuckDB として組み立てる</li></ol></nav>
@@ -163,7 +163,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <rect x="443" y="226" width="280" height="42" rx="9" fill="var(--lane)" stroke="var(--c3)" stroke-width="1.5"/><text x="583" y="253" text-anchor="middle" fill="var(--ink)" font-size="13">読み先をパスで指定するだけ</text>
 <text x="583" y="292" text-anchor="middle" fill="var(--c3)" font-size="13">立ち上げるものがない</text>
 </svg><figcaption>組み込み型はサーバー型の上位互換ではありません。共有・同時書き込み・権限管理といったサーバー型の役割を持たない代わりに、準備がゼロで済みます。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　組み込み型でよいのなら、すでにある SQLite を使えば済むのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>済みません。得意な仕事が違います。</strong> SQLite は「1 件の行を読む・書く」処理のために作られています。1 億行の合計を出すような集計を投げると、極端に時間がかかります。同じ組み込み型でありながら中身がまったく違う——その違いが次のステップです。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 組み込み型でよいのなら、すでにある SQLite を使えば済むのではないでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>済みません。得意な仕事が違います。</strong> SQLite は「1 件の行を読む・書く」処理のために作られています。1 億行の合計を出すような集計を投げると、極端に時間がかかります。同じ組み込み型でありながら中身がまったく違う——その違いが次のステップです。</p></div></details></div>
 
 <h2>STEP 3：列で持ち、まとめて処理する</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>大きなデータの集計で詰まる場所</li><li class="done"><span class="n">STEP 2 ✓</span>サーバーを立てないデータベース</li><li class="now"><span class="n">STEP 3</span>列で持ち、まとめて処理する</li><li><span class="n">STEP 4</span>ファイルをそのままテーブルにする</li><li><span class="n">STEP 5</span>DuckDB として組み立てる</li></ol></nav>
@@ -204,7 +204,7 @@ figcaption{margin-top:.7rem;font-size:.86rem;color:var(--muted);line-height:1.7}
 <text x="583" y="200" text-anchor="middle" fill="var(--c3)" font-size="13">呼び出しは 1 回で済む</text>
 </svg><figcaption>1 行ずつでも、全行を一度にメモリへ載せるのでもない中間の粒度、というのがベクトルの位置づけです。だからメモリに収まらない量でも動きます。</figcaption></figure>
 <p>この「列で持つ」「かたまりで処理する」の 2 つが、同じ SQL でも桁違いに速くなる中身です。1 件ずつの読み書きに強い <strong>OLTP</strong> 型（SQLite や PostgreSQL の主戦場）に対して、集計に強い <strong>OLAP</strong> 型がここにあたります。</p>
-<div class="quiz"><p class="q"><b>確認問題</b>　列指向で速くなるのは分かりました。では 8 GB の CSV を DuckDB のデータベースファイルに取り込めば、STEP 1 の悩みは解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>半分だけ解決します。</strong> 集計は速くなりますが、「取り込む」という工程が残っています。一度きりの集計のために取り込みを待つのは、STEP 1 で PostgreSQL を立てるのが割に合わなかったのと同じ理由で面倒です。次のステップが、この工程そのものを消します。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> 列指向で速くなるのは分かりました。では 8 GB の CSV を DuckDB のデータベースファイルに取り込めば、STEP 1 の悩みは解決するでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>半分だけ解決します。</strong> 集計は速くなりますが、「取り込む」という工程が残っています。一度きりの集計のために取り込みを待つのは、STEP 1 で PostgreSQL を立てるのが割に合わなかったのと同じ理由で面倒です。次のステップが、この工程そのものを消します。</p></div></details></div>
 
 <h2>STEP 4：ファイルをそのままテーブルにする</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>大きなデータの集計で詰まる場所</li><li class="done"><span class="n">STEP 2 ✓</span>サーバーを立てないデータベース</li><li class="done"><span class="n">STEP 3 ✓</span>列で持ち、まとめて処理する</li><li class="now"><span class="n">STEP 4</span>ファイルをそのままテーブルにする</li><li><span class="n">STEP 5</span>DuckDB として組み立てる</li></ol></nav>
@@ -238,7 +238,7 @@ duckdb.sql("SELECT region, sum(amount) FROM df GROUP BY region").df()</code></pr
 <line x1="162" y1="191" x2="200" y2="191" stroke="var(--wire)" stroke-width="2" marker-end="url(#am5)"/>
 <text x="660" y="196" text-anchor="middle" fill="var(--c3)" font-size="13" font-weight="700">工程が 2 つ消える</text>
 </svg><figcaption>消えているのは待ち時間だけではありません。取り込み用のスクリプトや、取り込み済みかどうかを気にする管理も一緒になくなります。</figcaption></figure>
-<div class="quiz"><p class="q"><b>確認問題</b>　ファイルを直接読めるなら、DuckDB のデータベースファイル（<code>.duckdb</code>）は何のためにあるのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>同じデータを何度も使うときのためです。</strong> データベースファイルに入れておけば、列指向で圧縮され統計情報も付いた形で持てるので、繰り返しのクエリはさらに速くなります。ビューや複数テーブルの関係もそこに保存できます。一度きりの集計はファイル直読み、何度も使うなら取り込む、という使い分けになります。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> ファイルを直接読めるなら、DuckDB のデータベースファイル（<code>.duckdb</code>）は何のためにあるのでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>同じデータを何度も使うときのためです。</strong> データベースファイルに入れておけば、列指向で圧縮され統計情報も付いた形で持てるので、繰り返しのクエリはさらに速くなります。ビューや複数テーブルの関係もそこに保存できます。一度きりの集計はファイル直読み、何度も使うなら取り込む、という使い分けになります。</p></div></details></div>
 
 <h2>STEP 5：DuckDB として組み立てる</h2>
 <nav class="rm" aria-label="進捗"><ol><li class="done"><span class="n">STEP 1 ✓</span>大きなデータの集計で詰まる場所</li><li class="done"><span class="n">STEP 2 ✓</span>サーバーを立てないデータベース</li><li class="done"><span class="n">STEP 3 ✓</span>列で持ち、まとめて処理する</li><li class="done"><span class="n">STEP 4 ✓</span>ファイルをそのままテーブルにする</li><li class="now"><span class="n">STEP 5</span>DuckDB として組み立てる</li></ol></nav>
@@ -281,7 +281,7 @@ duckdb.sql("SELECT region, sum(amount) FROM df GROUP BY region").df()</code></pr
 </tbody>
 </table></div>
 <div class="note"><p><strong>置き換える対象を間違えない。</strong> DuckDB が置き換えるのは、業務アプリのデータベースではありません。「分析のためだけに立てていた DB」や「遅い前処理スクリプト」のほうです。</p></div>
-<div class="quiz"><p class="q"><b>確認問題</b>　メモリが 16 GB のノート PC で、100 GB の Parquet を集計できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>条件しだいで、できることが多いです。</strong> 必要な列と行だけを読む仕組み（STEP 3・STEP 4）が効くので、100 GB のうち実際に読む量はずっと小さくなります。かたまり単位で処理し、足りなければディスクに退避しながら進めます。ただし何でも通るわけではなく、巨大な結合などは限界に当たります。そこから先は分散処理エンジンの領域です。</p></div></details></div>
+<div class="quiz"><p class="q"><b>確認問題</b> メモリが 16 GB のノート PC で、100 GB の Parquet を集計できるでしょうか。</p><details><summary>答えを見る</summary><div class="ans"><p><strong>条件しだいで、できることが多いです。</strong> 必要な列と行だけを読む仕組み（STEP 3・STEP 4）が効くので、100 GB のうち実際に読む量はずっと小さくなります。かたまり単位で処理し、足りなければディスクに退避しながら進めます。ただし何でも通るわけではなく、巨大な結合などは限界に当たります。そこから先は分散処理エンジンの領域です。</p></div></details></div>
 
 <h2>まとめ：そのまま使える説明テンプレート</h2>
 <h3>30 秒版</h3><blockquote><p>DuckDB は、集計に特化したオープンソースのデータベースです。いちばんの特徴はサーバーを立てないこと。ライブラリとしてアプリと同じプロセスの中で動くので、インストールしたらすぐ SQL が書けます。中身は列指向で、数千行をまとめて処理するので集計が速い。しかも CSV や Parquet をそのままテーブルとして <code>FROM</code> に書けるため、取り込みの工程が要りません。手元の大きなファイルを SQL で集計したいとき用の道具です。</p></blockquote>
