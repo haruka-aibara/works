@@ -13,6 +13,7 @@ from botocore.exceptions import ClientError
 
 from conftest import (
     BACKEND_ENV,
+    BOT_TOKEN,
     bedrock_response,
     load_backend,
     sqs_event,
@@ -655,3 +656,8 @@ class TestImportTimeConfiguration:
         module = self._load_without(monkeypatch, "BEDROCK_MAX_TOKENS", "backend_default_tokens")
 
         assert module.MAX_TOKENS == 1000
+
+    def test_reads_the_slack_token_from_ssm(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        module = self._load_without(monkeypatch, "BEDROCK_MAX_TOKENS", "backend_ssm_token")
+
+        module.WebClient.assert_called_once_with(token=BOT_TOKEN)

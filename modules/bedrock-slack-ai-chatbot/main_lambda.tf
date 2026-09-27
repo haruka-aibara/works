@@ -26,9 +26,10 @@ resource "aws_lambda_function" "slack_ai_chatbot" {
 
   environment {
     variables = {
-      SLACK_BOT_TOKEN      = var.slack_bot_token
-      SLACK_SIGNING_SECRET = var.slack_signing_secret
-      BACKEND_QUEUE_URL    = aws_sqs_queue.slack_ai_chatbot.url
+      # Parameter names, not the secrets: the function reads them from SSM.
+      SLACK_BOT_TOKEN_PARAMETER      = aws_ssm_parameter.slack_bot_token.name
+      SLACK_SIGNING_SECRET_PARAMETER = aws_ssm_parameter.slack_signing_secret.name
+      BACKEND_QUEUE_URL              = aws_sqs_queue.slack_ai_chatbot.url
     }
   }
 }
@@ -46,7 +47,7 @@ resource "aws_lambda_function" "slack_bolt_app_bedrock_backend" {
 
   environment {
     variables = {
-      SLACK_BOT_TOKEN = var.slack_bot_token
+      SLACK_BOT_TOKEN_PARAMETER = aws_ssm_parameter.slack_bot_token.name
       # BEDROCK_MODEL_ID         = var.bedrock_model_id
       BEDROCK_MODEL_ID    = aws_bedrock_inference_profile.claude_opus_4_6.arn
       BEDROCK_MAX_TOKENS  = var.bedrock_max_tokens

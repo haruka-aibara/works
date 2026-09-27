@@ -42,6 +42,18 @@ data "aws_iam_policy_document" "slack_ai_chatbot" {
       "arn:aws:sqs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${local.project_name}-queue"
     ]
   }
+
+  statement {
+    sid     = "ssm"
+    effect  = "Allow"
+    actions = ["ssm:GetParameter"]
+    # No kms:Decrypt: the AWS managed aws/ssm key already allows decryption
+    # through SSM for principals in this account.
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${local.project_name}/slack-bot-token",
+      "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${local.project_name}/slack-signing-secret",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "slack_ai_chatbot" {
@@ -142,6 +154,16 @@ data "aws_iam_policy_document" "bedrock_backend" {
     ]
     resources = [
       "arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.project_name}_bedrock-backend:*"
+    ]
+  }
+
+  statement {
+    sid     = "ssm"
+    effect  = "Allow"
+    actions = ["ssm:GetParameter"]
+    # See the frontend's ssm statement for why there is no kms:Decrypt.
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${local.project_name}/slack-bot-token",
     ]
   }
 }

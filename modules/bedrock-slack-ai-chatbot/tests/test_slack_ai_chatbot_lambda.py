@@ -12,7 +12,7 @@ from unittest import mock
 
 import pytest
 
-from conftest import FRONTEND_ENV, load_frontend
+from conftest import BOT_TOKEN, FRONTEND_ENV, SIGNING_SECRET, load_frontend
 
 
 def mention_event(text: str, **overrides: str) -> dict[str, str]:
@@ -200,3 +200,8 @@ class TestConfiguration:
         module = load_frontend("frontend_lambda_function_no_queue")
 
         assert module.sqs_queue_url == ""
+
+    def test_reads_the_slack_secrets_from_ssm(self, frontend: ModuleType) -> None:
+        kwargs = frontend.App.call_args.kwargs
+        assert kwargs["token"] == BOT_TOKEN
+        assert kwargs["signing_secret"] == SIGNING_SECRET

@@ -2,12 +2,14 @@ variable "bedrock_slack_ai_chatbot_slack_bot_token" {
   description = "Slack Bot User OAuth Token for the bedrock-slack-ai-chatbot module"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
 variable "bedrock_slack_ai_chatbot_slack_signing_secret" {
   description = "Slack Signing Secret for the bedrock-slack-ai-chatbot module"
   type        = string
   sensitive   = true
+  ephemeral   = true
 }
 
 # The short-cycle verification in docs/runbooks/tfe-token-rotation.md sets these
