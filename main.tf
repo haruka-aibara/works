@@ -44,14 +44,12 @@ module "haruka-aibara" {
 # see docs/runbooks/bedrock-slack-ai-chatbot-state-merge.md for the migration.
 module "bedrock_slack_ai_chatbot_infra" {
   source = "./modules/bedrock-slack-ai-chatbot"
+  providers = {
+    aws = aws.bedrock_slack_ai_chatbot
+  }
 
   slack_bot_token      = var.bedrock_slack_ai_chatbot_slack_bot_token
   slack_signing_secret = var.bedrock_slack_ai_chatbot_slack_signing_secret
-
-  tags = {
-    Environment = "production"
-    Project     = "bedrock-slack-ai-chatbot"
-  }
 }
 
 # Multi-turn Bedrock AI Agent — infrastructure.

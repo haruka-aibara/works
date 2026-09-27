@@ -15,6 +15,4 @@ resource "aws_dynamodb_table" "idempotency" {
     attribute_name = "expires_at"
     enabled        = true
   }
-
-  tags = var.tags
 }

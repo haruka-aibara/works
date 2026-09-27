@@ -31,8 +31,6 @@ resource "aws_lambda_function" "slack_ai_chatbot" {
       BACKEND_QUEUE_URL    = aws_sqs_queue.slack_ai_chatbot.url
     }
   }
-
-  tags = var.tags
 }
 
 resource "aws_lambda_function" "slack_bolt_app_bedrock_backend" {
@@ -55,8 +53,6 @@ resource "aws_lambda_function" "slack_bolt_app_bedrock_backend" {
       DYNAMODB_TABLE_NAME = aws_dynamodb_table.idempotency.name
     }
   }
-
-  tags = var.tags
 }
 
 resource "aws_lambda_event_source_mapping" "bedrock" {
@@ -69,6 +65,4 @@ resource "aws_lambda_event_source_mapping" "bedrock" {
   scaling_config {
     maximum_concurrency = 5
   }
-
-  tags = var.tags
 }

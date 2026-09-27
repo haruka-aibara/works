@@ -1,5 +1,6 @@
 locals {
-  # Resource naming. Common tags come from the root module's provider
-  # default_tags; Environment/Project come in through var.tags.
+  # Resource naming. default_tags (Owner/Environment/Project/Repository) come
+  # from the root module's aws.bedrock_slack_ai_chatbot provider, passed in as
+  # this module's default aws provider.
   project_name = "bedrock-slack-ai-chatbot"
 }
