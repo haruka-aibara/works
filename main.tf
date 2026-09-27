@@ -113,7 +113,7 @@ module "bedrock_slack_ai_chatbot_infra" {
 # rule. The module also creates the region's Config recorder, recording only a
 # resource type the account doesn't have so it records (and bills) nothing.
 # Tried once; not needed right now, so the call is commented out (see
-# docs/Ideas/2026-09-26-Cloud_CustodianでConfigルールを作ってみた.md). To enable
+# ideas/2026-09-26-Cloud_CustodianでConfigルールを作ってみた.md). To enable
 # it, uncomment this block.
 # module "aws_config_custodian" {
 #   source = "./modules/aws-config-custodian"
