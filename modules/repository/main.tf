@@ -33,17 +33,12 @@ resource "github_repository" "this" {
     }
   }
 
-  # prevent_destroy is lifted so that repositories absorbed into this monorepo
-  # with their history (devcontainer-templates,
-  # terraform-aws-budget-slack-notifier, aws-cost-allocation-tags,
-  # iam-access-analyzer-policy-generate,
-  # deploy-hcp-vault-dedicated-with-terraform, bedrock-slack-ai-agent,
-  # generate-dev-io-summary, google-cloud-hands-on, the hands-on repositories
-  # under hands-on/ and github-actions) could be destroyed for real. It stays
-  # false for now. This affects every repository this module manages, so
-  # removing a module call destroys that repository on the next apply.
+  # The repositories absorbed into this monorepo have all been destroyed, and the
+  # only one left is works itself -- the repository this configuration runs
+  # from. Removing its module call must not delete it on an auto-applied run.
+  # To destroy a repository on purpose, lift this in the same PR.
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
 }
 
@@ -85,7 +80,7 @@ resource "github_branch_protection" "this" {
     for_each = var.require_up_to_date_branch ? [1] : []
     content {
       strict   = true
-      contexts = []
+      contexts = var.required_status_checks
     }
   }
 

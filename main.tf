@@ -20,6 +20,12 @@ module "haruka-aibara" {
     branch = "main"
     path   = "/docs"
   }
+
+  # main is auto-applied, so a red PR must not be mergeable -- not even by an
+  # admin. If a check itself is broken, lift this in the UI; the next apply
+  # puts it back.
+  enforce_admins         = true
+  required_status_checks = local.works_required_status_checks
 }
 
 # =========================================

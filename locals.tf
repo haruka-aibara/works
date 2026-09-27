@@ -25,6 +25,22 @@ locals {
     Project     = "bedrock-slack-ai-chatbot"
   })
 
+  # works の main へのマージに必須にするチェック。
+  # Python CI は paths で絞っていて走らない PR があるので入れない（入れると永久に待つ）。
+  # Terraform Cloud/... は HCP Terraform の speculative plan。Actions が全部通っても
+  # plan だけ落ちることがある（#156 の init 失敗）ので、これも必須にする。
+  # repo-id は HCP Terraform が付ける識別子で、PR のチェック欄に出る名前そのまま。
+  works_required_status_checks = [
+    "ci / terraform fmt",
+    "ci / tflint",
+    "ci / trivy (IaC misconfig)",
+    "yamllint",
+    "actionlint",
+    "zizmor",
+    "markdownlint",
+    "Terraform Cloud/haruka-aibara/repo-id-MdiDoN1E26wzeCUX",
+  ]
+
   # Terraform repositories that should receive the CI caller workflow.
   # Add a line here to onboard a new repo.
   terraform_ci_repos = {
