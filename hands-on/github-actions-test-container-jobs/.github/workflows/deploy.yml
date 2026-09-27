@@ -21,7 +21,7 @@ jobs:
       PORT: 8080
     services:
       mongodb:
-        image: mongo:latest
+        image: mongo:latest@sha256:5d7043a4ffe02b9ed1b6e0bab057546981af5ca0a79107e9c461e49bc44c0a7b
         ports:
           - 27017:27017
         env:
@@ -29,9 +29,9 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: example
     steps:
       - name: Get Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@6f8efc29b200d32929f49075959781ed54ec270c # v3
         with:
           path: ~/.npm
           key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/package-lock.json') }}
