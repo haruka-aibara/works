@@ -4,6 +4,7 @@
     "config:best-practices",
     "customManagers:dockerfileVersions"
   ],
+  "rebaseWhen": "behind-base-branch",
   "terraform": {
     "enabled": true
   },
