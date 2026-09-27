@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: karpenter
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: public.ecr.aws/karpenter
+    chart: karpenter
+    targetRevision: {{ .Values.versions.karpenter }}
+    helm:
+      releaseName: karpenter
+      valuesObject:
+        # system ノードは 1 台なので、既定の 2 レプリカ（ノードを分けて配置）だと片方が Pending になる。
+        replicas: 1
+        nodeSelector:
+          karpenter.sh/controller: "true"
+        settings:
+          clusterName: {{ .Values.clusterName }}
+          interruptionQueue: {{ .Values.karpenter.interruptionQueue }}
+  destination:
+    server: https://kubernetes.default.svc
+    # infra の Pod Identity が kube-system/karpenter に紐づいている。
+    namespace: kube-system
+  {{- include "apps.syncPolicy" . | nindent 2 }}
