@@ -42,16 +42,20 @@ BACKEND_DIR = REPO_ROOT / "lambda_function_bedrock_backend"
 AWS_REGION = "ap-northeast-1"
 QUEUE_NAME = "test-queue"
 TABLE_NAME = "test-idempotency"
+BOT_TOKEN_PARAMETER = "/test/slack-bot-token"
+SIGNING_SECRET_PARAMETER = "/test/slack-signing-secret"
+BOT_TOKEN = "xoxb-test-token"
+SIGNING_SECRET = "test-signing-secret"
 
 FRONTEND_ENV = {
-    "SLACK_BOT_TOKEN": "xoxb-test-token",
-    "SLACK_SIGNING_SECRET": "test-signing-secret",
+    "SLACK_BOT_TOKEN_PARAMETER": BOT_TOKEN_PARAMETER,
+    "SLACK_SIGNING_SECRET_PARAMETER": SIGNING_SECRET_PARAMETER,
     # The URL moto hands back for QUEUE_NAME in its default account.
     "BACKEND_QUEUE_URL": f"https://sqs.{AWS_REGION}.amazonaws.com/123456789012/{QUEUE_NAME}",
 }
 
 BACKEND_ENV = {
-    "SLACK_BOT_TOKEN": "xoxb-test-token",
+    "SLACK_BOT_TOKEN_PARAMETER": BOT_TOKEN_PARAMETER,
     "BEDROCK_MODEL_ID": "arn:aws:bedrock:ap-northeast-1:123456789012:inference-profile/test",
     "BEDROCK_MAX_TOKENS": "1000",
     "DYNAMODB_TABLE_NAME": TABLE_NAME,
@@ -102,8 +106,14 @@ def aws_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def aws() -> Iterator[None]:
-    """An in-memory AWS backend, torn down after the test."""
+    """An in-memory AWS backend, torn down after the test.
+
+    The Slack secrets are put in SSM up front, since both handlers read them at import.
+    """
     with mock_aws():
+        ssm = boto3.client("ssm")
+        ssm.put_parameter(Name=BOT_TOKEN_PARAMETER, Value=BOT_TOKEN, Type="SecureString")
+        ssm.put_parameter(Name=SIGNING_SECRET_PARAMETER, Value=SIGNING_SECRET, Type="SecureString")
         yield
 
 

@@ -23,6 +23,7 @@ BEDROCK_RETRY_CONFIG = Config(retries={"max_attempts": 5, "mode": "adaptive"})
 if TYPE_CHECKING:
     from mypy_boto3_bedrock_runtime import BedrockRuntimeClient
     from mypy_boto3_sqs import SQSClient
+    from mypy_boto3_ssm import SSMClient
 
     def get_bedrock_runtime_client() -> BedrockRuntimeClient:
         """Get a properly typed BedrockRuntime client"""
@@ -31,6 +32,10 @@ if TYPE_CHECKING:
     def get_sqs_client() -> SQSClient:
         """Get a properly typed SQS client"""
         return boto3.client("sqs")
+
+    def get_ssm_client() -> SSMClient:
+        """Get a properly typed SSM client"""
+        return boto3.client("ssm")
 else:
 
     def get_bedrock_runtime_client():
@@ -40,3 +45,7 @@ else:
     def get_sqs_client():
         """Get an SQS client"""
         return boto3.client("sqs")
+
+    def get_ssm_client():
+        """Get an SSM client"""
+        return boto3.client("ssm")

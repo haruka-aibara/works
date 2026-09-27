@@ -11,13 +11,14 @@ dependencies = [
     { name = "boto3-stubs" },
     { name = "mypy-boto3-bedrock-runtime" },
     { name = "mypy-boto3-sqs" },
+    { name = "mypy-boto3-ssm" },
     { name = "slack-bolt" },
     { name = "slack-sdk" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "moto", extra = ["dynamodb"] },
+    { name = "moto", extra = ["dynamodb", "ssm"] },
     { name = "pytest" },
 ]
 
@@ -27,13 +28,14 @@ requires-dist = [
     { name = "boto3-stubs", specifier = ">=1.38.8" },
     { name = "mypy-boto3-bedrock-runtime", specifier = ">=1.38.4" },
     { name = "mypy-boto3-sqs", specifier = ">=1.38.0" },
+    { name = "mypy-boto3-ssm", specifier = ">=1.38.0" },
     { name = "slack-bolt", specifier = ">=1.23.0" },
     { name = "slack-sdk", specifier = ">=3.35.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "moto", extras = ["dynamodb", "sqs"], specifier = ">=5.2.3" },
+    { name = "moto", extras = ["dynamodb", "sqs", "ssm"], specifier = ">=5.2.3" },
     { name = "pytest", specifier = ">=8.4.2" },
 ]
 
@@ -462,6 +464,9 @@ dynamodb = [
     { name = "docker" },
     { name = "py-partiql-parser" },
 ]
+ssm = [
+    { name = "pyyaml" },
+]
 
 [[package]]
 name = "mypy-boto3-bedrock-runtime"
@@ -479,6 +484,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f0/a0/ef5c7bdb33af5d0a48029fed11401388fa68949c6c0f9b11b2e845f5fe0e/mypy_boto3_sqs-1.38.0.tar.gz", hash = "sha256:39aebc121a2fe20f962fd83b617fd916003605d6f6851fdf195337a0aa428fe1", size = 23541, upload-time = "2025-04-22T21:35:17.315Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a5/97/72fccc9aaa0e3c8f3f99b4edac580ede651808aefb47b0d2b52c18a3d16b/mypy_boto3_sqs-1.38.0-py3-none-any.whl", hash = "sha256:8e881c8492f6f51dcbe1cce9d9f05334f4b256b5843e227fa925e0f6e702b31d", size = 33669, upload-time = "2025-04-22T21:35:16.073Z" },
+]
+
+[[package]]
+name = "mypy-boto3-ssm"
+version = "1.43.53"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/24/a5/f43b2c755cf3ad6c61821f54802d13acf3831deb378d90e68f5ced332063/mypy_boto3_ssm-1.43.53.tar.gz", hash = "sha256:f20a2f1035a0d58b61647c6f5c883e058152acdccd8a97e7d1916476dc8e7c7b", size = 97766, upload-time = "2026-07-21T19:52:31.108Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/97/b2cf5f41d412891e8122e5e6a1986c7ebcdff3c9d5ac90058e045c65a816/mypy_boto3_ssm-1.43.53-py3-none-any.whl", hash = "sha256:d90a5a46e2e5db78ae5354d6cf925be81567704d4d051337feef79b8cfd6d3de", size = 99501, upload-time = "2026-07-21T19:52:28.759Z" },
 ]
 
 [[package]]

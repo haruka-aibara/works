@@ -21,7 +21,7 @@ import boto3
 from botocore.exceptions import ClientError
 from slack_sdk import WebClient
 
-from boto3_utils import get_bedrock_runtime_client
+from boto3_utils import get_bedrock_runtime_client, get_ssm_client
 
 # Configure logger
 logger = logging.getLogger()
@@ -29,7 +29,19 @@ logger.setLevel(logging.INFO)
 
 # Initialize clients
 bedrock_runtime = get_bedrock_runtime_client()
-slack_client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
+ssm = get_ssm_client()
+
+
+def read_secret(parameter_env: str) -> str:
+    """Read a SecureString from SSM, given the env var holding its parameter name.
+
+    The secrets are kept out of the Lambda environment so they cannot be read from
+    the function configuration. They are fetched once per cold start.
+    """
+    return ssm.get_parameter(Name=os.environ[parameter_env], WithDecryption=True)["Parameter"]["Value"]
+
+
+slack_client = WebClient(token=read_secret("SLACK_BOT_TOKEN_PARAMETER"))
 dynamodb = boto3.resource("dynamodb")
 
 # Get model ID from environment variable

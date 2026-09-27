@@ -14,22 +14,34 @@ from typing import Any
 from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
-from boto3_utils import get_sqs_client
+from boto3_utils import get_sqs_client, get_ssm_client
 
 # Configure logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Initialize SQS client
+# Initialize AWS clients
 sqs = get_sqs_client()
+ssm = get_ssm_client()
 
 # Get SQS queue URL from environment variable
 sqs_queue_url = os.environ.get("BACKEND_QUEUE_URL", "")
 
+
+
+def read_secret(parameter_env: str) -> str:
+    """Read a SecureString from SSM, given the env var holding its parameter name.
+
+    The secrets are kept out of the Lambda environment so they cannot be read from
+    the function configuration. They are fetched once per cold start.
+    """
+    return ssm.get_parameter(Name=os.environ[parameter_env], WithDecryption=True)["Parameter"]["Value"]
+
+
 # Initialize Slack Bolt app
 app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    token=read_secret("SLACK_BOT_TOKEN_PARAMETER"),
+    signing_secret=read_secret("SLACK_SIGNING_SECRET_PARAMETER"),
     process_before_response=True,
 )
 
