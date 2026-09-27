@@ -5,3 +5,15 @@ misconfigurations:
     paths:
       - hands-on/github-actions-test-custom-actions/.github/actions/deploy-s3-docker/Dockerfile
     statement: Docker コンテナアクションは root で動かす前提（GitHub の仕様で USER を置けない）
+  - id: AWS-0039
+    paths:
+      - hands-on/eks-arc-self-hosted-runner/eks.tf
+    statement: 使い捨てのハンズオン。EKS 既定の envelope encryption（AWS 管理キー）で足り、KMS キーの費用をかけない
+  - id: AWS-0040
+    paths:
+      - hands-on/eks-arc-self-hosted-runner/eks.tf
+    statement: 手元から kubectl / helm を使うため public endpoint を開ける。アクセス元は public_access_cidrs で絞っている
+  - id: AWS-0164
+    paths:
+      - hands-on/eks-arc-self-hosted-runner/network.tf
+    statement: NAT Gateway の費用を避けるため、ノードを public subnet に置く。インバウンドは EKS のクラスタ SG で閉じている
