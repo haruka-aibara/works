@@ -11,6 +11,10 @@
   "devcontainer": {
     "enabled": false
   },
+  "html": {
+    "description": "HTML に CDN 依存は無く、docs/ の記事の全角スペース（U+3000）が hidden Unicode 警告になるだけなので読ませない",
+    "enabled": false
+  },
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
   ],
