@@ -5,8 +5,8 @@ tags: github, dependabot, security, operations
 Settings → Code security で Dependency graph・Dependabot alerts・Dependabot security updates（修正 PR を自動で出す）を ON にするだけ。`dependabot.yml` は最初は書かない。
 
 version updates は PR が増えるので、欲しくなってから `dependabot.yml` を weekly と `groups` で週1本にまとめて足す。
-自動マージまでは [Dependabot](../GitHub/42_Dependabot/README.md) に書いた。
-このリポジトリの更新は [Renovate](../GitHub/41_Renovate/README.md) 主体で、Dependabot は devcontainer だけ。
+自動マージまでは [Dependabot](../docs/GitHub/42_Dependabot/README.md) に書いた。
+このリポジトリの更新は [Renovate](../docs/GitHub/41_Renovate/README.md) 主体で、Dependabot は devcontainer だけ。
 
 ## アラートを自分で閉じないといけない問題
 

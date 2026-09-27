@@ -1,6 +1,6 @@
 # Dependabot で PR 作成とマージを自動にする
 
-入口のメモは [Ideas/2026-09-26-Dependabotは複雑にしないで使う.md](../../Ideas/2026-09-26-Dependabotは複雑にしないで使う.md)。
+入口のメモは [ideas/2026-09-26-Dependabotは複雑にしないで使う.md](../../../ideas/2026-09-26-Dependabotは複雑にしないで使う.md)。
 ここでは「PR を自動で作る」と「PR を自動でマージする」を分けて書く。
 
 ## PR を自動で作る

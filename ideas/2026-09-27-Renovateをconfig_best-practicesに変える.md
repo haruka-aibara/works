@@ -7,4 +7,4 @@ best-practices に変えると、npm の3日間の cooldown（`minimumReleaseAge
 
 変えたら、claude-code 用の手書きの `minimumReleaseAge` は外せるはず。
 
-詳細は [Renovate](../GitHub/41_Renovate/README.md) に書く。
+詳細は [Renovate](../docs/GitHub/41_Renovate/README.md) に書く。

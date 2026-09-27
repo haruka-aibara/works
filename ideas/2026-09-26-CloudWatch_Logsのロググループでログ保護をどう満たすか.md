@@ -12,4 +12,4 @@ S3 のバケットポリシーや Object Lock に当たるものが、ロググ�
 - 読み手を絞るのは IAM。リソース側で絞りたければ KMS カスタマー管理キーのキーポリシー
 - 単一アカウントでは管理者が Deny ごと外せる。絶対に消せない保証が要るログ（CloudTrail など）は、S3 Object Lock 側で担保する
 
-詳細：[8.15ログ保護をCloudWatch_Logsのロググループで満たす](../ISMS/8.15ログ保護をCloudWatch_Logsのロググループで満たす.md)
+詳細：[8.15ログ保護をCloudWatch_Logsのロググループで満たす](../docs/ISMS/8.15ログ保護をCloudWatch_Logsのロググループで満たす.md)
