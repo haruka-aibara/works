@@ -9,8 +9,3 @@ DevelopersIO に前日投稿された記事を要約して、毎朝 Slack へ通
 ## コードの外にある前提
 
 - Slack ワークスペースは、事前に AWS Chatbot のコンソールで認可しておく。
-
-## 気をつけること
-
-- **Lambda Layer の中身はコミットしない。**
-  plan のたびに `build_layer.py` が `requirements.txt` から作るので、バージョンを変えるときは `requirements.txt` だけを直す。
