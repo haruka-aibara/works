@@ -1,4 +1,4 @@
-requests==2.33.0
+requests==2.34.2
 beautifulsoup4==4.15.0
 # 間接依存も固定する。固定しないと新しい版が出るたびに layer の中身が変わり、
 # plan で layer が作り直される。
