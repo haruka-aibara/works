@@ -10,16 +10,20 @@ locals {
   # vcs_repo.oauth_token_id に使う。GitHub App 認証（GITHUB_APP_*）とは別物。
   oauth_token_id = data.tfe_oauth_client.this.oauth_token_id
 
-  # bedrock-slack-ai-chatbot モジュールの AWS リソースに付与する既定タグ。
-  # provider "aws" の default_tags はモジュール単位で分離できないため、この
-  # リポジトリが AWS 管理するアプリが増えたら再設計が要る。
-  bedrock_slack_ai_chatbot_default_tags = {
-    Owner       = "haruka-aibara"
-    Terraform   = true
+  # provider "aws" の default_tags に入れる、全 AWS リソース共通のタグ。
+  # Project はここに入れない。入れると全リソースが同じ Project で
+  # コスト配分されるので、アプリごとの alias 付き provider で付ける。
+  aws_default_tags = {
+    Owner      = "haruka-aibara"
+    Terraform  = true
+    Repository = "https://github.com/haruka-aibara/works"
+  }
+
+  # bedrock-slack-ai-chatbot モジュール専用の provider "aws" に入れるタグ。
+  bedrock_slack_ai_chatbot_default_tags = merge(local.aws_default_tags, {
     Environment = "production"
     Project     = "bedrock-slack-ai-chatbot"
-    Repository  = "https://github.com/haruka-aibara/works"
-  }
+  })
 
   # Terraform repositories that should receive the CI caller workflow.
   # Add a line here to onboard a new repo.
