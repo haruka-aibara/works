@@ -28,6 +28,25 @@ updates:
 
 このリポジトリの `.github/dependabot.yml` も devcontainer についてこの形になっている。
 
+### PR は週1回まとめて見る
+
+`interval: weekly` と `groups` の組み合わせで、version updates の PR は週1本にまとまる。
+PR を1個ずつ追いかけず、週1回その1本を見てマージする運用にする。
+
+ただし security updates は `schedule` に関係なく、アラートが出た時点で PR が来る。
+そのままだと1件ずつ PR になるので、まとめたいなら `applies-to: security-updates` のグループを足す。
+
+```yaml
+    groups:
+      all:
+        patterns: ["*"]            # version updates を1本に
+      security:
+        applies-to: security-updates
+        patterns: ["*"]            # security updates も1本に
+```
+
+security updates は急ぐものなので、週1回の確認を待たずに見る。
+
 ## PR を自動でマージする
 
 Dependabot 自体にはマージ機能がない。GitHub の auto-merge を、ワークフローから Dependabot の PR に対して ON にする。
@@ -73,3 +92,4 @@ Claude から聞いた話で、次は公式ドキュメントでまだ自分で�
 
 - `groups` でまとめた PR の `update-type` の決まり方
 - Dependabot が起こした `pull_request` で、`permissions` を書けば `GITHUB_TOKEN` に書き込み権限が付くこと
+- security updates が `schedule` に関係なく即時に来ることと、`applies-to: security-updates` でまとめられること
