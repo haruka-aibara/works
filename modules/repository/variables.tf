@@ -111,6 +111,12 @@ variable "require_up_to_date_branch" {
   default     = true
 }
 
+variable "required_status_checks" {
+  description = "Status check contexts that must pass before merging. Only applied when require_up_to_date_branch is true. Leave out checks whose workflow is filtered by paths: a check that never reports blocks the PR forever"
+  type        = list(string)
+  default     = []
+}
+
 variable "pages" {
   description = "GitHub Pages configuration. Set to null (default) to leave Pages unmanaged/disabled. path is the folder within the branch to publish, either \"/\" or \"/docs\""
   type = object({
