@@ -24,10 +24,8 @@ apply は main へのマージでしか走らないので、書き込みの経�
 
 ## これでは残るもの
 
-ワークスペースの環境変数（GitHub App の秘密鍵、`TFE_TOKEN` など）は plan からも読める。
-ロールを分けても塞がらないので、別に考える。
+環境変数の秘密（GitHub App の鍵、`TFE_TOKEN` など）は plan からも読める。別に考える。
 
 ## 未確認
 
-- 読み取り専用で plan が通るか（`aws_lambda_invocation` のような、plan で書き込むものがないか）
-- plan 中に外部コマンドから Web Identity トークンを読めるか
+読み取り専用で plan が通るか（`aws_lambda_invocation` など、plan で書き込むものがないか）。
