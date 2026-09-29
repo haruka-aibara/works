@@ -3,6 +3,17 @@
 EKS に Actions Runner Controller（ARC）を入れて、ジョブが来たときだけ runner 用のノードと Pod を立てる構成を、本番に近い形で試すハンズオン。
 1〜2 日で消す前提。
 
+## なぜ作ったか
+
+部品ごとの手順は [EKS Workshop](https://www.eksworkshop.com/) や各ツールの公式ドキュメントにそろっている。
+このハンズオンで試したいのは、それらを 1 つのクラスタでつないだときに初めて出てくる部分。
+
+- **作る順番と消す順番**：Terraform で作るものと Argo CD で入れるものの境界、destroy 前に Karpenter のノードと runner の登録を片付ける手順
+- **値の受け渡し**：クラスタ名や SQS のキュー名が、Terraform → root Application → 各 chart へどう渡るか
+- **部品どうしの前提**：ARC の chart を Argo CD で入れると controller の ServiceAccount を明示しないといけない、runner Pod の requests が Karpenter のノードサイズを決める、など
+
+どれも単体の教材では扱われず、組み合わせて動かしてみないと気づけない。
+
 ## 構成
 
 | 層 | 管理するもの | 何で入れるか |
