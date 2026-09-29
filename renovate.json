@@ -52,6 +52,18 @@
       "groupName": "hands-on",
       "minimumReleaseAge": "3 days",
       "automerge": true
+    },
+    {
+      "description": "hands-on の React サンプルは .eslintrc.json と --ext を使うので eslint 9 以降では動かない。eslint-plugin-react も eslint 10 に未対応",
+      "matchFileNames": ["hands-on/**"],
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<9"
+    },
+    {
+      "description": "react-scripts 5.0.1（最終版）の peer が typescript ^3.2.1 || ^4 なので、それ以上に上げると lockfile を作れない",
+      "matchFileNames": ["hands-on/docker-simple-cicd-demo/web/**"],
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<5"
     }
   ]
 }
