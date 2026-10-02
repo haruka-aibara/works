@@ -25,4 +25,4 @@ Access Analyzer は自動推論で、ポリシーが実際に何を許すかを�
 - plan JSON からポリシーを取り出すのは awslabs の `terraform-iam-policy-validator` でできるはず
 - CI からはチェック用 API だけを許すロールを OIDC で使う
 
-金額と awslabs ツールの現状は未確認
+金額と awslabs ツールの現状は未確認。
