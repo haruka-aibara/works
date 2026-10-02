@@ -1,4 +1,4 @@
 # Lambda layer の中身。plan のたびに build_layer.py がここから .build/lambda_layer を作る。
 # バージョンを変えると layer が作り直される。
 slack-bolt==1.30.0
-slack-sdk==3.44.1
+slack-sdk==3.45.0
