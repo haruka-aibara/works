@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runner-set
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: {{ .Values.versions.arc }}
+    helm:
+      # ワークフローの runs-on に書くラベルになる。
+      releaseName: eks-arc
+      valuesObject:
+        githubConfigUrl: {{ .Values.github.configUrl }}
+        # arc-github-secret が ESO で作る Secret。
+        githubConfigSecret: arc-github-app
+        minRunners: 0
+        maxRunners: {{ .Values.maxRunners }}
+        # chart は controller の ServiceAccount をクラスタに問い合わせて探すが、
+        # Argo CD は helm template で描画するので問い合わせが効かない。明示する。
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: arc-gha-rs-controller
+        template:
+          metadata:
+            annotations:
+              # ジョブの途中で Karpenter の統合（consolidation）にノードを回収させない。
+              karpenter.sh/do-not-disrupt: "true"
+          spec:
+            nodeSelector:
+              karpenter.sh/nodepool: github-runner
+            tolerations:
+              - key: github-runner
+                operator: Exists
+                effect: NoSchedule
+            containers:
+              - name: runner
+                image: ghcr.io/actions/actions-runner:{{ .Values.versions.runnerImage }}
+                command: ["/home/runner/run.sh"]
+                # Karpenter はこの requests を見てノードのサイズを決める。
+                resources:
+                  requests:
+                    cpu: "1"
+                    memory: 2Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+  {{- include "apps.syncPolicy" . | nindent 2 }}
