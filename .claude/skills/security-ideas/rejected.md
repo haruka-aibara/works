@@ -30,3 +30,12 @@
 - 組み合わせ（インシデント対応 × 組織）：Quarantine OU に SCP と RCP を付けておき、`MoveAccount` 1 回で隔離する
 - 生成 AI：Bedrock Knowledge Bases は元の S3 の権限を越えて答えるので、メタデータフィルタをアプリ側で付ける
 - 上限・クォータ：セキュリティ対応用の Lambda に reserved concurrency を確保する
+- 組み合わせ（サプライチェーン × IAM）：GitHub OIDC の `sub` を名前だけで縛ると、改名・削除後に同じ名前を取られて入られるので、`repository_id` などの ID で縛る
+- 組み合わせ（組織 × S3）：閉鎖したアカウントのバケット名を他人に取られるので、`aws:ResourceAccount` で自組織以外のバケットに書かせない
+- 組み合わせ（生成 AI × データの所在）：Bedrock の cross-region inference でリージョン制限の SCP を越えるので、`jp.` の profile に限る
+- インシデント対応の準備：`aws/ebs` で暗号化したスナップショットは共有できないので、EBS のデフォルトキーをフォレンジック用に許可した CMK にする
+- 組み合わせ（人・組織 × 後片付け）：作成者タグを自動で付け、SCIM で退職者が無効化されたら Resource Explorer で洗い出して引き継ぐ
+- 組み合わせ（証明書 × DNS）：Certificate Transparency ログの証明書名を Route 53 のレコードと突き合わせる
+- 組み合わせ（IaC × 棚卸し）：`default_tags` の `managed-by` がないリソースを Resource Explorer で探す
+- 攻撃の手口：`PowerUserAccess` なら EC2 Instance Connect でどのインスタンスにも SSH できる
+- コスト：使っていないリージョンに $0.01 の Budgets を置いて SCP の抜けを確かめる
