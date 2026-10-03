@@ -3,7 +3,7 @@ tags: terraform, tflint, ci
 # tflint-ruleset-terraform を preset = "all" で入れる
 
 [tflint-ruleset-terraform](https://github.com/terraform-linters/tflint-ruleset-terraform) は TFLint に同梱されていて、
-`.tflint.hcl` がなくても `recommended` のルールだけは動いている（はず）。
+`.tflint.hcl` がなくても `recommended` のルールだけは動いている。
 
 `.tflint.hcl` で明示して `preset = "all"` にすると、`recommended` に入っていないルールも効く。
 

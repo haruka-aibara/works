@@ -14,7 +14,7 @@ tags: terraform, hcp-terraform, drift, security, operations
 
 ## おまけ：ローテーションの合図にもなる
 
-`time_rotating` でトークンや鍵を回しているなら、期限が来た時点で差分が出る（はず）。
+`time_rotating` でトークンや鍵を回しているなら、期限が来た時点で差分が出る。
 通知が「apply してローテーションして」の合図を兼ね、別のリマインダーが要らない。
 
 ## 気をつけること
