@@ -8,7 +8,7 @@ function App() {
       Hello App
     </h1>
     <button onClick={async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_SERVER}/hello`, {mode: 'cors'})
+      const response = await fetch(`${import.meta.env.REACT_APP_API_SERVER}/hello`, {mode: 'cors'})
       const text = await response.text()
       setHelloText(text)
     }}>
