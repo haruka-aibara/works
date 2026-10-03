@@ -49,3 +49,12 @@
 - 組み合わせ（生成 AI × OIDC）：`job_workflow_ref` で AWS ロールを引き受けられる workflow を限り、AI エージェントの workflow には渡さない
 - 時間がたつと腐る：break-glass のロールが使えるかを月 1 回自動で確かめる
 - 組織：`CreateAccount` 直後は root 直下にあるので、最低限の SCP は root に付ける
+- 組み合わせ（IaC × レビュー）：レビューした plan とマージ後に適用される plan のずれを、ブランチの最新化と speculative plan で止める
+- 組み合わせ（インシデント対応 × 自動化）：GuardDuty の finding から Athena のクエリを自動で流して Slack に貼る
+- 検知の前に自分のノイズを消す：自分たちの正規の AccessDenied を潰してから偵察の検知に使う
+- 生成 AI：plan の JSON を LLM に渡し、誰が何に新しくアクセスできるかをコメントさせる
+- 矛盾の解き方：本番を見せるとき `ReadOnlyAccess` ではなく `ViewOnlyAccess` を付ける
+- 組み合わせ（組織 × 横断レビュー）：SCP の例外・外部アクセス・新しい公開リソースを月次の議題に自動でまとめる
+- 組み合わせ（コスト × Config）：変化の激しいリソースタイプだけ Config を daily 記録にする
+- 組み合わせ（ログ × データ保護）：CloudWatch Logs のデータ保護でマスクし、`logs:Unmask` を調査用ロールに限る
+- インシデント対応の準備：全アカウントのセキュリティ代替連絡先を Terraform で揃える
