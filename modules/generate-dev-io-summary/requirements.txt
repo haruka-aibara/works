@@ -3,7 +3,7 @@ beautifulsoup4==4.15.0
 # 間接依存も固定する。固定しないと新しい版が出るたびに layer の中身が変わり、
 # plan で layer が作り直される。
 certifi==2026.7.22
-charset-normalizer==3.5.1
+charset-normalizer==3.5.2
 idna==3.20
 soupsieve==2.10
 urllib3==2.8.0
