@@ -7,24 +7,24 @@ apply に要る権限を洗い出して絞るのは重い。
 
 ## なぜ plan か
 
-`works` の AWS 認証は `TFC_AWS_RUN_ROLE_ARN` の1本だけ。
-PR の speculative plan も、apply と同じ書き込み権限で動いている。
+HCP Terraform の動的認証を `TFC_AWS_RUN_ROLE_ARN` の 1 本で組むと、
+PR の speculative plan も apply と同じ書き込み権限で動く。
 
 plan の中でも任意のコードは動く（`data "external"` や provider のコード）。
 つまり、マージしなくても PR を出すだけで AWS を操作できる。
-「AI は PR まで」の分担も、いまは成り立っていない。
+「AI は PR まで、マージは人間」という分担も、この状態では成り立たない。
 
-apply は main へのマージでしか走らないので、書き込みの経路をマージだけに寄せられる。
+apply がマージでしか走らないなら、書き込みをマージだけに寄せられる。
 
 ## やること
 
 - `TFC_AWS_PLAN_ROLE_ARN` と `TFC_AWS_APPLY_ROLE_ARN` を分ける
-- plan 用は読み取り専用にし、`sub` を `...:workspace:works:run_phase:plan` に絞る。`ReadOnlyAccess` は SSM パラメータも読めるので、そのままは付けない
+- plan 用は読み取り専用にし、`sub` を `...:workspace:<名前>:run_phase:plan` に絞る。`ReadOnlyAccess` は SSM パラメータも読めるので、そのままは付けない
 - apply 用は `run_phase:apply` だけに信頼させる
 
 ## これでは残るもの
 
-環境変数の秘密（GitHub App の鍵、`TFE_TOKEN` など）は plan からも読める。別に考える。
+ワークスペースの環境変数に置いた秘密は plan からも読める。別に考える。
 
 ## 未確認
 

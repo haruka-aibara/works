@@ -2,8 +2,8 @@ tags: terraform, hcp-terraform, drift, security, operations
 
 # Terraform の差分が出たら鳴らす
 
-ここまでの ideas は「Terraform の実行ロール以外は Deny」に寄りかかっている。
-逆に言えば、**Terraform の外で何かが変わったら、それ自体が異常**として扱える。
+変更は Terraform からだけ、という運用にしているなら、
+**Terraform の外で何かが変わったら、それ自体が異常**として扱える。
 
 一番安いのは、定期的に plan を回して差分（ドリフト）が出たら鳴らすこと。
 Deny を書いていないリソースの手作業の変更にも気づける。
