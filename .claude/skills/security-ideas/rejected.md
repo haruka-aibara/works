@@ -17,3 +17,54 @@
 - 組み合わせ（ネットワーク × CI）：VPC Network Access Analyzer の scope を apply 後の CI で流し、到達してはいけない経路があれば失敗させる
 - 攻撃の手口：KMS キーに `ScheduleKeyDeletion` をかけて脅す。キーポリシーで禁止し、EventBridge で通知する
 - 仕組みの裏側：停止中の EC2 の userData に `#cloud-boothook` を仕込み、起動のたびに実行させて永続化する
+- 組み合わせ（IaC × 人・組織）：plan の JSON で IAM・キーポリシー・バケットポリシーの変更を見つけ、セキュリティ担当のレビューを必須にする
+- 組み合わせ（設計・DR × 時間）：AWS Backup の logically air-gapped vault と Restore testing で、消されないことと戻せることを毎月確かめる
+- 組み合わせ（上限・クォータ）：`RequestServiceQuotaIncrease` を SCP で禁止して通知し、GPU マイニングの予兆に気づく
+- 攻撃の手口（端末）：IAM Identity Center の device code フローを使ったフィッシング
+- 時間がたつと危なくなる：Lambda のランタイム終了で更新がブロックされ、緊急のパッチを当てられなくなる
+- 組み合わせ（ネットワーク × 組織）：RAM で共有したマネージドプレフィックスリストを 1 行変えると組織中の SG が開くので、SCP で変更を絞って通知する
+- 組み合わせ（生成 AI × 端末）：コーディングエージェント用の権限セットにセッションタグを付け、SCP で書き込みを拒否する
+- 攻撃の手口：Session Manager のリモートホストへのポートフォワーディングで、どのインスタンスも踏み台になる
+- 仕組みの裏側：KMS の grant はキーポリシーから外しても残るので、`CreateGrant` を見張って棚卸しする
+- 組み合わせ（コンテナ × サプライチェーン）：ECR の pull-through cache で自動作成されるリポジトリに、repository creation template でタグ不変化やスキャンを強制する
+- 組み合わせ（インシデント対応 × 組織）：Quarantine OU に SCP と RCP を付けておき、`MoveAccount` 1 回で隔離する
+- 生成 AI：Bedrock Knowledge Bases は元の S3 の権限を越えて答えるので、メタデータフィルタをアプリ側で付ける
+- 上限・クォータ：セキュリティ対応用の Lambda に reserved concurrency を確保する
+- 組み合わせ（サプライチェーン × IAM）：GitHub OIDC の `sub` を名前だけで縛ると、改名・削除後に同じ名前を取られて入られるので、`repository_id` などの ID で縛る
+- 組み合わせ（組織 × S3）：閉鎖したアカウントのバケット名を他人に取られるので、`aws:ResourceAccount` で自組織以外のバケットに書かせない
+- 組み合わせ（生成 AI × データの所在）：Bedrock の cross-region inference でリージョン制限の SCP を越えるので、`jp.` の profile に限る
+- インシデント対応の準備：`aws/ebs` で暗号化したスナップショットは共有できないので、EBS のデフォルトキーをフォレンジック用に許可した CMK にする
+- 組み合わせ（人・組織 × 後片付け）：作成者タグを自動で付け、SCIM で退職者が無効化されたら Resource Explorer で洗い出して引き継ぐ
+- 組み合わせ（証明書 × DNS）：Certificate Transparency ログの証明書名を Route 53 のレコードと突き合わせる
+- 組み合わせ（IaC × 棚卸し）：`default_tags` の `managed-by` がないリソースを Resource Explorer で探す
+- 攻撃の手口：`PowerUserAccess` なら EC2 Instance Connect でどのインスタンスにも SSH できる
+- コスト：使っていないリージョンに $0.01 の Budgets を置いて SCP の抜けを確かめる
+- 組み合わせ（秘密情報 × DB ログ）：ローテーション後に古いパスワードで認証失敗した相手を拾い、ハードコードや漏えいを見つける
+- 組み合わせ（Security Hub × IaC × 時間）：automation rules の抑制を Terraform で管理し、期限切れを CI で落とす
+- 組み合わせ（上限・クォータ × IAM）：信頼ポリシーの文字数上限でワイルドカードに逃げないよう、`aws:PrincipalOrgPaths` で書く
+- 攻撃の手口：盗まれた鍵で SES から自社ドメインのフィッシングを送られる
+- 仕組みの裏側：`GetSecretValue` や `GetParameter` は管理イベントなので、機微な小さいデータは S3 より読み取りの監査がただで付く
+- 実際のインシデント事例：Snowflake 型のインフォスティーラー対策として、PC の `~/.aws/credentials` から長期キーをなくす
+- 組み合わせ（規制・監査 × PR）：Identity Center の割り当てをレポートにして PR を作り、アクセスレビューを PR の承認で済ませる
+- 組み合わせ（生成 AI × OIDC）：`job_workflow_ref` で AWS ロールを引き受けられる workflow を限り、AI エージェントの workflow には渡さない
+- 時間がたつと腐る：break-glass のロールが使えるかを月 1 回自動で確かめる
+- 組織：`CreateAccount` 直後は root 直下にあるので、最低限の SCP は root に付ける
+- 組み合わせ（IaC × レビュー）：レビューした plan とマージ後に適用される plan のずれを、ブランチの最新化と speculative plan で止める
+- 組み合わせ（インシデント対応 × 自動化）：GuardDuty の finding から Athena のクエリを自動で流して Slack に貼る
+- 検知の前に自分のノイズを消す：自分たちの正規の AccessDenied を潰してから偵察の検知に使う
+- 生成 AI：plan の JSON を LLM に渡し、誰が何に新しくアクセスできるかをコメントさせる
+- 矛盾の解き方：本番を見せるとき `ReadOnlyAccess` ではなく `ViewOnlyAccess` を付ける
+- 組み合わせ（組織 × 横断レビュー）：SCP の例外・外部アクセス・新しい公開リソースを月次の議題に自動でまとめる
+- 組み合わせ（コスト × Config）：変化の激しいリソースタイプだけ Config を daily 記録にする
+- 組み合わせ（ログ × データ保護）：CloudWatch Logs のデータ保護でマスクし、`logs:Unmask` を調査用ロールに限る
+- インシデント対応の準備：全アカウントのセキュリティ代替連絡先を Terraform で揃える
+- 組み合わせ（検知のテスト）：Stratus Red Team を sandbox で流し、GuardDuty と自作の検知が鳴るかを ATT&CK の表で突き合わせる
+- 優先順位付け：新しい Security Hub の exposure finding（toxic combinations）から見る運用に変える
+- 組み合わせ（非人間 ID）：外部アカウントを信頼するロールを、最終使用日と契約中ベンダーの一覧で棚卸しする
+- 組み合わせ（脅威モデリング）：Threat Composer の JSON をリポジトリに置き、PR テンプレートで更新を求める
+- サプライチェーン：SLSA の来歴をイメージに付けて署名し、来歴のないイメージを動かさない
+- 組み合わせ（検知 × 書き込みは TF だけ）：実行ロール以外の書き込み API を EventBridge 1 本で鳴らす許可リスト型の検知
+- 組み合わせ（IAM × HCP Terraform）：実行ロールを HCP Terraform の外向き IP からしか使えないようにする
+- 組み合わせ（監視の監視）：毎朝サンプルの finding を本番の経路に流し、届かなければ外部の死活監視で鳴らす
+- 後片付け：Lambda が自動で作るロググループは管理外で無期限に残るので、先に Terraform で作る
+- 仕組みの裏側：IAM ロールを replace すると、リソースポリシーの ARN が古い ID のままで権限が戻らない
