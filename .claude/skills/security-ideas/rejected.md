@@ -44,3 +44,8 @@
 - 組み合わせ（上限・クォータ × IAM）：信頼ポリシーの文字数上限でワイルドカードに逃げないよう、`aws:PrincipalOrgPaths` で書く
 - 攻撃の手口：盗まれた鍵で SES から自社ドメインのフィッシングを送られる
 - 仕組みの裏側：`GetSecretValue` や `GetParameter` は管理イベントなので、機微な小さいデータは S3 より読み取りの監査がただで付く
+- 実際のインシデント事例：Snowflake 型のインフォスティーラー対策として、PC の `~/.aws/credentials` から長期キーをなくす
+- 組み合わせ（規制・監査 × PR）：Identity Center の割り当てをレポートにして PR を作り、アクセスレビューを PR の承認で済ませる
+- 組み合わせ（生成 AI × OIDC）：`job_workflow_ref` で AWS ロールを引き受けられる workflow を限り、AI エージェントの workflow には渡さない
+- 時間がたつと腐る：break-glass のロールが使えるかを月 1 回自動で確かめる
+- 組織：`CreateAccount` 直後は root 直下にあるので、最低限の SCP は root に付ける
