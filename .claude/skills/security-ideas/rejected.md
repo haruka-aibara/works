@@ -26,3 +26,7 @@
 - 組み合わせ（生成 AI × 端末）：コーディングエージェント用の権限セットにセッションタグを付け、SCP で書き込みを拒否する
 - 攻撃の手口：Session Manager のリモートホストへのポートフォワーディングで、どのインスタンスも踏み台になる
 - 仕組みの裏側：KMS の grant はキーポリシーから外しても残るので、`CreateGrant` を見張って棚卸しする
+- 組み合わせ（コンテナ × サプライチェーン）：ECR の pull-through cache で自動作成されるリポジトリに、repository creation template でタグ不変化やスキャンを強制する
+- 組み合わせ（インシデント対応 × 組織）：Quarantine OU に SCP と RCP を付けておき、`MoveAccount` 1 回で隔離する
+- 生成 AI：Bedrock Knowledge Bases は元の S3 の権限を越えて答えるので、メタデータフィルタをアプリ側で付ける
+- 上限・クォータ：セキュリティ対応用の Lambda に reserved concurrency を確保する
