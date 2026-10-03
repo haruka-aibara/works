@@ -39,3 +39,8 @@
 - 組み合わせ（IaC × 棚卸し）：`default_tags` の `managed-by` がないリソースを Resource Explorer で探す
 - 攻撃の手口：`PowerUserAccess` なら EC2 Instance Connect でどのインスタンスにも SSH できる
 - コスト：使っていないリージョンに $0.01 の Budgets を置いて SCP の抜けを確かめる
+- 組み合わせ（秘密情報 × DB ログ）：ローテーション後に古いパスワードで認証失敗した相手を拾い、ハードコードや漏えいを見つける
+- 組み合わせ（Security Hub × IaC × 時間）：automation rules の抑制を Terraform で管理し、期限切れを CI で落とす
+- 組み合わせ（上限・クォータ × IAM）：信頼ポリシーの文字数上限でワイルドカードに逃げないよう、`aws:PrincipalOrgPaths` で書く
+- 攻撃の手口：盗まれた鍵で SES から自社ドメインのフィッシングを送られる
+- 仕組みの裏側：`GetSecretValue` や `GetParameter` は管理イベントなので、機微な小さいデータは S3 より読み取りの監査がただで付く
