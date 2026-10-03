@@ -9,13 +9,13 @@
 | 触るもの | 読む |
 |---|---|
 | ルートの `*.tf` / `modules/` / `workflow-dist/` | `README.md` |
-| `docs/` / `ideas/` 配下 | `docs/reference/README.md` |
+| `docs/` / `ideas/` / `til/` 配下 | `docs/reference/README.md` |
 | `devcontainer-templates/` | `devcontainer-templates/README.md` |
 | 運用手順・過去の経緯を調べる | `docs/runbooks/README.md` |
 
 **README に運用メモを載せない。** 運用手順・ランブックの索引は `docs/runbooks/README.md` に置き、README からは参照しない。
 
-**`ideas/` は 1500 文字以内の入口だけにする。** 結論と要点だけ書き、詳細は `docs/` の該当トピックのディレクトリに書いてリンクする。
+**`ideas/`（思いついたこと）と `til/`（知ったこと）は 1500 文字以内の入口だけにする。** 結論と要点だけ書き、詳細は `docs/` の該当トピックのディレクトリに書いてリンクする。
 
 **PRを作るときは `.github/PULL_REQUEST_TEMPLATE.md` に従う。** 概要・変更内容・関連Issue の見出しをそのまま使い、本文を埋める。
 
