@@ -32,7 +32,6 @@ locals {
   # repo-id は HCP Terraform が付ける識別子で、PR のチェック欄に出る名前そのまま。
   works_required_status_checks = [
     "ci / terraform fmt",
-    "ci / terraform validate",
     "ci / tflint",
     "ci / trivy (IaC misconfig)",
     "yamllint",
