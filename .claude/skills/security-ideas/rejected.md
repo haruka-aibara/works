@@ -17,3 +17,8 @@
 - 組み合わせ（ネットワーク × CI）：VPC Network Access Analyzer の scope を apply 後の CI で流し、到達してはいけない経路があれば失敗させる
 - 攻撃の手口：KMS キーに `ScheduleKeyDeletion` をかけて脅す。キーポリシーで禁止し、EventBridge で通知する
 - 仕組みの裏側：停止中の EC2 の userData に `#cloud-boothook` を仕込み、起動のたびに実行させて永続化する
+- 組み合わせ（IaC × 人・組織）：plan の JSON で IAM・キーポリシー・バケットポリシーの変更を見つけ、セキュリティ担当のレビューを必須にする
+- 組み合わせ（設計・DR × 時間）：AWS Backup の logically air-gapped vault と Restore testing で、消されないことと戻せることを毎月確かめる
+- 組み合わせ（上限・クォータ）：`RequestServiceQuotaIncrease` を SCP で禁止して通知し、GPU マイニングの予兆に気づく
+- 攻撃の手口（端末）：IAM Identity Center の device code フローを使ったフィッシング
+- 時間がたつと危なくなる：Lambda のランタイム終了で更新がブロックされ、緊急のパッチを当てられなくなる
