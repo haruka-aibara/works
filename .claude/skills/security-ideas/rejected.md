@@ -58,3 +58,8 @@
 - 組み合わせ（コスト × Config）：変化の激しいリソースタイプだけ Config を daily 記録にする
 - 組み合わせ（ログ × データ保護）：CloudWatch Logs のデータ保護でマスクし、`logs:Unmask` を調査用ロールに限る
 - インシデント対応の準備：全アカウントのセキュリティ代替連絡先を Terraform で揃える
+- 組み合わせ（検知のテスト）：Stratus Red Team を sandbox で流し、GuardDuty と自作の検知が鳴るかを ATT&CK の表で突き合わせる
+- 優先順位付け：新しい Security Hub の exposure finding（toxic combinations）から見る運用に変える
+- 組み合わせ（非人間 ID）：外部アカウントを信頼するロールを、最終使用日と契約中ベンダーの一覧で棚卸しする
+- 組み合わせ（脅威モデリング）：Threat Composer の JSON をリポジトリに置き、PR テンプレートで更新を求める
+- サプライチェーン：SLSA の来歴をイメージに付けて署名し、来歴のないイメージを動かさない
