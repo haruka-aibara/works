@@ -1,0 +1,133 @@
+# security-ideas スキルでアイデアを 5 本出し、Slack に送る。
+# Claude は Bedrock で動かし、結果は SNS トピック → AWS Chatbot で Slack に届く。
+# AWS 側（ロール・トピック・Chatbot）は modules/security-ideas-slack-notifier。
+# 認証は GitHub の OIDC だけで、API キーも Slack の秘密もリポジトリに置かない。
+name: Security ideas
+
+on:
+  schedule:
+    # 平日 7:53 JST。GitHub の schedule は毎時 0 分が混んで遅れやすいので、ずらしている。
+    - cron: "53 22 * * 0-4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-ideas
+  cancel-in-progress: false
+
+env:
+  # modules/security-ideas-slack-notifier の outputs と同じ値。名前を変えたらここも直す。
+  AWS_ROLE_ARN: arn:aws:iam::172580074565:role/security-ideas-github-actions-role
+  SNS_TOPIC_ARN: arn:aws:sns:ap-northeast-1:172580074565:security-ideas_topic
+  BEDROCK_MODEL: anthropic.claude-opus-5-5
+  # 自動実行で出したアイデアの履歴。ideas/ には書かないので、重複よけはこれで持つ。
+  HISTORY_FILE: .security-ideas-history/history.md
+
+jobs:
+  ideas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # AWS への OIDC 認証に使う。
+      id-token: write
+    env:
+      # Claude Code が軽い処理に使う Haiku も同じモデルに寄せ、IAM で許すモデルを 1 つにする。
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic.claude-opus-5-5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # 前回までの履歴を取り出す。キーは毎回変わるので、restore-keys で最新のものに当たる。
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .security-ideas-history
+          key: security-ideas-history-${{ github.run_id }}
+          restore-keys: security-ideas-history-
+
+      - run: |
+          mkdir -p "$(dirname "$HISTORY_FILE")"
+          touch "$HISTORY_FILE"
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - id: claude
+        uses: anthropics/claude-code-action@cab360f6565aa35a51d6ce9e43f1f4287c0a32ea # v1.0.241
+        with:
+          use_bedrock: "true"
+          github_token: ${{ github.token }}
+          prompt: |
+            .claude/skills/security-ideas/SKILL.md を読み、そのとおりにアイデアを 5 本出してください。
+            スキルが読むよう指示しているファイル（rejected.md・手本の 4 本・ideas/ と til/ のファイル名）は必ず読んでください。
+
+            これは毎朝の自動実行で、結果は Slack に送られます。いつもと違う点は次のとおりです。
+
+            - ${{ env.HISTORY_FILE }} は、過去の自動実行で出したアイデアの一覧です。ここにあるネタも、同じ切り口の言い換えも出さないでください
+            - ユーザーに聞き返せないので、分野は自分で選んでください
+            - ファイルは書き換えず、ideas/ や til/ にも書かないでください
+            - 結果は表ではなく、指定の JSON の形で返してください。Slack では表が崩れるためです
+          claude_args: |
+            --model ${{ env.BEDROCK_MODEL }}
+            --max-turns 40
+            --allowedTools Read,Glob,Grep
+            --json-schema '{"type":"object","additionalProperties":false,"required":["ideas","unverified"],"properties":{"ideas":{"type":"array","minItems":5,"maxItems":5,"items":{"type":"object","additionalProperties":false,"required":["kind","idea"],"properties":{"kind":{"type":"string","description":"種類（攻撃の手口、組み合わせ（IaC × 時間）など）"},"idea":{"type":"string","description":"アイデア本文。どのサービスの・どの設定で・何が起きて・どう直すかまで"}}}},"unverified":{"type":"array","items":{"type":"string"},"description":"確かめていないこと。なければ空配列"}}}'
+
+      - name: Publish to Slack
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.claude.outputs.structured_output }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$STRUCTURED_OUTPUT" ]; then
+            echo "::error::Claude から structured_output が返ってこなかった"
+            exit 1
+          fi
+          today=$(TZ=Asia/Tokyo date +%F)
+
+          # AWS Chatbot のカスタム通知の形式。description は Slack の mrkdwn で表示される。
+          message=$(jq -c --arg today "$today" --arg run "$RUN_URL" '
+            {
+              version: "1.0",
+              source: "custom",
+              content: {
+                textType: "client-markdown",
+                title: "セキュリティのアイデア \($today)",
+                description: (
+                  ([.ideas | to_entries[] | "*\(.key + 1). \(.value.kind)*\n\(.value.idea)"] | join("\n\n"))
+                  + (if (.unverified | length) > 0
+                     then "\n\n*確かめていないこと*\n" + ([.unverified[] | "• \(.)"] | join("\n"))
+                     else "" end)
+                  + "\n\n実行ログ: \($run)"
+                )
+              }
+            }' <<<"$STRUCTURED_OUTPUT")
+
+          aws sns publish --topic-arn "$SNS_TOPIC_ARN" --message "$message" > /dev/null
+
+          # 次回以降の重複よけに足す。古いものから捨て、直近 200 本だけ残す。
+          jq -r --arg today "$today" '.ideas[] | "- \($today) \(.kind)：\(.idea | gsub("\n"; " "))"' \
+            <<<"$STRUCTURED_OUTPUT" >> "$HISTORY_FILE"
+          tail -n 200 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
+
+      # 黙って届かない日が続くと気づけないので、失敗も Slack に送る。
+      - name: Notify failure
+        if: failure()
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          message=$(jq -nc --arg run "$RUN_URL" '
+            {version: "1.0", source: "custom",
+             content: {textType: "client-markdown",
+                       title: "セキュリティのアイデア：実行に失敗しました",
+                       description: "実行ログ: \($run)"}}')
+          aws sns publish --topic-arn "$SNS_TOPIC_ARN" --message "$message" > /dev/null
+
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .security-ideas-history
+          key: security-ideas-history-${{ github.run_id }}

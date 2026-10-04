@@ -27,6 +27,18 @@ variable "buffer_minutes" {
   default     = null
 }
 
+# For module "security_ideas_slack_notifier" in main.tf. Not secrets, but set
+# on the works workspace in the UI like the other Slack IDs.
+variable "security_ideas_slack_channel_id" {
+  type        = string
+  description = "Slack channel ID that receives the security ideas"
+}
+
+variable "security_ideas_slack_workspace_id" {
+  type        = string
+  description = "Slack workspace ID authorized in AWS Chatbot"
+}
+
 # For module "aws_budget_slack_notifier" in main.tf, which is commented out for
 # now. Uncomment together with that module.
 # variable "budget_slack_channel_id" {

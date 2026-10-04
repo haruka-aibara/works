@@ -96,6 +96,19 @@ module "bedrock_slack_ai_chatbot_infra" {
 #   budgets_limit_amount_daily = var.budget_limit_amount_daily
 # }
 
+# Security ideas — infrastructure.
+# .github/workflows/security-ideas.yml runs the security-ideas skill with
+# Claude on Bedrock every weekday morning and publishes the result to this
+# SNS topic, which AWS Chatbot forwards to Slack. The workflow hardcodes the
+# role and topic ARNs, so keep them in sync if the names change.
+module "security_ideas_slack_notifier" {
+  source = "./modules/security-ideas-slack-notifier"
+
+  slack_channel_id   = var.security_ideas_slack_channel_id
+  slack_workspace_id = var.security_ideas_slack_workspace_id
+  github_repository  = "${local.github_owner}/works"
+}
+
 # AWS Cost Allocation Tags — infrastructure.
 # Absorbed from the standalone aws-cost-allocation-tags repository with its
 # history (git log -- modules/aws-cost-allocation-tags). Not needed right now,
