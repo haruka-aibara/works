@@ -16,6 +16,15 @@ on:
         type: string
         default: "."
 
+# Callers cannot grant more than this, whatever their own permissions say.
+permissions:
+  contents: read
+
+# Tool versions are bumped by Renovate (customManagers:githubActionsVersions).
+env:
+  # renovate: datasource=pypi depName=ruff
+  RUFF_VERSION: 0.16.10
+
 jobs:
   discover:
     runs-on: ubuntu-latest
@@ -88,7 +97,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: ${{ matrix.project }}/uv.lock
       - name: Lint
-        run: uvx ruff check .
+        run: uvx "ruff@${RUFF_VERSION}" check .
       - name: Install dependencies
         id: install
         # --locked fails the build if uv.lock is stale rather than silently re-resolving.

@@ -82,6 +82,8 @@ blame まで元の作者・日付にするには main の履歴を書き換え�
 
 ## 補足: bump コミットと HCP Terraform
 
-リリースワークフローは version を bump したコミットを main に直接 push する。コミットメッセージの `[skip ci]` を GitHub Actions と HCP Terraform の両方が見るので、bump のたびに `works` の apply が走ることはない。ワークフローを触るときにこのマーカーを落とさないこと。
+以前のリリースワークフローは、version を bump したコミットを `[skip ci]` 付きで main に直接 push していた。
+main にブランチ保護（必須チェック + `enforce_admins`）を入れてからはこの push が毎回弾かれ、publish まで進まなくなった。
 
-bump コミットが他の PR のマージと競合しないよう、ワークフローは `concurrency` で直列化し、push 前に `git pull --rebase` している。
+今は main にコミットせず、ghcr に publish 済みの最新バージョンから次の番号を決めて、ジョブの中だけでファイルを書き換える。
+main が動かないので、`works` の apply が余計に走ることもない。

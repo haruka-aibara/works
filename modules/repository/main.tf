@@ -92,3 +92,24 @@ resource "github_branch_protection" "this" {
     }
   }
 }
+
+# GITHUB_TOKEN defaults to read-only; workflows ask for more per job.
+# Actions may not approve pull requests, so a workflow cannot satisfy review
+# requirements on its own.
+resource "github_workflow_repository_permissions" "this" {
+  repository = github_repository.this.name
+
+  default_workflow_permissions     = "read"
+  can_approve_pull_request_reviews = false
+}
+
+# Every action and reusable workflow from another repository must be pinned to
+# a full commit SHA, so a moved tag cannot change what runs. Local references
+# (./.github/...) are not affected.
+resource "github_actions_repository_permissions" "this" {
+  repository = github_repository.this.name
+
+  enabled              = true
+  allowed_actions      = "all"
+  sha_pinning_required = var.actions_sha_pinning_required
+}

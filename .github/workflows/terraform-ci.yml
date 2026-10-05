@@ -5,9 +5,17 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Lets a workflow re-run the checks on a commit it pushed with GITHUB_TOKEN,
+  # which does not start pull_request runs on its own.
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+# Cancel superseded runs on a pull request; pushes to main always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:

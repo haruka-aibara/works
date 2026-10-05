@@ -12,10 +12,21 @@ on:
         type: string
         default: ""
 
+# Callers cannot grant more than this, whatever their own permissions say.
+permissions:
+  contents: read
+
+# Tool versions are bumped by Renovate (customManagers:githubActionsVersions).
+# tflint plugin versions are pinned in each repository's .tflint.hcl.
+env:
+  # renovate: datasource=github-releases depName=terraform-linters/tflint
+  TFLINT_VERSION: v0.64.0
+
 jobs:
   fmt:
     name: terraform fmt
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,16 +51,54 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: terraform fmt -check -recursive
 
+  validate:
+    name: terraform validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Resolve Terraform version
+        id: tfver
+        env:
+          TF_VERSION_INPUT: ${{ inputs.terraform-version }}
+          WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        run: |
+          if [ -n "$TF_VERSION_INPUT" ]; then
+            echo "version=$TF_VERSION_INPUT" >> "$GITHUB_OUTPUT"
+          elif [ -f "$WORKING_DIRECTORY/.terraform-version" ]; then
+            echo "version=$(cat "$WORKING_DIRECTORY/.terraform-version")" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=latest" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.tfver.outputs.version }}
+      # -backend=false fetches providers and modules only, so no backend or HCP Terraform credentials are needed.
+      - name: terraform init
+        working-directory: ${{ inputs.working-directory }}
+        run: terraform init -backend=false -input=false
+      - name: terraform validate
+        working-directory: ${{ inputs.working-directory }}
+        run: terraform validate
+
   tflint:
     name: tflint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
       - name: tflint --init
         working-directory: ${{ inputs.working-directory }}
+        # Plugins are downloaded from GitHub Releases; authenticate to avoid the anonymous rate limit.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: tflint --init
       - name: tflint
         working-directory: ${{ inputs.working-directory }}
@@ -58,6 +107,7 @@ jobs:
   trivy:
     name: trivy (IaC misconfig)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

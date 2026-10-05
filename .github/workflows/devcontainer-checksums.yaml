@@ -10,8 +10,7 @@ on:
     paths:
       - 'devcontainer-templates/src/haruka-aibara-dev-env/.devcontainer/Dockerfile'
 
-permissions:
-  contents: write
+permissions: {}
 
 # 実行中に Renovate がブランチを更新したら、古い実行は push が通らないので捨てる。
 concurrency:
@@ -21,6 +20,12 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # 追いコミットの push
+      contents: write
+      # 追いコミットに対する必須チェックの起動（workflow_dispatch）
+      actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
 
@@ -30,6 +35,7 @@ jobs:
       # このコミットの author は renovate.json の gitIgnoredAuthors に入れてあるので、
       # Renovate は引き続きこのブランチを rebase・更新する。
       - name: Commit and push
+        id: push
         run: |
           if git diff --quiet; then
             echo "checksums are up to date"
@@ -39,3 +45,17 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -am 'fix(devcontainer): SHA256 をバージョンに合わせて更新'
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN の push では pull_request の実行が承認待ちで止まり、追いコミットに必須チェックが付かない。
+      # workflow_dispatch は GITHUB_TOKEN からでも起動できるので、必須チェックを出すワークフローをここで起動する。
+      # Terraform Cloud の speculative plan は webhook で動くので、ここで起動しなくても走る。
+      - name: Run required checks on the new commit
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          gh workflow run lint.yml --ref "$BRANCH"
+          gh workflow run terraform-ci.yml --ref "$BRANCH"

@@ -1,6 +1,10 @@
 # devcontainer テンプレートを ghcr.io に publish する。
 # Terraform 管理外（workflow-dist/ から配布される terraform-ci.yml / python-ci.yml とは別物）なので
 # このファイルは直接編集してよい。
+#
+# version は main にコミットしない。ghcr に publish 済みの最新バージョンから次の番号を決め、
+# ジョブの中だけで devcontainer-template.json を書き換えて publish する。
+# main はブランチ保護（必須チェック + enforce_admins）で CI からの直接 push を受け付けないため。
 name: Release Dev Container Templates
 
 on:
@@ -14,11 +18,13 @@ on:
   workflow_dispatch:
     inputs:
       skip_version_bump:
-        description: 'バージョンを bump せず、現在のバージョンのまま再 publish する'
+        description: 'バージョンを bump せず、publish 済みの最新バージョン（無ければファイルの version）で publish する'
         type: boolean
         default: false
 
-# bump コミットを main に push するため、同時実行すると push が衝突する。
+permissions: {}
+
+# 同時に走ると同じ番号を 2 回取りにいくので直列化する。
 concurrency:
   group: devcontainer-release
   cancel-in-progress: false
@@ -30,43 +36,52 @@ jobs:
   deploy:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
+      contents: read
+      # ghcr への publish
       packages: write
-      contents: write
     steps:
-      # bump コミットを push するので認証情報は残す。
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # bump コミットを main に rebase して push するため、浅いクローンでは足りない。
-          fetch-depth: 0
+          persist-credentials: false
 
-      - name: "Bump version"
-        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.skip_version_bump }}
+      - name: "Decide version"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_VERSION_BUMP: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_version_bump }}
         run: |
           set -euo pipefail
           FILE="$TEMPLATE_FILE"
-          VERSION=$(jq -r .version "$FILE")
-          MAJOR=$(echo "$VERSION" | cut -d. -f1)
-          MINOR=$(echo "$VERSION" | cut -d. -f2)
-          PATCH=$(echo "$VERSION" | cut -d. -f3)
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          if echo "$COMMIT_MSG" | grep -qE 'BREAKING' || echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\(.+\))?!:'; then
-            NEW_VERSION="$((MAJOR+1)).0.0"
-          elif echo "$COMMIT_MSG" | grep -qE '^feat(\(.+\))?:'; then
-            NEW_VERSION="${MAJOR}.$((MINOR+1)).0"
+          REPO="${GITHUB_REPOSITORY,,}/$(jq -r .id "$FILE")"
+          FILE_VERSION=$(jq -r .version "$FILE")
+
+          # publish 済みのタグ（x.y.z だけ）から最新を取る。package がまだ無ければ空。
+          TOKEN=$(curl -fsS -u "github-actions:$GITHUB_TOKEN" "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
+          LATEST=$(curl -sS -H "Authorization: Bearer $TOKEN" "https://ghcr.io/v2/$REPO/tags/list?n=1000" \
+            | jq -r '.tags // [] | .[]' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
+
+          # ファイルの version は「次に出す番号の下限」。手で上げれば（例: 2.0.0）その番号で出る。
+          if [ -z "$LATEST" ] || [ "$(printf '%s\n%s\n' "$LATEST" "$FILE_VERSION" | sort -V | tail -n1)" != "$LATEST" ]; then
+            NEW_VERSION="$FILE_VERSION"
+          elif [ "$SKIP_VERSION_BUMP" = "true" ]; then
+            NEW_VERSION="$LATEST"
           else
-            NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
+            MAJOR=$(echo "$LATEST" | cut -d. -f1)
+            MINOR=$(echo "$LATEST" | cut -d. -f2)
+            PATCH=$(echo "$LATEST" | cut -d. -f3)
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            if echo "$COMMIT_MSG" | grep -qE 'BREAKING' || echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\(.+\))?!:'; then
+              NEW_VERSION="$((MAJOR+1)).0.0"
+            elif echo "$COMMIT_MSG" | grep -qE '^feat(\(.+\))?:'; then
+              NEW_VERSION="${MAJOR}.$((MINOR+1)).0"
+            else
+              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
+            fi
           fi
+
+          echo "published: ${LATEST:-none}, file: $FILE_VERSION -> publish: $NEW_VERSION"
           jq --arg v "$NEW_VERSION" '.version = $v' "$FILE" > tmp.json && mv tmp.json "$FILE"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$FILE"
-          # [skip ci] は GitHub Actions だけでなく HCP Terraform の VCS 連携でも効く。
-          # works ワークスペースは auto_apply = true なので、これが無いと bump のたびに apply が走る。
-          git commit -m "chore: bump devcontainer template version to $NEW_VERSION [skip ci]"
-          # monorepo なので、ジョブ実行中に main が進んでいることがある。
-          git pull --rebase origin main
-          git push origin HEAD:main
 
       - name: "Publish Templates"
         uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
