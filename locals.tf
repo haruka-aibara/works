@@ -30,15 +30,17 @@ locals {
   # Terraform Cloud/... は HCP Terraform の speculative plan。Actions が全部通っても
   # plan だけ落ちることがある（#156 の init 失敗）ので、これも必須にする。
   # repo-id は HCP Terraform が付ける識別子で、PR のチェック欄に出る名前そのまま。
+  # Actions のチェック名はジョブの name: そのまま（reusable 経由は「呼び出し側のジョブ名 / ジョブ名」）。
+  # ワークフローで name: を変えたら、ここも同じ PR で変える。
   works_required_status_checks = [
-    "ci / terraform fmt",
-    "ci / terraform validate",
-    "ci / tflint",
-    "ci / trivy (IaC misconfig)",
-    "yamllint",
-    "actionlint",
-    "zizmor",
-    "markdownlint",
+    "Terraform / フォーマット (terraform fmt)",
+    "Terraform / 構文・参照のチェック (terraform validate)",
+    "Terraform / 書き方・AWS 設定値のチェック (tflint)",
+    "Terraform / セキュリティ設定の検査 (trivy)",
+    "YAML の構文チェック (yamllint)",
+    "GitHub Actions ワークフローの構文チェック (actionlint)",
+    "GitHub Actions ワークフローのセキュリティ検査 (zizmor)",
+    "Markdown の書式チェック (markdownlint)",
     "Terraform Cloud/haruka-aibara/repo-id-MdiDoN1E26wzeCUX",
   ]
 

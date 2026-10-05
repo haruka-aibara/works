@@ -27,6 +27,7 @@ env:
 
 jobs:
   discover:
+    name: 対象プロジェクトの検出
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -78,7 +79,7 @@ jobs:
   check:
     needs: discover
     if: needs.discover.outputs.projects != '[]'
-    name: check (${{ matrix.project }})
+    name: lint・テスト (${{ matrix.project }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -110,6 +111,7 @@ jobs:
 
   # One stable check name for branch protection, whatever the matrix expands to.
   result:
+    name: 結果まとめ
     needs: [discover, check]
     if: always()
     runs-on: ubuntu-latest

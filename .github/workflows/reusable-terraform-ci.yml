@@ -24,7 +24,7 @@ env:
 
 jobs:
   fmt:
-    name: terraform fmt
+    name: フォーマット (terraform fmt)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -52,7 +52,7 @@ jobs:
         run: terraform fmt -check -recursive
 
   validate:
-    name: terraform validate
+    name: 構文・参照のチェック (terraform validate)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -84,7 +84,7 @@ jobs:
         run: terraform validate
 
   tflint:
-    name: tflint
+    name: 書き方・AWS 設定値のチェック (tflint)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -105,7 +105,7 @@ jobs:
         run: tflint -f compact
 
   trivy:
-    name: trivy (IaC misconfig)
+    name: セキュリティ設定の検査 (trivy)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

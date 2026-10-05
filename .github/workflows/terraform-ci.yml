@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   ci:
+    name: Terraform
     uses: ./.github/workflows/reusable-terraform-ci.yml
     with:
       working-directory: "."

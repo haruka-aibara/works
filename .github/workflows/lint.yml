@@ -2,7 +2,7 @@
 # Terraform 管理外（workflow-dist/ から配布される terraform-ci.yml / python-ci.yml とは別物）なので
 # このファイルは直接編集してよい。
 # 導入の経緯とルールの取捨は docs/decisions/0002-lint-ci-for-docs-and-config.md。
-name: Lint
+name: Lint (YAML / GitHub Actions / Markdown)
 
 on:
   pull_request:
@@ -31,6 +31,7 @@ env:
 
 jobs:
   yamllint:
+    name: YAML の構文チェック (yamllint)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -41,6 +42,7 @@ jobs:
       - run: git ls-files -z '*.yml' '*.yaml' | xargs -0 uvx "yamllint@${YAMLLINT_VERSION}" --strict -f github
 
   actionlint:
+    name: GitHub Actions ワークフローの構文チェック (actionlint)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -53,6 +55,7 @@ jobs:
           args: -color
 
   zizmor:
+    name: GitHub Actions ワークフローのセキュリティ検査 (zizmor)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -64,6 +67,7 @@ jobs:
       - run: uvx "zizmor@${ZIZMOR_VERSION}" --offline --format github .github/workflows
 
   markdownlint:
+    name: Markdown の書式チェック (markdownlint)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   ci:
+    name: Python
     uses: ./.github/workflows/reusable-python-ci.yml
     with:
       working-directory: "."

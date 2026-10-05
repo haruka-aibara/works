@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   update:
+    name: Claude Code の SHA256 を更新
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
