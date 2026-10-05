@@ -21,7 +21,7 @@ devcontainer-templates/
   docs/adr/                          # 設計判断の記録
   docs/superpowers/                  # 初期設計時の plan / spec
   src/haruka-aibara-dev-env/
-    devcontainer-template.json       # テンプレートのメタ情報（version は次に出す番号の下限）
+    devcontainer-template.json       # テンプレートのメタ情報（version は PR で手で上げる）
     .devcontainer/
       Dockerfile                     # ベースイメージとツールのピン
       devcontainer.json              # 拡張機能・設定・features
@@ -56,25 +56,11 @@ devcontainer-templates/
 
 ## リリースフロー
 
-`.github/workflows/devcontainer-release.yaml` が担当する。`workflow-dist/` から配布される CI とは別で、Terraform 管理外なので直接編集してよい。
+`devcontainer-template.json` の `version` を PR の中で手で上げ、main にマージすると `.github/workflows/devcontainer-release.yaml` が ghcr に publish する。
 
-- `devcontainer-templates/src/**` または当該ワークフローへの push（main）で自動実行
-- ghcr に publish 済みの最新バージョンを見て次の番号を決め、ジョブの中だけで `devcontainer-template.json` を書き換えて publish する
-- Actions タブから `workflow_dispatch` で手動実行もできる（`skip_version_bump: true` なら bump せず、publish 済みの最新バージョンで再 publish）
-
-CI は main に bump コミットを push しない。
-main はブランチ保護（必須チェック + `enforce_admins`）で CI からの直接 push を受け付けず、以前の push 方式は毎回ここで失敗していた。
-
-### バージョン bump ルール
-
-| main のコミットメッセージ（マージコミットなら PR タイトルも含む） | 変化 |
-|---|---|
-| `feat: ...` | minor bump（1.4.x → 1.5.0）|
-| `fix: ...` / その他 | patch bump（1.4.12 → 1.4.13）|
-| `BREAKING ...` / `feat!: ...` | major bump（1.4.x → 2.0.0）|
-
-- ファイルの `version` は「次に出す番号の下限」。publish 済みの最新より大きくすれば、bump ルールを無視してその番号で出る（例: 2.0.0 に上げる）
-- そうでなければファイルの番号は使われないので、publish 済みの番号と食い違っていてもよい
+- `version` を上げていない変更（Renovate・Dependabot の更新など）は publish されない。publish 済みのバージョンは CLI が飛ばすので、ワークフローは何もせず成功する
+- 何を上げるかは semver に従う（追加なら minor、修正・依存更新なら patch、互換が壊れるなら major）
+- 以前は CI が bump コミットを main に push していたが、main のブランチ保護（必須チェック + `enforce_admins`）に毎回弾かれ、publish まで進んでいなかった。そのため手で上げる形（[devcontainers/template-starter](https://github.com/devcontainers/template-starter) と同じ）にした
 
 ### publish 先
 

@@ -15,4 +15,4 @@
 ## main へのマージで起きること
 
 - **HCP Terraform が apply する。** ワークスペース `works` は `auto_apply = true` なので、plan を確認する段階がなくそのまま反映される。ローカルでやるのは検証まで
-- `devcontainer-templates/src/**` を変えていれば、version を bump して publish する
+- `devcontainer-templates/` のテンプレートの version を上げていれば、ghcr に publish する

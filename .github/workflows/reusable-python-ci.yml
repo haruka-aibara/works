@@ -1,12 +1,8 @@
 name: Python CI
 
 # Every directory under `working-directory` with a tracked pyproject.toml is a Python
-# project (typically one Lambda) and gets its own ruff + pytest job. Adding a project
-# is just adding the directory: nothing here or in the caller needs to change.
-#
-# Each project is expected to carry its own uv.lock and tests/. On a pull request only
-# the projects the PR touches run; on any other event, or when a workflow file changes,
-# all of them do.
+# project and gets its own ruff + pytest job. Each project carries its own uv.lock
+# and tests/. Adding a project is just adding the directory.
 
 on:
   workflow_call:
@@ -16,11 +12,9 @@ on:
         type: string
         default: "."
 
-# Callers cannot grant more than this, whatever their own permissions say.
 permissions:
   contents: read
 
-# Tool versions are bumped by Renovate (customManagers:githubActionsVersions).
 env:
   # renovate: datasource=pypi depName=ruff
   RUFF_VERSION: 0.16.10
@@ -36,45 +30,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Full history for the PR diff, but without blobs: only trees are compared.
-          fetch-depth: 0
-          filter: blob:none
+      # Tracked files only, so local virtualenvs never count as projects.
       - id: find
         env:
           SEARCH_ROOT: ${{ inputs.working-directory }}
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          set -euo pipefail
-
-          # Tracked files only, so local virtualenvs never count as projects.
-          mapfile -t all < <(git ls-files -- "$SEARCH_ROOT" | grep -E '(^|/)pyproject\.toml$' | xargs -r -n1 dirname | sort -u)
-
-          selected=()
-          if [[ "$EVENT_NAME" != pull_request* ]]; then
-            selected=("${all[@]}")
-          else
-            mapfile -t changed < <(git diff --name-only "$BASE_SHA...HEAD")
-            if printf '%s\n' "${changed[@]}" | grep -q '^\.github/workflows/'; then
-              selected=("${all[@]}")
-            else
-              for project in "${all[@]}"; do
-                for file in "${changed[@]}"; do
-                  if [[ "$project" == "." || "$file" == "$project/"* ]]; then
-                    selected+=("$project")
-                    break
-                  fi
-                done
-              done
-            fi
-          fi
-
-          projects=$(jq -cn "\$ARGS.positional" --args "${selected[@]}")
+          projects=$(git ls-files -- "$SEARCH_ROOT" | grep -E '(^|/)pyproject\.toml$' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
           echo "projects=$projects" >> "$GITHUB_OUTPUT"
-          {
-            echo "### Python projects (${#selected[@]} of ${#all[@]})"
-            if (( ${#selected[@]} )); then printf -- "- \`%s\`\n" "${selected[@]}"; fi
-          } >> "$GITHUB_STEP_SUMMARY"
 
   check:
     needs: discover
@@ -97,30 +59,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: ${{ matrix.project }}/uv.lock
-      - name: Lint
-        run: uvx "ruff@${RUFF_VERSION}" check .
-      - name: Install dependencies
-        id: install
-        # --locked fails the build if uv.lock is stale rather than silently re-resolving.
-        # Runs even when lint failed, so one push reports both.
-        if: ${{ !cancelled() }}
-        run: uv sync --locked
-      - name: Test
-        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: uv run pytest
-
-  # One stable check name for branch protection, whatever the matrix expands to.
-  result:
-    name: 結果まとめ
-    needs: [discover, check]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
-        run: |
-          echo "results: $RESULTS"
-          if [[ " $RESULTS " == *" failure "* || " $RESULTS " == *" cancelled "* ]]; then
-            exit 1
-          fi
+      - run: uvx "ruff@${RUFF_VERSION}" check .
+      # --locked fails if uv.lock is stale instead of silently re-resolving it.
+      - run: uv sync --locked
+      - run: uv run pytest

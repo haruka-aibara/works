@@ -1,105 +1,34 @@
-# devcontainer テンプレートを ghcr.io に publish する。
-# Terraform 管理外（workflow-dist/ から配布される terraform-ci.yml / python-ci.yml とは別物）なので
-# このファイルは直接編集してよい。
+# devcontainer テンプレートを ghcr.io に publish する（devcontainers/template-starter と同じ形）。
+# workflow-dist/ から配布するものではないので、直接編集してよい。
 #
-# version は main にコミットしない。ghcr に publish 済みの最新バージョンから次の番号を決め、
-# ジョブの中だけで devcontainer-template.json を書き換えて publish する。
-# main はブランチ保護（必須チェック + enforce_admins）で CI からの直接 push を受け付けないため。
+# publish するバージョンは devcontainer-template.json の version で、PR の中で手で上げる。
+# 上げていなければ publish 済みのバージョンなので、何もせずに終わる。
 name: Release Dev Container Templates
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'devcontainer-templates/src/**'
-      - '.github/workflows/devcontainer-release.yaml'
-  # 手動再 publish 用（例: ghcr の名前空間が変わり、中身を変えずに publish し直したいとき）。
   workflow_dispatch:
-    inputs:
-      skip_version_bump:
-        description: 'バージョンを bump せず、publish 済みの最新バージョン（無ければファイルの version）で publish する'
-        type: boolean
-        default: false
 
 permissions: {}
 
-# 同時に走ると同じ番号を 2 回取りにいくので直列化する。
-concurrency:
-  group: devcontainer-release
-  cancel-in-progress: false
-
-env:
-  TEMPLATE_FILE: devcontainer-templates/src/haruka-aibara-dev-env/devcontainer-template.json
-
 jobs:
-  deploy:
+  publish:
     name: テンプレートを ghcr に publish
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
-      # ghcr への publish
       packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: "Decide version"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SKIP_VERSION_BUMP: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_version_bump }}
-        run: |
-          set -euo pipefail
-          FILE="$TEMPLATE_FILE"
-          REPO="${GITHUB_REPOSITORY,,}/$(jq -r .id "$FILE")"
-          FILE_VERSION=$(jq -r .version "$FILE")
-
-          # publish 済みのタグ（x.y.z だけ）から最新を取る。package がまだ無ければ空。
-          TOKEN=$(curl -fsS -u "github-actions:$GITHUB_TOKEN" "https://ghcr.io/token?scope=repository:$REPO:pull" | jq -r .token)
-          LATEST=$(curl -sS -H "Authorization: Bearer $TOKEN" "https://ghcr.io/v2/$REPO/tags/list?n=1000" \
-            | jq -r '.tags // [] | .[]' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
-
-          # ファイルの version は「次に出す番号の下限」。手で上げれば（例: 2.0.0）その番号で出る。
-          if [ -z "$LATEST" ] || [ "$(printf '%s\n%s\n' "$LATEST" "$FILE_VERSION" | sort -V | tail -n1)" != "$LATEST" ]; then
-            NEW_VERSION="$FILE_VERSION"
-          elif [ "$SKIP_VERSION_BUMP" = "true" ]; then
-            NEW_VERSION="$LATEST"
-          else
-            MAJOR=$(echo "$LATEST" | cut -d. -f1)
-            MINOR=$(echo "$LATEST" | cut -d. -f2)
-            PATCH=$(echo "$LATEST" | cut -d. -f3)
-            COMMIT_MSG=$(git log -1 --pretty=%B)
-            if echo "$COMMIT_MSG" | grep -qE 'BREAKING' || echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\(.+\))?!:'; then
-              NEW_VERSION="$((MAJOR+1)).0.0"
-            elif echo "$COMMIT_MSG" | grep -qE '^feat(\(.+\))?:'; then
-              NEW_VERSION="${MAJOR}.$((MINOR+1)).0"
-            else
-              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
-            fi
-          fi
-
-          echo "published: ${LATEST:-none}, file: $FILE_VERSION -> publish: $NEW_VERSION"
-          jq --arg v "$NEW_VERSION" '.version = $v' "$FILE" > tmp.json && mv tmp.json "$FILE"
-
-      - name: "Publish Templates"
-        uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
+      - uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
         with:
           publish-templates: "true"
           base-path-to-templates: "./devcontainer-templates/src"
-          generate-docs: "true"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Summary"
-        run: |
-          set -euo pipefail
-          {
-            echo "### Published template"
-            echo
-            echo '```'
-            echo "ghcr.io/${GITHUB_REPOSITORY,,}/$(jq -r .id "$TEMPLATE_FILE"):$(jq -r .version "$TEMPLATE_FILE")"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"

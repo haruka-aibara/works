@@ -33,8 +33,7 @@ locals {
   # Actions のチェック名はジョブの name: そのまま（reusable 経由は「呼び出し側のジョブ名 / ジョブ名」）。
   # ワークフローで name: を変えたら、ここも同じ PR で変える。
   works_required_status_checks = [
-    "Terraform / フォーマット (terraform fmt)",
-    "Terraform / 構文・参照のチェック (terraform validate)",
+    "Terraform / フォーマット・構文チェック (terraform fmt / validate)",
     "Terraform / 書き方・AWS 設定値のチェック (tflint)",
     "Terraform / セキュリティ設定の検査 (trivy)",
     "YAML の構文チェック (yamllint)",

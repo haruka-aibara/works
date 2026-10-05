@@ -85,5 +85,4 @@ blame まで元の作者・日付にするには main の履歴を書き換え�
 以前のリリースワークフローは、version を bump したコミットを `[skip ci]` 付きで main に直接 push していた。
 main にブランチ保護（必須チェック + `enforce_admins`）を入れてからはこの push が毎回弾かれ、publish まで進まなくなった。
 
-今は main にコミットせず、ghcr に publish 済みの最新バージョンから次の番号を決めて、ジョブの中だけでファイルを書き換える。
-main が動かないので、`works` の apply が余計に走ることもない。
+今は version を PR の中で手で上げ、ワークフローは publish だけをする。

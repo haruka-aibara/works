@@ -5,8 +5,7 @@ on:
   pull_request:
   push:
     branches: [main]
-  # Lets a workflow re-run the checks on a commit it pushed with GITHUB_TOKEN,
-  # which does not start pull_request runs on its own.
+  # For commits pushed with GITHUB_TOKEN (see devcontainer-checksums.yaml).
   workflow_dispatch:
 
 permissions:
