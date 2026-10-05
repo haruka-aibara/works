@@ -6,7 +6,6 @@
 
 - **GitHub もクラウドも Terraform で持つ。** 手で作らず、このリポジトリから apply する
 - **アプリのコードは、それを動かすインフラと同じモジュールに置く。**
-- **他リポジトリに配るものは、ここを単一ソースにする。** CI（`workflow-dist/`）は Terraform で配布するので、配布先は直接編集しない
 - **学んだことは記事にして公開する。** `docs/` に書き、[GitHub Pages](https://haruka-aibara.github.io/works/) で読めるようにする。書き方は [`docs/reference/README.md`](docs/reference/README.md)
 - **開発環境も配布物として持つ。** [`devcontainer-templates/`](devcontainer-templates/README.md) から ghcr に publish する
 - **ハンズオンで試しただけのものも、リポジトリを切らずに `hands-on/` に置く。** 1つにつき1ディレクトリで、apply もデプロイもしない

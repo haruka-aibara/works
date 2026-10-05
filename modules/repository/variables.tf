@@ -125,9 +125,3 @@ variable "pages" {
   })
   default = null
 }
-
-variable "actions_sha_pinning_required" {
-  description = "Whether every action and reusable workflow from another repository must be pinned to a full commit SHA. Turn it off for a repository that receives a CI caller from workflow-dist/, which calls the works reusable workflow at @main"
-  type        = bool
-  default     = true
-}

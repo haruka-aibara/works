@@ -1,5 +1,4 @@
 # devcontainer テンプレートを ghcr.io に publish する（devcontainers/template-starter と同じ形）。
-# workflow-dist/ から配布するものではないので、直接編集してよい。
 #
 # publish するバージョンは devcontainer-template.json の version で、PR の中で手で上げる。
 # 上げていなければ publish 済みのバージョンなので、何もせずに終わる。

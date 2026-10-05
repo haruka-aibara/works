@@ -1,5 +1,4 @@
 # YAML・GitHub Actions・Markdown の検査。
-# workflow-dist/ から配布するものではないので、直接編集してよい。
 # 導入の経緯とルールの取捨は docs/decisions/0002-lint-ci-for-docs-and-config.md。
 name: Lint (YAML / GitHub Actions / Markdown)
 

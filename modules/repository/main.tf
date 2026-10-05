@@ -111,5 +111,5 @@ resource "github_actions_repository_permissions" "this" {
 
   enabled              = true
   allowed_actions      = "all"
-  sha_pinning_required = var.actions_sha_pinning_required
+  sha_pinning_required = true
 }

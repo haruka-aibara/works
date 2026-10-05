@@ -166,54 +166,25 @@ module "bedrock_slack_ai_chatbot_infra" {
 # }
 
 # =========================================
-# Terraform CI distribution
-# The reusable workflow body lives in .github/workflows/reusable-terraform-ci.yml;
-# only the thin caller files are distributed from here.
+# CI
 # =========================================
 
-# Distribute the thin caller workflow to each Terraform repository.
-resource "github_repository_file" "terraform_ci_caller" {
-  for_each = local.terraform_ci_repos
-
-  repository = each.key
-  branch     = "main"
-  file       = ".github/workflows/terraform-ci.yml"
-  content = templatefile("${path.module}/workflow-dist/callers/terraform-ci-caller.yml.tftpl", {
-    working_directory = each.value.working_directory
-    # works 自身は同じコミットの reusable を使う（PR 上でも変更後の中身で走る）。
-    reusable = each.key == "works" ? "./.github/workflows/reusable-terraform-ci.yml" : "${local.github_owner}/works/.github/workflows/reusable-terraform-ci.yml@main"
-  })
-  commit_message      = "Add Terraform CI caller workflow (managed by Terraform)"
-  overwrite_on_create = true
+# CI used to be distributed from workflow-dist/ as github_repository_file. It now
+# lives directly in .github/workflows/, so stop managing the files without
+# deleting them from the repository. Delete these blocks after one apply.
+removed {
+  from = github_repository_file.terraform_ci_caller
 
   lifecycle {
-    ignore_changes = [commit_author, commit_email]
+    destroy = false
   }
 }
 
-# =========================================
-# Python CI distribution
-# The reusable workflow body lives in .github/workflows/reusable-python-ci.yml;
-# only the thin caller files are distributed from here.
-# =========================================
-
-# Distribute the thin caller workflow to each Python repository.
-resource "github_repository_file" "python_ci_caller" {
-  for_each = local.python_ci_repos
-
-  repository = each.key
-  branch     = "main"
-  file       = ".github/workflows/python-ci.yml"
-  content = templatefile("${path.module}/workflow-dist/callers/python-ci-caller.yml.tftpl", {
-    working_directory = each.value.working_directory
-    # works 自身は同じコミットの reusable を使う（PR 上でも変更後の中身で走る）。
-    reusable = each.key == "works" ? "./.github/workflows/reusable-python-ci.yml" : "${local.github_owner}/works/.github/workflows/reusable-python-ci.yml@main"
-  })
-  commit_message      = "Add Python CI caller workflow (managed by Terraform)"
-  overwrite_on_create = true
+removed {
+  from = github_repository_file.python_ci_caller
 
   lifecycle {
-    ignore_changes = [commit_author, commit_email]
+    destroy = false
   }
 }
 
