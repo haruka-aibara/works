@@ -18,7 +18,7 @@
 
 ## 決定
 
-`.github/workflows/lint.yml` で PR と main への push ごとに次を走らせる。落ちたらマージしない。
+`.github/workflows/` の `yaml-lint.yml`・`github-actions-lint.yml`・`markdown-lint.yml` で、PR と main への push ごとに次を走らせる。落ちたらマージしない。
 
 | ツール | 対象 | 設定 |
 |---|---|---|

@@ -1,6 +1,6 @@
-# YAML・GitHub Actions・Markdown の検査。
-# 導入の経緯とルールの取捨は docs/decisions/0002-lint-ci-for-docs-and-config.md。
-name: Lint (YAML / GitHub Actions / Markdown)
+# GitHub Actions のワークフローの検査。設定は .github/zizmor.yml。
+# 導入の経緯は docs/decisions/0002-lint-ci-for-docs-and-config.md。
+name: GitHub Actions Lint
 
 on:
   pull_request:
@@ -17,23 +17,10 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  # renovate: datasource=pypi depName=yamllint
-  YAMLLINT_VERSION: 1.38.0
   # renovate: datasource=pypi depName=zizmor
   ZIZMOR_VERSION: 1.30.1
 
 jobs:
-  yamllint:
-    name: YAML の構文チェック (yamllint)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-      - run: git ls-files -z '*.yml' '*.yaml' | xargs -0 uvx "yamllint@${YAMLLINT_VERSION}" --strict -f github
-
   actionlint:
     name: GitHub Actions ワークフローの構文チェック (actionlint)
     runs-on: ubuntu-latest
@@ -56,19 +43,4 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-      # 設定は .github/zizmor.yml。
       - run: uvx "zizmor@${ZIZMOR_VERSION}" --offline --format github .github/workflows
-
-  markdownlint:
-    name: Markdown の書式チェック (markdownlint)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      # 設定と対象外のファイルは .markdownlint-cli2.jsonc。
-      # 手元では `npx markdownlint-cli2 --fix "**/*.md"` で空行まわりを自動修正できる。
-      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
-        with:
-          globs: "**/*.md"

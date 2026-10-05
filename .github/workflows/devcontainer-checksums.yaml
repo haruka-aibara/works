@@ -40,5 +40,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -am 'fix(devcontainer): SHA256 をバージョンに合わせて更新'
           git push
-          gh workflow run lint.yml --ref "$BRANCH"
+          gh workflow run yaml-lint.yml --ref "$BRANCH"
+          gh workflow run github-actions-lint.yml --ref "$BRANCH"
+          gh workflow run markdown-lint.yml --ref "$BRANCH"
           gh workflow run terraform-ci.yml --ref "$BRANCH"
