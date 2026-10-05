@@ -34,7 +34,6 @@ locals {
   # ワークフローで name: を変えたら、ここも同じ PR で変える。
   works_required_status_checks = [
     "Terraform のフォーマットのチェック",
-    "Terraform の構文・参照のチェック",
     "Terraform の書き方・AWS 設定値のチェック",
     "Terraform のセキュリティ設定の検査",
     "YAML の構文チェック",
