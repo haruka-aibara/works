@@ -64,8 +64,8 @@ WORKDIR /home/vscode
 # Renovate bumps the version; .github/workflows/devcontainer-checksums.yaml then rewrites the SHA256s.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 ARG CLAUDE_VERSION=2.1.288
-ARG CLAUDE_SHA256_AMD64=3afe8535c0cc33f0e24f7b25dab7a1727b8b592196f8496a8bc302ba2161eed3
-ARG CLAUDE_SHA256_ARM64=6764ffc39e9fed425a493ff61ea28506d1ba83996ce81a48d1177dbb393419c9
+ARG CLAUDE_SHA256_AMD64=0298068b686e7fdbaf9402a7a587bb7f49c0b0e084de09f69145a0719207640c
+ARG CLAUDE_SHA256_ARM64=359ab6a058fcde9741dff54979a212fd134cdf8e8cfc2f8de02bc350b9e2b9d5
 ARG TARGETARCH
 RUN set -eux; \
     case "${TARGETARCH}" in \
