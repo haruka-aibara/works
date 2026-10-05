@@ -20,7 +20,7 @@
 
 ### 2. 初回 publish の結果を確認する
 
-Actions の **Release Dev Container Templates** が成功すると、ジョブサマリに publish されたタグが出る。
+Actions の **devcontainers/action** ワークフローが成功すると、ジョブのログに publish されたタグが出る。
 
 まず匿名 pull できるか確認する。private のままだと `Dev Containers: Clone Repository in Container Volume...` から参照できない。
 

@@ -9,8 +9,8 @@ PR / push で以下の CI が走る。コードを書いたら必ず通ること
 | Terraform fmt | `terraform fmt -recursive -check` | 差分があると exit 1 |
 | tflint | `tflint -f compact` | warning でも exit 2 |
 | Trivy | `trivy config .` | HIGH/CRITICAL で exit 1 |
-| ruff | `uvx ruff check .` | works ルートの `.github/workflows/python-ci.yml` |
-| pytest | `uv run pytest` | 同上 |
+| ruff | `uvx ruff check .` | works ルートの `.github/workflows/ruff.yml` |
+| pytest | `uv run pytest` | works ルートの `.github/workflows/pytest.yml` |
 
 CI は works ルートの `.github/workflows/` にある（このディレクトリの `.github/workflows/` ではない。GitHub Actions はリポジトリルートのワークフローしか読まない）。
 

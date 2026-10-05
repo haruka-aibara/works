@@ -26,20 +26,20 @@ locals {
   })
 
   # works の main へのマージに必須にするチェック。
-  # Python CI は paths で絞っていて走らない PR があるので入れない（入れると永久に待つ）。
+  # ruff・pytest は paths で絞っていて走らない PR があるので入れない（入れると永久に待つ）。
   # Terraform Cloud/... は HCP Terraform の speculative plan。Actions が全部通っても
   # plan だけ落ちることがある（#156 の init 失敗）ので、これも必須にする。
   # repo-id は HCP Terraform が付ける識別子で、PR のチェック欄に出る名前そのまま。
   # Actions のチェック名はジョブの name: そのまま。
   # ワークフローで name: を変えたら、ここも同じ PR で変える。
   works_required_status_checks = [
-    "Terraform のフォーマット・構文チェック (terraform fmt / validate)",
-    "Terraform の書き方・AWS 設定値のチェック (tflint)",
-    "Terraform のセキュリティ設定の検査 (trivy)",
-    "YAML の構文チェック (yamllint)",
-    "GitHub Actions ワークフローの構文チェック (actionlint)",
-    "GitHub Actions ワークフローのセキュリティ検査 (zizmor)",
-    "Markdown の書式チェック (markdownlint)",
+    "Terraform のフォーマット・構文チェック",
+    "Terraform の書き方・AWS 設定値のチェック",
+    "Terraform のセキュリティ設定の検査",
+    "YAML の構文チェック",
+    "GitHub Actions ワークフローの構文チェック",
+    "GitHub Actions ワークフローのセキュリティ検査",
+    "Markdown の書式チェック",
     "Terraform Cloud/haruka-aibara/repo-id-MdiDoN1E26wzeCUX",
   ]
 }

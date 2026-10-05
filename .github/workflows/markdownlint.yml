@@ -1,7 +1,7 @@
-# Markdown の書式チェック。設定と対象外のファイルは .markdownlint-cli2.jsonc。
+# 設定と対象外のファイルは .markdownlint-cli2.jsonc。
 # 手元では `npx markdownlint-cli2 --fix "**/*.md"` で空行まわりを自動修正できる。
 # 導入の経緯は docs/decisions/0002-lint-ci-for-docs-and-config.md。
-name: Markdown Lint
+name: markdownlint
 
 on:
   pull_request:
@@ -18,8 +18,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  markdownlint:
-    name: Markdown の書式チェック (markdownlint)
+  check:
+    name: Markdown の書式チェック
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

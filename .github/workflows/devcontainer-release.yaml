@@ -2,7 +2,7 @@
 #
 # publish するバージョンは devcontainer-template.json の version で、PR の中で手で上げる。
 # 上げていなければ publish 済みのバージョンなので、何もせずに終わる。
-name: Release Dev Container Templates
+name: devcontainers/action
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   publish:
-    name: テンプレートを ghcr に publish
+    name: devcontainer テンプレートを ghcr に publish
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

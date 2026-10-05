@@ -1,8 +1,7 @@
-# pyproject.toml がある各ディレクトリを 1 プロジェクトとして、ruff と pytest を回す。
+# pyproject.toml がある各ディレクトリを 1 プロジェクトとして、pytest を回す。
 # プロジェクトを足すときは、ディレクトリを足すだけでよい（uv.lock と tests/ を持たせる）。
-#
 # PR は paths で絞っているので、走らない PR がある。そのため必須チェックにはできない。
-name: Python CI
+name: pytest
 
 on:
   pull_request:
@@ -10,7 +9,7 @@ on:
       - "**/*.py"
       - "**/pyproject.toml"
       - "**/uv.lock"
-      - ".github/workflows/python-ci.yml"
+      - ".github/workflows/pytest.yml"
   push:
     branches: [main]
 
@@ -21,13 +20,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  # renovate: datasource=pypi depName=ruff
-  RUFF_VERSION: 0.16.10
-
 jobs:
   discover:
-    name: Python プロジェクトの検出
+    name: テスト対象のプロジェクトの検出
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -39,13 +34,13 @@ jobs:
       # git 管理下のファイルだけを見るので、手元の仮想環境は数えない。
       - id: find
         run: |
-          projects=$(git ls-files | grep -E '(^|/)pyproject\.toml$' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
+          projects=$(git ls-files '*pyproject.toml' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
           echo "projects=$projects" >> "$GITHUB_OUTPUT"
 
-  check:
+  test:
     needs: discover
     if: needs.discover.outputs.projects != '[]'
-    name: Python の lint・テスト (${{ matrix.project }})
+    name: Python のテスト（${{ matrix.project }}）
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -63,7 +58,6 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: ${{ matrix.project }}/uv.lock
-      - run: uvx "ruff@${RUFF_VERSION}" check .
       # --locked: uv.lock が古ければ、黙って解決し直さずに落とす。
       - run: uv sync --locked
       - run: uv run pytest

@@ -1,6 +1,5 @@
-# YAML の構文チェック。設定は .yamllint.yml。
-# 導入の経緯は docs/decisions/0002-lint-ci-for-docs-and-config.md。
-name: YAML Lint
+# 設定は trivy.yaml、見送るものは .trivyignore.yaml。
+name: trivy
 
 on:
   pull_request:
@@ -16,18 +15,18 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  # renovate: datasource=pypi depName=yamllint
-  YAMLLINT_VERSION: 1.38.0
-
 jobs:
-  yamllint:
-    name: YAML の構文チェック (yamllint)
+  check:
+    name: Terraform のセキュリティ設定の検査
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-      - run: git ls-files -z '*.yml' '*.yaml' | xargs -0 uvx "yamllint@${YAMLLINT_VERSION}" --strict -f github
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          exit-code: "1"
+          severity: HIGH,CRITICAL

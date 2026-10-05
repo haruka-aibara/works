@@ -1,6 +1,6 @@
 # Renovate が devcontainer の Dockerfile の CLAUDE_VERSION を上げたら、
 # 対応する SHA256 を計算し直して同じブランチに追いコミットする（Renovate は SHA256 を計算できない）。
-name: Update Dev Container Checksums
+name: update-checksums.sh
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   update:
-    name: Claude Code の SHA256 を更新
+    name: devcontainer の Claude Code の SHA256 を更新
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -40,7 +40,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -am 'fix(devcontainer): SHA256 をバージョンに合わせて更新'
           git push
-          gh workflow run yaml-lint.yml --ref "$BRANCH"
-          gh workflow run github-actions-lint.yml --ref "$BRANCH"
-          gh workflow run markdown-lint.yml --ref "$BRANCH"
-          gh workflow run terraform-ci.yml --ref "$BRANCH"
+          for workflow in terraform tflint trivy yamllint actionlint zizmor markdownlint; do
+            gh workflow run "$workflow.yml" --ref "$BRANCH"
+          done
