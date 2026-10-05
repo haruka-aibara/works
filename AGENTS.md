@@ -8,7 +8,7 @@
 
 | 触るもの | 読む |
 |---|---|
-| ルートの `*.tf` / `modules/` / `workflow-dist/` | `README.md` |
+| ルートの `*.tf` / `modules/` | `README.md` |
 | `docs/` / `ideas/` / `til/` 配下 | `docs/reference/README.md` |
 | `devcontainer-templates/` | `devcontainer-templates/README.md` |
 | 運用手順・過去の経緯を調べる | `docs/runbooks/README.md` |

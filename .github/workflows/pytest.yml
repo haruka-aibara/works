@@ -1,0 +1,63 @@
+# pyproject.toml がある各ディレクトリを 1 プロジェクトとして、pytest を回す。
+# プロジェクトを足すときは、ディレクトリを足すだけでよい（uv.lock と tests/ を持たせる）。
+# PR は paths で絞っているので、走らない PR がある。そのため必須チェックにはできない。
+name: pytest
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - "**/pyproject.toml"
+      - "**/uv.lock"
+      - ".github/workflows/pytest.yml"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  discover:
+    name: テスト対象のプロジェクトの検出
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      projects: ${{ steps.find.outputs.projects }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # git 管理下のファイルだけを見るので、手元の仮想環境は数えない。
+      - id: find
+        run: |
+          projects=$(git ls-files '*pyproject.toml' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
+          echo "projects=$projects" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: discover
+    if: needs.discover.outputs.projects != '[]'
+    name: Python のテスト（${{ matrix.project }}）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.discover.outputs.projects) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: ${{ matrix.project }}/uv.lock
+      # --locked: uv.lock が古ければ、黙って解決し直さずに落とす。
+      - run: uv sync --locked
+      - run: uv run pytest

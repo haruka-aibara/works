@@ -1,0 +1,44 @@
+# pyproject.toml がある各ディレクトリを 1 プロジェクトとして、その中で ruff を回す。
+# PR は paths で絞っているので、走らない PR がある。そのため必須チェックにはできない。
+name: ruff
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - "**/pyproject.toml"
+      - "**/uv.lock"
+      - ".github/workflows/ruff.yml"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # renovate: datasource=pypi depName=ruff
+  RUFF_VERSION: 0.16.10
+
+jobs:
+  check:
+    name: Python の lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      # import の並び順の判定がカレントディレクトリに依存するので、プロジェクトごとに中へ入って回す。
+      - run: |
+          status=0
+          for dir in $(git ls-files '*pyproject.toml' | xargs -n1 dirname); do
+            echo "::group::$dir"
+            (cd "$dir" && uvx "ruff@${RUFF_VERSION}" check .) || status=1
+            echo "::endgroup::"
+          done
+          exit $status

@@ -1,4 +1,4 @@
-# trivy（Terraform CI の IaC misconfig）で、ファイル単位で見送るもの。
+# trivy（Terraform ワークフローの IaC misconfig 検査）で、ファイル単位で見送るもの。
 # trivy.yaml から ignorefile として読む。
 misconfigurations:
   - id: DS-0002
