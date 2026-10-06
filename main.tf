@@ -207,11 +207,15 @@ data "tfe_oauth_client" "this" {
 }
 
 # Haruka Aibara Workspace
+#
+# auto_apply is off so that a person can wait for .github/workflows/plan-diff.yml,
+# which checks the post-merge plan against the one reviewed on the PR, before
+# confirming the apply.
 resource "tfe_workspace" "works" {
   name                          = "works"
   organization                  = local.tfe_organization
   description                   = "Terraform-managed GitHub repositories, HCP Terraform workspaces, and AWS resources"
-  auto_apply                    = true
+  auto_apply                    = false
   auto_apply_run_trigger        = false
   file_triggers_enabled         = false
   queue_all_runs                = false

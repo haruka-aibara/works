@@ -1,0 +1,100 @@
+# ============================================================
+# マージ前後の plan を比較する
+#
+# PR をマージしたら、次のことをする。
+#   1. PR で HCP Terraform が出した plan（マージ前）を取ってくる
+#   2. マージ後に HCP Terraform が出した plan を取ってくる
+#   3. 2つを比べる
+#        同じなら ✅ 成功
+#        違えば   ❌ 失敗
+#
+# 運用（✅ を見てから Confirm する）は docs/runbooks/plan-diff.md。
+# ============================================================
+
+name: マージ前後の plan を比較
+
+on:
+  pull_request:
+    types: [closed] # PR が閉じられたときに動く
+
+# HCP Terraform の API を呼ぶだけで、このリポジトリには何もしない
+permissions: {}
+
+jobs:
+  plan-diff:
+    name: マージ前後の plan を比較
+    # マージされずに閉じた PR では動かさない
+    if: github.event.pull_request.merged
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      TFC_API: https://app.terraform.io/api/v2
+      TFC_TOKEN: ${{ secrets.TFC_TOKEN }}
+      ORGANIZATION: haruka-aibara
+      WORKSPACE: works
+
+      BEFORE_COMMIT: ${{ github.event.pull_request.head.sha }} # PR の最後のコミット
+      AFTER_COMMIT: ${{ github.event.pull_request.merge_commit_sha }} # マージでできたコミット
+
+    steps:
+
+      # ----------------------------------------------------------
+      # 1. マージ前の plan を取ってくる
+      # ----------------------------------------------------------
+
+      - name: マージ前の plan を取ってくる
+        run: |
+          # PR の最後のコミットで動いた run を探す
+          # （PR の plan は plan_only という種類なので、それも指定する）
+          curl -sSfLg -H "Authorization: Bearer $TFC_TOKEN" \
+            "$TFC_API/organizations/$ORGANIZATION/runs?filter[workspace_names]=$WORKSPACE&search[commit]=$BEFORE_COMMIT&filter[operation]=plan_only" \
+            > before_run.json
+
+          # その run の plan ID を取り出す
+          PLAN_ID=$(jq -r '.data[0].relationships.plan.data.id' before_run.json)
+
+          # plan の中身を取ってくる
+          curl -sSfL -H "Authorization: Bearer $TFC_TOKEN" \
+            "$TFC_API/plans/$PLAN_ID/json-output-redacted" \
+            > before.json
+
+      # ----------------------------------------------------------
+      # 2. マージ後の plan を取ってくる
+      # ----------------------------------------------------------
+
+      - name: マージ後の plan が終わるまで待つ
+        # マージ直後は HCP Terraform の plan がまだ終わっていないため
+        run: sleep 300
+
+      - name: マージ後の plan を取ってくる
+        run: |
+          # マージでできたコミットで動いた run を探す
+          curl -sSfLg -H "Authorization: Bearer $TFC_TOKEN" \
+            "$TFC_API/organizations/$ORGANIZATION/runs?filter[workspace_names]=$WORKSPACE&search[commit]=$AFTER_COMMIT" \
+            > after_run.json
+
+          # その run の plan ID を取り出す
+          PLAN_ID=$(jq -r '.data[0].relationships.plan.data.id' after_run.json)
+
+          # plan の中身を取ってくる
+          curl -sSfL -H "Authorization: Bearer $TFC_TOKEN" \
+            "$TFC_API/plans/$PLAN_ID/json-output-redacted" \
+            > after.json
+
+      # ----------------------------------------------------------
+      # 3. 2つを比べる
+      # ----------------------------------------------------------
+
+      - name: 比べる前に、比較の邪魔になる部分を整える
+        run: |
+          # provider_schemas    : provider の型定義。比較に関係ないので消す
+          # relevant_attributes : 中身が同じでも並び順が毎回変わるので、並べ直す
+          jq 'del(.provider_schemas) | .relevant_attributes |= sort_by(tojson)' before.json > before_clean.json
+          jq 'del(.provider_schemas) | .relevant_attributes |= sort_by(tojson)' after.json > after_clean.json
+
+      - name: 2つの plan を比べる（違えば失敗）
+        # 公開リポジトリでログは誰でも読めるので、中身は出さず「違うかどうか」だけ出す。
+        # 中身は HCP Terraform の画面で見る。
+        run: diff -q before_clean.json after_clean.json

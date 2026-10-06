@@ -22,6 +22,7 @@
 ```
 
 **定期ローテーションではコードが1文字も変わらない。** 差分は時計から出る。やることは Plan & Apply を1回通すだけで、PR は要らない。
+`works` は `auto_apply = false` なので、plan のあとに Confirm を押すところまでが1回。
 
 差分が出たことを知らせる仕組みは無い。plan を走らせて初めて分かる。
 
@@ -87,7 +88,7 @@ Organization Settings → **Variable sets** → Create variable set
 
 ### 3.3 マージする
 
-`auto_apply = true` なので merge した時点で apply が走り、1回の apply で
+merge すると plan が走るので、Confirm を押して apply する。1回の apply で
 
 1. owners team に blue / green のトークンを発行する
 2. **workspace 変数として `TFE_TOKEN` を作り、green のトークンを入れる**
