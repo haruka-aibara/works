@@ -1,0 +1,4 @@
+apiVersion: v2
+name: apps
+description: root Application が読む app of apps。クラスタに入れるものを Application として並べる
+version: 0.1.0

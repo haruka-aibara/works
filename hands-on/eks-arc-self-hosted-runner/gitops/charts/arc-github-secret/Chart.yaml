@@ -1,0 +1,4 @@
+apiVersion: v2
+name: arc-github-secret
+description: Secrets Manager の GitHub App 認証情報を、ARC が読む Secret に同期する
+version: 0.1.0

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: karpenter-resources
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.gitops.repoURL }}
+    targetRevision: {{ .Values.gitops.targetRevision }}
+    path: {{ .Values.chartPath }}/karpenter-resources
+    helm:
+      valuesObject:
+        clusterName: {{ .Values.clusterName }}
+        nodeRoleName: {{ .Values.karpenter.nodeRoleName }}
+  destination:
+    server: https://kubernetes.default.svc
+  {{- include "apps.syncPolicy" . | nindent 2 }}
