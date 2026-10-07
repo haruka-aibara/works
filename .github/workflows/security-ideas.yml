@@ -1,4 +1,4 @@
-# security-ideas スキルでアイデアを 5 本出し、Slack に送る。
+# security-ideas スキルの deep-dive の手順で刺さる 1 本を出し、Slack に送る。
 # Claude は Bedrock で動かし、結果は SNS トピック → AWS Chatbot で Slack に届く。
 # AWS 側（ロール・トピック・Chatbot）は modules/security-ideas-slack-notifier。
 # 認証は GitHub の OIDC だけで、API キーも Slack の秘密もリポジトリに置かない。
@@ -28,7 +28,7 @@ env:
 jobs:
   ideas:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     permissions:
       contents: read
       # AWS への OIDC 認証に使う。
@@ -63,20 +63,22 @@ jobs:
           use_bedrock: "true"
           github_token: ${{ github.token }}
           prompt: |
-            .claude/skills/security-ideas/SKILL.md を読み、そのとおりにアイデアを 5 本出してください。
-            スキルが読むよう指示しているファイル（rejected.md・手本の 4 本・ideas/ と til/ のファイル名）は必ず読んでください。
+            .claude/skills/security-ideas/SKILL.md と .claude/skills/security-ideas/references/deep-dive.md を読み、deep-dive.md の手順で刺さる 1 本を出してください。
+            SKILL.md が読むよう指示しているファイル（rejected.md・手本の 4 本・ideas/ と til/ のファイル名）は必ず読んでください。
 
             これは毎朝の自動実行で、結果は Slack に送られます。いつもと違う点は次のとおりです。
 
             - ${{ env.HISTORY_FILE }} は、過去の自動実行で出したアイデアの一覧です。ここにあるネタも、同じ切り口の言い換えも出さないでください
             - ユーザーに聞き返せないので、分野は自分で選んでください
+            - Web 検索は使えません。裏取りは、公式ドキュメントの URL を WebFetch で読んで行ってください
             - ファイルは書き換えず、ideas/ や til/ にも書かないでください
-            - 結果は表ではなく、指定の JSON の形で返してください。Slack では表が崩れるためです
+            - 結果は指定の JSON の形で返してください
           claude_args: |
             --model ${{ env.BEDROCK_MODEL }}
-            --max-turns 40
-            --allowedTools Read,Glob,Grep
-            --json-schema '{"type":"object","additionalProperties":false,"required":["ideas","unverified"],"properties":{"ideas":{"type":"array","minItems":5,"maxItems":5,"items":{"type":"object","additionalProperties":false,"required":["kind","idea"],"properties":{"kind":{"type":"string","description":"種類（攻撃の手口、組み合わせ（IaC × 時間）など）"},"idea":{"type":"string","description":"アイデア本文。どのサービスの・どの設定で・何が起きて・どう直すかまで"}}}},"unverified":{"type":"array","items":{"type":"string"},"description":"確かめていないこと。なければ空配列"}}}'
+            --effort xhigh
+            --max-turns 200
+            --allowedTools Read,Glob,Grep,WebFetch,Task
+            --json-schema '{"type":"object","additionalProperties":false,"required":["kind","title","what_happens","how_to_fix","why_overlooked","sources","unverified","runners_up"],"properties":{"kind":{"type":"string","description":"種類（組み合わせ（IaC × 時間）、攻撃の手口など）"},"title":{"type":"string","description":"アイデアを一文で"},"what_happens":{"type":"string","description":"どのサービスの・どの設定で・何が起きるか"},"how_to_fix":{"type":"string","description":"どう直すか / どう気づくか"},"why_overlooked":{"type":"string","description":"なぜ見落とされるか"},"sources":{"type":"array","items":{"type":"string"},"description":"裏取りに使った URL"},"unverified":{"type":"array","items":{"type":"string"},"description":"確かめきれなかったこと。なければ空配列"},"runners_up":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["idea","reason"],"properties":{"idea":{"type":"string"},"reason":{"type":"string","description":"落とした理由を一言"}}},"description":"惜しかった候補 2〜3 本"}}}'
 
       - name: Publish to Slack
         env:
@@ -91,16 +93,22 @@ jobs:
 
           # AWS Chatbot のカスタム通知の形式。description は Slack の mrkdwn で表示される。
           message=$(jq -c --arg today "$today" --arg run "$RUN_URL" '
+            def bullets: [.[] | "• \(.)"] | join("\n");
             {
               version: "1.0",
               source: "custom",
               content: {
                 textType: "client-markdown",
-                title: "セキュリティのアイデア \($today)",
+                title: "セキュリティのアイデア \($today)：\(.title)",
                 description: (
-                  ([.ideas | to_entries[] | "*\(.key + 1). \(.value.kind)*\n\(.value.idea)"] | join("\n\n"))
-                  + (if (.unverified | length) > 0
-                     then "\n\n*確かめていないこと*\n" + ([.unverified[] | "• \(.)"] | join("\n"))
+                  "_\(.kind)_\n\n"
+                  + "*何が起きるか*\n\(.what_happens)\n\n"
+                  + "*どう直すか / どう気づくか*\n\(.how_to_fix)\n\n"
+                  + "*なぜ見落とされるか*\n\(.why_overlooked)"
+                  + (if (.unverified | length) > 0 then "\n\n*確かめていないこと*\n" + (.unverified | bullets) else "" end)
+                  + (if (.sources | length) > 0 then "\n\n*裏取り*\n" + (.sources | bullets) else "" end)
+                  + (if (.runners_up | length) > 0
+                     then "\n\n*惜しかった候補*\n" + ([.runners_up[] | "• \(.idea)（\(.reason)）"] | join("\n"))
                      else "" end)
                   + "\n\n実行ログ: \($run)"
                 )
@@ -110,7 +118,7 @@ jobs:
           aws sns publish --topic-arn "$SNS_TOPIC_ARN" --message "$message" > /dev/null
 
           # 次回以降の重複よけに足す。古いものから捨て、直近 200 本だけ残す。
-          jq -r --arg today "$today" '.ideas[] | "- \($today) \(.kind)：\(.idea | gsub("\n"; " "))"' \
+          jq -r --arg today "$today" '"- \($today) \(.kind)：\(.title)", (.runners_up[] | "- \($today) 惜しかった候補：\(.idea)")' \
             <<<"$STRUCTURED_OUTPUT" >> "$HISTORY_FILE"
           tail -n 200 "$HISTORY_FILE" > "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
 
