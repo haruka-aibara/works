@@ -4,7 +4,7 @@
 
 **3行:**
 
-- **GitHub API を叩く認証**と、**HCP がリポジトリを見る VCS 連携**は完全に別系統。前者が GitHub App、後者が OAuth App
+- **GitHub API を叩く認証**と、**HCP がリポジトリを見る VCS 連携**は完全に別系統。前者は provider 用の GitHub App、後者は VCS 用の GitHub App を OAuth 方式で繋いだもの。App が 2 つある
 - 前者で実際に使われるトークンは**毎 run 発行され、1時間で失効する**
 - 恒久的に存在する秘密は **2 つ**。App の秘密鍵 (PEM) と、VCS 連携が持つ OAuth トークン。どちらも HCP Terraform 側にある
 
@@ -70,7 +70,7 @@ workspace `works`（リポジトリ `haruka-aibara/works`）に設定されて�
 | | 何と何を繋ぐか | 実体 |
 |---|---|---|
 | `GITHUB_APP_*`（環境変数） | github provider → GitHub API | 自前の **GitHub App** の秘密鍵 |
-| `vcs_repo.oauth_token_id` | HCP Terraform → リポジトリ（コード取得・webhook） | 自前の **OAuth App** を authorize したユーザーのトークン |
+| `vcs_repo.oauth_token_id` | HCP Terraform → リポジトリ（コード取得・webhook） | VCS 用の **GitHub App** を authorize したユーザーのトークン（user-to-server token） |
 
 前者が壊れると `github_repository` などが落ち、後者が壊れると **push しても run が走らなくなる**。症状が全く違うので切り分けはしやすい。
 
@@ -85,13 +85,25 @@ data "tfe_oauth_client" "this" {
 
 `vcs_repo` が要求するのは OAuth **トークン**の id（`ot-...`）で、これは OAuth client（`oc-...`）にぶら下がっている。接続を authorize し直すとトークン id が変わるため、値を書き込まずに毎回引いている。
 
+**VCS 用の App は「User-to-server token expiration」を Opt-out にしてある。**
+GitHub App のユーザートークンは、既定では 8 時間で失効する。
+HCP Terraform は refresh token で更新しないため、既定のままだと半日ほどで VCS 連携が外れ、毎回 reauth が必要になる。
+設定場所は App の設定 → Optional features。
+
+期限を外すと、OAuth App のトークンと同じく無期限になる。
+その代わり、トークンでできることは App の permission とインストール先の範囲に絞られる。
+OAuth App の `repo` スコープより狭い。
+
 ---
 
 ## 3. GitHub App
 
 org `haruka-aibara` の Settings → Developer settings → GitHub Apps にある。**消すと Terraform が GitHub を操作できなくなる。**
 
-GitHub 側には自前のものが **2 つ**並んでいる。**GitHub App**（このセクションの主題。provider 認証用）と、**OAuth App**（HCP Terraform の VCS 連携用。Developer settings の別タブにある）。用途が全く違うので消し間違えないこと。
+GitHub Apps タブには自前の App が **2 つ**並んでいる。
+provider 認証用（このセクションの主題）と、HCP Terraform の VCS 連携用（§2 の `vcs_repo`）である。
+VCS 用は OAuth 方式で HCP Terraform に登録しているが、実体は OAuth App ではなく GitHub App である。
+用途が全く違うので消し間違えないこと。
 
 HashiCorp が提供する VCS 連携用の App は**使っていない**。理由は §4 を参照。
 
@@ -154,8 +166,8 @@ OAuth 方式は「組織が特定の 1 ユーザーとして振る舞う」方�
 
 代償は正直に書いておく。
 
-- 無期限シークレットが 1 個増える（OAuth App の client secret と、authorize したユーザーのトークン。どちらも HCP 内）
-- 権限が粗くなる（App installation の permission 単位 → OAuth の `repo` スコープ）
+- 無期限シークレットが 1 個増える（VCS 用 App の client secret と、authorize したユーザーのトークン。どちらも HCP 内。トークンは期限を Opt-out して無期限にしている。§2 参照）
+- 権限は、VCS 用 App の permission と authorize したユーザーの権限が重なる範囲になる。OAuth App で繋ぐ場合の `repo` スコープよりは狭い
 - **authorize したユーザーに依存し続ける**。App 方式では「繋ぐときだけ」人が要ったが、OAuth では「動き続けるのに」人が要る。revoke されたり org を抜けると全 workspace の VCS 連携が止まる
 
 ### なぜ Vault を挟まないのか
@@ -248,8 +260,9 @@ awk '{printf "%s\\n", $0}' your-app.private-key.pem
 | `401` | PEM の 1 行化ミス、または App ID / installation ID の不整合 |
 | `403` | permission 不足。特に **Workflows**（`.github/workflows/` への書き込み時） |
 | `Resource not accessible by integration` | 個人アカウント配下にリポジトリを作ろうとしている |
-| push しても run が走らない | VCS 連携側の問題。webhook が消えたか、OAuth App の認可が revoke されている |
-| webhook 作成で apply が落ちる | OAuth App を authorize したユーザーが、その repo に admin 権限を持っていない |
+| push しても run が走らない | VCS 連携側の問題。webhook が消えたか、VCS 用 App の認可が revoke されている |
+| VCS 連携が半日ほどで外れ、reauth を求められる | VCS 用 App の「User-to-server token expiration」が有効に戻っている。§2 参照 |
+| webhook 作成で apply が落ちる | VCS 用 App を authorize したユーザーが、その repo に admin 権限を持っていない |
 | plan が返ってこない | 資格情報が無効で匿名アクセスになっている |
 | `Value for undeclared variable` | 宣言を消した変数が workspace に残っている。UI から削除する |
 

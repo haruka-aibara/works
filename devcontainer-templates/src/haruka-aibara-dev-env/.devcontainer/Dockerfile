@@ -13,7 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # from their official multi-arch images, pinned by tag + digest. Renovate's dockerfile manager
 # tracks both, so no per-arch SHA256 needs to be maintained here.
 COPY --from=ghcr.io/tofuutils/tenv:4.15.1@sha256:1132db268644e2768beb7ffe60fb2688bd33f4bab85ec105b2812bea0ad44cfb /usr/local/bin/tenv /usr/bin/tenv
-COPY --from=ghcr.io/astral-sh/uv:0.12.22@sha256:f513a91fc62fe7c17567eee97230dd198e43edb8a9fbecca843714a4358fe1bc /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 /uv /uvx /usr/local/bin/
 
 # Installing minimal set of essential system tools for development
 # Grouped in a single RUN command to reduce image layers
@@ -63,9 +63,9 @@ WORKDIR /home/vscode
 # Checksums match the claude binary in the official npm platform packages (@anthropic-ai/claude-code-linux-*).
 # Renovate bumps the version; .github/workflows/devcontainer-checksums.yaml then rewrites the SHA256s.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_VERSION=2.1.282
-ARG CLAUDE_SHA256_AMD64=3afe8535c0cc33f0e24f7b25dab7a1727b8b592196f8496a8bc302ba2161eed3
-ARG CLAUDE_SHA256_ARM64=6764ffc39e9fed425a493ff61ea28506d1ba83996ce81a48d1177dbb393419c9
+ARG CLAUDE_VERSION=2.1.288
+ARG CLAUDE_SHA256_AMD64=0298068b686e7fdbaf9402a7a587bb7f49c0b0e084de09f69145a0719207640c
+ARG CLAUDE_SHA256_ARM64=359ab6a058fcde9741dff54979a212fd134cdf8e8cfc2f8de02bc350b9e2b9d5
 ARG TARGETARCH
 RUN set -eux; \
     case "${TARGETARCH}" in \

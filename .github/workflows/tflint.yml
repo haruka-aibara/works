@@ -1,0 +1,38 @@
+# プラグインのバージョンは .tflint.hcl で固定する。
+name: tflint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # devcontainer-checksums.yaml の追いコミットに対して起動する。
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # renovate: datasource=github-releases depName=terraform-linters/tflint
+  TFLINT_VERSION: v0.64.0
+
+jobs:
+  check:
+    name: Terraform の書き方・AWS 設定値のチェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+      # プラグインは GitHub Releases から取るので、トークンで rate limit を避ける。
+      - run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: tflint -f compact

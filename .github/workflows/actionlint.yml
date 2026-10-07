@@ -1,0 +1,30 @@
+# 導入の経緯は docs/decisions/0002-lint-ci-for-docs-and-config.md。
+name: actionlint
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # devcontainer-checksums.yaml の追いコミットに対して起動する。
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: GitHub Actions ワークフローの構文チェック
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # run: 内のシェルも、イメージ同梱の shellcheck で検査される。
+      - uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: -color

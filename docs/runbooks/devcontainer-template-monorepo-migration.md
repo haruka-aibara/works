@@ -20,7 +20,7 @@
 
 ### 2. 初回 publish の結果を確認する
 
-Actions の **Release Dev Container Templates** が成功すると、ジョブサマリに publish されたタグが出る。
+Actions の **devcontainers/action** ワークフローが成功すると、ジョブのログに publish されたタグが出る。
 
 まず匿名 pull できるか確認する。private のままだと `Dev Containers: Clone Repository in Container Volume...` から参照できない。
 
@@ -82,6 +82,7 @@ blame まで元の作者・日付にするには main の履歴を書き換え�
 
 ## 補足: bump コミットと HCP Terraform
 
-リリースワークフローは version を bump したコミットを main に直接 push する。コミットメッセージの `[skip ci]` を GitHub Actions と HCP Terraform の両方が見るので、bump のたびに `works` の apply が走ることはない。ワークフローを触るときにこのマーカーを落とさないこと。
+以前のリリースワークフローは、version を bump したコミットを `[skip ci]` 付きで main に直接 push していた。
+main にブランチ保護（必須チェック + `enforce_admins`）を入れてからはこの push が毎回弾かれ、publish まで進まなくなった。
 
-bump コミットが他の PR のマージと競合しないよう、ワークフローは `concurrency` で直列化し、push 前に `git pull --rebase` している。
+今は version を PR の中で手で上げ、ワークフローは publish だけをする。

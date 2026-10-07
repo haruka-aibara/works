@@ -3,11 +3,5 @@ rules:
   unpinned-uses:
     config:
       policies:
-        # 自分の共通ワークフロー（workflow-dist/ から配布）は main を追う運用なので、ブランチ参照を許す。
-        "haruka-aibara/*": ref-pin
-        # それ以外の action はコミットハッシュで固定する。
+        # GitHub 公式の action も含め、すべてコミットハッシュで固定する。
         "*": hash-pin
-  # works 自身の caller は同じリポジトリの reusable を `./.github/...` で呼ぶ。
-  # 新しい `$/...` 記法は actionlint（1.7.12）が解釈できずエラーになるので、この指摘は見ない。
-  self-repository:
-    disable: true

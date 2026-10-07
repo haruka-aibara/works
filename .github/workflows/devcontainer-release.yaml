@@ -1,89 +1,33 @@
-# devcontainer テンプレートを ghcr.io に publish する。
-# Terraform 管理外（workflow-dist/ から配布される terraform-ci.yml / python-ci.yml とは別物）なので
-# このファイルは直接編集してよい。
-name: Release Dev Container Templates
+# devcontainer テンプレートを ghcr.io に publish する（devcontainers/template-starter と同じ形）。
+#
+# publish するバージョンは devcontainer-template.json の version で、PR の中で手で上げる。
+# 上げていなければ publish 済みのバージョンなので、何もせずに終わる。
+name: devcontainers/action
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'devcontainer-templates/src/**'
-      - '.github/workflows/devcontainer-release.yaml'
-  # 手動再 publish 用（例: ghcr の名前空間が変わり、中身を変えずに publish し直したいとき）。
   workflow_dispatch:
-    inputs:
-      skip_version_bump:
-        description: 'バージョンを bump せず、現在のバージョンのまま再 publish する'
-        type: boolean
-        default: false
 
-# bump コミットを main に push するため、同時実行すると push が衝突する。
-concurrency:
-  group: devcontainer-release
-  cancel-in-progress: false
-
-env:
-  TEMPLATE_FILE: devcontainer-templates/src/haruka-aibara-dev-env/devcontainer-template.json
+permissions: {}
 
 jobs:
-  deploy:
-    if: ${{ github.ref == 'refs/heads/main' }}
+  publish:
+    name: devcontainer テンプレートを ghcr に publish
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
+      contents: read
       packages: write
-      contents: write
     steps:
-      # bump コミットを push するので認証情報は残す。
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # bump コミットを main に rebase して push するため、浅いクローンでは足りない。
-          fetch-depth: 0
-
-      - name: "Bump version"
-        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.skip_version_bump }}
-        run: |
-          set -euo pipefail
-          FILE="$TEMPLATE_FILE"
-          VERSION=$(jq -r .version "$FILE")
-          MAJOR=$(echo "$VERSION" | cut -d. -f1)
-          MINOR=$(echo "$VERSION" | cut -d. -f2)
-          PATCH=$(echo "$VERSION" | cut -d. -f3)
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          if echo "$COMMIT_MSG" | grep -qE 'BREAKING' || echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\(.+\))?!:'; then
-            NEW_VERSION="$((MAJOR+1)).0.0"
-          elif echo "$COMMIT_MSG" | grep -qE '^feat(\(.+\))?:'; then
-            NEW_VERSION="${MAJOR}.$((MINOR+1)).0"
-          else
-            NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
-          fi
-          jq --arg v "$NEW_VERSION" '.version = $v' "$FILE" > tmp.json && mv tmp.json "$FILE"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$FILE"
-          # [skip ci] は GitHub Actions だけでなく HCP Terraform の VCS 連携でも効く。
-          # works ワークスペースは auto_apply = true なので、これが無いと bump のたびに apply が走る。
-          git commit -m "chore: bump devcontainer template version to $NEW_VERSION [skip ci]"
-          # monorepo なので、ジョブ実行中に main が進んでいることがある。
-          git pull --rebase origin main
-          git push origin HEAD:main
-
-      - name: "Publish Templates"
-        uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
+          persist-credentials: false
+      - uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
         with:
           publish-templates: "true"
           base-path-to-templates: "./devcontainer-templates/src"
-          generate-docs: "true"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Summary"
-        run: |
-          set -euo pipefail
-          {
-            echo "### Published template"
-            echo
-            echo '```'
-            echo "ghcr.io/${GITHUB_REPOSITORY,,}/$(jq -r .id "$TEMPLATE_FILE"):$(jq -r .version "$TEMPLATE_FILE")"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"

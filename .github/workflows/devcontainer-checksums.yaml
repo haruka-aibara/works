@@ -1,41 +1,45 @@
-# Renovate が devcontainer の Dockerfile の CLAUDE_VERSION を上げたとき、
-# 対応する SHA256 を計算し直して同じブランチに push する。
-# Renovate は SHA256 を計算できないため、この後追いが要る。
-name: Update Dev Container Checksums
+# Renovate が devcontainer の Dockerfile の CLAUDE_VERSION を上げたら、
+# 対応する SHA256 を計算し直して同じブランチに追いコミットする（Renovate は SHA256 を計算できない）。
+name: update-checksums.sh
 
 on:
   push:
-    branches:
-      - 'renovate/**'
+    branches: ['renovate/**']
     paths:
       - 'devcontainer-templates/src/haruka-aibara-dev-env/.devcontainer/Dockerfile'
 
-permissions:
-  contents: write
+permissions: {}
 
-# 実行中に Renovate がブランチを更新したら、古い実行は push が通らないので捨てる。
 concurrency:
-  group: devcontainer-checksums-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   update:
+    name: devcontainer の Claude Code の SHA256 を更新
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write  # 追いコミットの push
+      actions: write   # 必須チェックの起動
     steps:
+      # push するので認証情報を残す。
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked]
 
       - run: devcontainer-templates/scripts/update-checksums.sh
 
-      # 追いコミットを push するので、認証情報を残す（persist-credentials: false にしない）。
-      # このコミットの author は renovate.json の gitIgnoredAuthors に入れてあるので、
-      # Renovate は引き続きこのブランチを rebase・更新する。
-      - name: Commit and push
+      # このコミットの author は renovate.json の gitIgnoredAuthors に入れてあるので、Renovate は引き続きブランチを更新する。
+      # GITHUB_TOKEN の push では PR の CI が承認待ちで止まるので、必須チェックは workflow_dispatch で起動する。
+      - name: Commit, push and run required checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
         run: |
-          if git diff --quiet; then
-            echo "checksums are up to date"
-            exit 0
-          fi
+          git diff --quiet && exit 0
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -am 'fix(devcontainer): SHA256 をバージョンに合わせて更新'
           git push
+          for workflow in terraform-fmt tflint trivy yamllint actionlint zizmor markdownlint; do
+            gh workflow run "$workflow.yml" --ref "$BRANCH"
+          done

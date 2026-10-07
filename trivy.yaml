@@ -1,2 +1,2 @@
-# trivy はカレントの trivy.yaml を既定で読む。Terraform CI の trivy-action もこれを拾う。
+# trivy はカレントの trivy.yaml を既定で読む。Terraform ワークフローの trivy-action もこれを拾う。
 ignorefile: .trivyignore.yaml
