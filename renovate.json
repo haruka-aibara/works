@@ -55,11 +55,22 @@
       "automerge": true
     },
     {
-      "description": "ワークフローで使う action と lint ツールのバージョンは、メジャー以外を公開から 3 日経ってから自動マージする。必須チェックが全部ワークフローに対して走るので、壊れたら赤くなって止まる。Terraform は main が auto apply なので対象にしない。リポジトリの Allow auto-merge は無効なので、GitHub の自動マージではなく次の Renovate の実行時に Renovate がマージする",
+      "description": "ワークフローで使う action と lint ツールのバージョンは、minor と patch だけ公開から 3 日経ってから自動マージする。必須チェックが全部ワークフローに対して走るので、壊れたら赤くなって止まる。Terraform は main が auto apply なので対象にしない。リポジトリの Allow auto-merge は無効なので、GitHub の自動マージではなく次の Renovate の実行時に Renovate がマージする。方針は docs/GitHub/41_Renovate/オートマージ.md",
       "matchFileNames": [".github/workflows/**"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "matchUpdateTypes": ["minor", "patch"],
       "minimumReleaseAge": "3 days",
       "automerge": true
+    },
+    {
+      "description": "バージョンが同じままコミットだけ変わる digest 更新は、タグの付け替え（2026 年 3 月の trivy-action の侵害と同じ形）でも出る。日付は元のタグのままなので minimumReleaseAge も効かない。hands-on の中のワークフローは動かないので対象外。自動マージせず、PR に確認点を書く",
+      "matchFileNames": [".github/workflows/**"],
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["digest"],
+      "automerge": false,
+      "labels": ["security"],
+      "prBodyNotes": [
+        "⚠️ バージョンが同じままコミットだけ変わっています。メンテナがタグを付け直したのか、乗っ取られたタグなのか（trivy-action の侵害と同じ形）を、リリースノートやアドバイザリで確かめてからマージしてください。"
+      ]
     }
   ]
 }
