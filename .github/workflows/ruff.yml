@@ -21,7 +21,7 @@ concurrency:
 
 env:
   # renovate: datasource=pypi depName=ruff
-  RUFF_VERSION: 0.16.10
+  RUFF_VERSION: 0.17.0
 
 jobs:
   check:
