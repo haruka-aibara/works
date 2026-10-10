@@ -13,7 +13,7 @@ tags: aws, iam, vault, security
 ## 例：Vault で発行する特権昇格用の IAM ユーザー
 
 Vault の AWS secrets engine（`iam_user`）で作業時だけ発行する強い権限のユーザーにも付ける。
-`policy_arns` に元の権限、`policy_document` に Deny を入れれば、発行されるキー全部に効く。
+Deny を管理ポリシーにして、ロールの `policy_arns` に元の権限と並べれば、発行されるキー全部に効く。
 
 ## 穴になりそうなところ
 
