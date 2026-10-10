@@ -15,10 +15,8 @@ tags: aws, iam, vault, security
 Vault の AWS secrets engine（`iam_user`）で作業時だけ発行する強い権限のユーザーにも付ける。
 `policy_arns` に元の権限、`policy_document` に Deny を入れれば、発行されるキー全部に効く。
 
-`token_bound_cidrs` が絞るのはキーを取り出せる場所で、使える場所ではない。両方かける。
-
 ## 穴になりそうなところ
 
-- VPC エンドポイント経由では `aws:SourceIp` が効かない
+- VPC エンドポイント経由では `aws:SourceIp` が効かない。`aws:SourceVpc` などで別に絞る
 - AWS サービス経由の呼び出しも拒否される。`aws:ViaAWSService` で外す
 - IAM の権限があれば自分の Deny を外せる。その操作も Deny するか boundary で縛る（[材料の権限を絞る](2026-10-03-権限昇格の経路は見つけるより材料の権限を絞る.md)）
