@@ -55,6 +55,12 @@
       "automerge": true
     },
     {
+      "description": "lock file maintenance は公開日時を持たないので、minimumReleaseAge があると stability-days が永遠に pending になる。Renovate 公式の security:minimumReleaseAge* preset と同じく待ち期間を外す",
+      "matchFileNames": ["hands-on/**"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "ワークフローで使う action と lint ツールのバージョンは、minor と patch だけ公開から 3 日経ってから自動マージする。必須チェックが全部ワークフローに対して走るので、壊れたら赤くなって止まる。Terraform は main が auto apply なので対象にしない。リポジトリの Allow auto-merge は無効なので、GitHub の自動マージではなく次の Renovate の実行時に Renovate がマージする。方針は docs/GitHub/41_Renovate/オートマージ.md",
       "matchFileNames": [".github/workflows/**"],
       "matchUpdateTypes": ["minor", "patch"],
