@@ -25,7 +25,26 @@ GitHub Actions（schedule・毎日）
   └→ Slack に通知（失敗したときも）
 ```
 
-GitHub への書き込みは Actions の `GITHUB_TOKEN` で済むので、長期の秘密はどこにも置かない。
+ブランチの push と PR の作成は、GitHub App のトークンで行う。理由は次の節。
+
+## PR は GitHub App のトークンで作る
+
+`GITHUB_TOKEN` でも PR は作れる。
+ただし、`GITHUB_TOKEN` による push や PR では、別の GitHub Actions のワークフローが起動しない。
+Actions が Actions を呼び続ける無限ループを防ぐための仕様。
+
+そのため、snapshot の PR で JSON の書式チェックなどの CI を動かせない。
+ブランチ保護で「ステータスチェック必須」にすると、チェックが来ないのでマージもできなくなる。
+
+GitHub App のトークンで作った PR なら、ふつうに CI が動く。
+ワークフローの中で `actions/create-github-app-token` を使い、その場で1時間の短期トークンを発行して使う。
+
+- GitHub App はインストール先を snapshot リポジトリだけにし、権限は `contents: write` と `pull_requests: write` だけにする
+- PR の作成者は App の bot になる。自分が作成者ではないので、「レビュー必須」のブランチ保護でも自分の承認で通せる
+- 代わりに、App の private key を snapshot リポジトリの Actions のシークレットに置くことになる。AWS には何も置かない
+
+外部サービスの連携（HCP Terraform の VCS 連携・Renovate・レビュー用の GitHub App・Slack の GitHub アプリ）は webhook で動くので、`GITHUB_TOKEN` でも止まらない。
+止まるのは Actions のワークフローだけ。
 
 ## Lambda を挟む理由
 
@@ -131,7 +150,7 @@ IAM のポリシーシミュレーターは使わない。
 
 - **Lambda**：IAM を読んで判定し、スナップショットの JSON を返す。実行ロールの権限は `iam:List*` と `iam:Get*` だけ。コードと実行ロールは Terraform 側で管理する
 - **Actions が入るロール**：OIDC で入る。権限はその Lambda の ARN に対する `lambda:InvokeFunction` だけ。信頼ポリシーは、snapshot リポジトリの main ブランチのこのワークフローだけに絞る（`sub` を `repo:<owner>/<repo>:ref:refs/heads/main` で固定）
-- **GitHub 側**：ワークフローの `permissions` に `contents: write`・`pull-requests: write`・`id-token: write`。リポジトリの設定で、Actions に PR の作成を許可する
+- **GitHub 側**：snapshot リポジトリだけにインストールした GitHub App（`contents: write`・`pull_requests: write`）。App ID と private key を Actions のシークレットに置く。ワークフローの `permissions` は、OIDC 用の `id-token: write` と、読み取り用の `contents: read` だけ
 - main のブランチ保護と CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする。ワークフローが乗っ取られても、承認は偽れない
 - **ジョブが失敗したら Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
 - Lambda の実行時間の上限は15分。ロールやユーザーが多い環境では、時間内に収まるかを見ておく
