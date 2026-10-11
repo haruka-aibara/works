@@ -9,13 +9,19 @@
 private リポジトリに、特権を持つロールやユーザーごとの JSON を置く。
 **main ブランチにある JSON が、確認済みのスナップショット**になる。
 
-GitHub Actions で毎日、次の処理を実行する。
+EventBridge Scheduler で毎日 Lambda を起動し、次の処理を実行する。
 
 1. 全ロールと全ユーザーのポリシーを取る（信頼ポリシー・インライン・アタッチした管理ポリシー・ユーザーならグループ経由のもの）
 2. 特権に当たるステートメントを探す
-3. 1つでも当たったロールやユーザーについて、JSON を書き出す
-4. main と差分があれば、固定のブランチで PR を作るか更新する（`peter-evans/create-pull-request`）
+3. 1つでも当たったロールやユーザーについて、JSON を作る
+4. main と差分があれば、固定のブランチ（例：`snapshot/update`）を更新し、開いている PR がなければ作る
 5. PR を作ったときと、中身が変わったときだけ Slack に1件通知する
+
+```
+EventBridge Scheduler（毎日）→ Lambda ─┬→ GitHub App で private リポジトリに PR
+                                       └→ Slack に通知
+Lambda の Errors → CloudWatch アラーム → Slack
+```
 
 | 起きたこと | PR の差分 |
 |---|---|
@@ -87,35 +93,43 @@ IAM のポリシーシミュレーターは使わない。
 攻撃者にとっては、どのロールを狙えばいいかの一覧になる。
 公開リポジトリには置かない。
 
-GitHub Actions の定期実行は、公開リポジトリだと 60 日間動きがないと自動で止まる。
-差分がない限りコミットが発生しない仕組みなので、公開リポジトリだと黙って止まる。
-これも private に置く理由になる。
-
 ## 必要なもの
 
-- GitHub Actions から AWS に入る OIDC ロール。権限は `iam:List*` と `iam:Get*` だけ。信頼ポリシーは、このリポジトリの main ブランチのワークフローだけに絞る
-- `GITHUB_TOKEN` に `contents: write` と `pull-requests: write`。リポジトリの設定で、Actions に PR の作成を許可する
-- CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする
-- **ジョブが失敗したら Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
+- Lambda の実行ロール。AWS 側の権限は `iam:List*` と `iam:Get*` だけ
+- **GitHub App**。インストール先を snapshot 用の private リポジトリだけにし、権限は `contents: write` と `pull_requests: write` だけにする。private key は Secrets Manager に置き、Lambda が実行のたびに短期のインストールトークンに換える。PAT は使わない
+- main のブランチ保護と CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする。GitHub App の鍵が漏れても、承認は偽れない
+- **Lambda の `Errors` に CloudWatch アラームを張り、Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
 
 ## Slack の通知
 
-`create-pull-request` が返す `pull-request-operation` で、通知するかを決める。
+Lambda が GitHub API で PR を操作した結果で、通知するかを決める。
 
-| 値 | 通知 |
+| 結果 | 通知 |
 |---|---|
-| `created` | 新しい変更がある |
-| `updated` | 前回の PR から中身が変わった |
-| `none` | 通知しない。PR が開いたままで、中身も同じ |
-| `closed` | 通知しない |
+| PR を新しく作った | 新しい変更がある |
+| 開いている PR のブランチを、前回と違う中身で更新した | 前回の PR から中身が変わった |
+| 開いている PR と中身が同じ | 通知しない |
+| main と差分がなくなったので PR を閉じた | 通知しない |
+
+前回と中身が同じかは、固定のブランチの今の中身と比べて判定する。
 
 1回の実行で通知は1件だけにして、新規・変更・削除のロールとユーザーの名前を並べる。
 
 ## やらないこと・できないこと
 
-- **侵入の検知ではない。** 1日1回の実行なので、作ってすぐ使って消された特権ロールは記録に残らない。それは GuardDuty や CloudTrail の役目。これは「今ある特権を全部見て、OK を出した状態を保つ」ための仕組み
+- **侵入の検知ではない。** 1日1回の実行なので、作ってすぐ使って消された特権ロールは記録に残らない。それは GuardDuty や CloudTrail の役目。これは「今ある特権を全部見て、OK を出した状態を保つ」ための仕組み。即時に近づけるなら次の節
 - SCP やリソースポリシーは見ない。ロールやユーザー自身のポリシーだけを見る
 - 対象は1アカウント。複数アカウントなら、各アカウントに読み取り用のロールを置く
+
+## 即時にするなら（あとから足す）
+
+定期実行に加えて、IAM の変更をきっかけに起動する。
+
+- EventBridge のルールは us-east-1 に置く。IAM はグローバルサービスで、イベントは us-east-1 に届く
+- 対象は特権が変わりうる操作だけにする（`AttachRolePolicy`・`PutRolePolicy`・`UpdateAssumeRolePolicy`・`CreatePolicyVersion`・`AddUserToGroup` など）。インスタンスプロファイルの付け外し・タグ付け・サービスリンクロールの作成は入れない
+- EventBridge と Lambda の間に SQS を挟み、数分まとめてから Lambda を同時実行 1 で動かす。Terraform の apply 1回で何十件も出るイベントが、1回の実行と1件の通知にまとまる
+- イベントのときは、変わったロールやユーザーだけを取り直す。毎回全件を取り直すと、ロールが多い環境で IAM の API の上限に当たる
+- Kubernetes のコントローラー（Karpenter・ACK・Crossplane など）がロールを高速に作ったり消したりする環境では、`userIdentity.arn` の `anything-but` でコントローラーの操作を外す。作られる側ではなく作る側を見張る。コントローラーのロールは `iam:CreateRole` と `iam:PassRole` を持つので、スナップショットに入る。作るロールにはアクセス許可の境界を必ず付けさせ（`iam:PermissionsBoundary` の条件付きでだけ `CreateRole` を許す）、定期実行でもそのパスやプレフィックスを除外する
 
 ## 除外条件に使っているロールについて
 
@@ -132,6 +146,7 @@ SCP やバケットポリシーで特定のロールを Deny から除外して�
 
 - **Terraform の `check` ブロックで、確認時点の JSON と比べる**：plan を実行しないと気づけない。見張るロールを手で列挙する必要がある。AWS 管理ポリシーの中身まで比べると、AWS の更新のたびに警告が出る
 - **AWS 管理ポリシーのバージョンを追う**：更新の大半は特権と関係ない。特権に当たるステートメントだけを記録すれば、追う必要がなくなる
+- **GitHub Actions で定期実行する**：`peter-evans/create-pull-request` で PR の操作は楽になる。一方で、GitHub から AWS に入る OIDC ロールが要る。公開リポジトリでは 60 日間動きがないと定期実行が止まる。IAM の変更をきっかけに即時に動かす拡張もしにくい
 - **AWS Config・Security Hub CSPM**：変更の記録や `*:*` の検出はできるが、「確認して OK を出した状態」を持てない
 
 ## 未確認
