@@ -105,7 +105,7 @@ jobs:
 
       - name: Fill in the new image ID in the Amazon ECS task definition for web
         id: render-web-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@138c24f321fdbdf7edee4a685519d253cae2cdea # v1
+        uses: aws-actions/amazon-ecs-render-task-definition@8d79160660ad39c402a16e5fc7cd2a32e8f7d6b7 # v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: web
@@ -113,7 +113,7 @@ jobs:
 
       - name: Fill in the new image ID in the Amazon ECS task definition for api
         id: render-api-task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@138c24f321fdbdf7edee4a685519d253cae2cdea # v1
+        uses: aws-actions/amazon-ecs-render-task-definition@8d79160660ad39c402a16e5fc7cd2a32e8f7d6b7 # v1
         with:
           task-definition: ${{ steps.render-web-task-def.outputs.task-definition }}
           container-name: api
