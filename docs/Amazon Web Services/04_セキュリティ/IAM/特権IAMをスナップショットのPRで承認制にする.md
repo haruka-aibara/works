@@ -9,7 +9,7 @@
 private リポジトリに、特権を持つロールやユーザーごとの JSON を置く。
 **main ブランチにある JSON が、確認済みのスナップショット**になる。
 
-EventBridge Scheduler で毎日 Lambda を起動し、次の処理を実行する。
+その private リポジトリの GitHub Actions で毎日、次の処理を実行する。
 
 1. 全ロールと全ユーザーのポリシーを取る（信頼ポリシー・インライン・アタッチした管理ポリシー・ユーザーならグループ経由のもの）
 2. 特権に当たるステートメントを探す
@@ -18,10 +18,14 @@ EventBridge Scheduler で毎日 Lambda を起動し、次の処理を実行す�
 5. PR を作ったときと、中身が変わったときだけ Slack に1件通知する
 
 ```
-EventBridge Scheduler（毎日）→ Lambda ─┬→ GitHub App で private リポジトリに PR
-                                       └→ Slack に通知
-Lambda の Errors → CloudWatch アラーム → Slack
+GitHub Actions（schedule・毎日）
+  ├→ OIDC で AWS の読み取り専用ロールに入る → IAM を読む
+  ├→ リソースごとのブランチと PR を作る・更新する（gh CLI）
+  └→ Slack に通知（失敗したときも）
 ```
+
+AWS 側に作るのは、読み取り専用のロール1つだけ。
+GitHub への書き込みは Actions の `GITHUB_TOKEN` で済むので、長期の秘密はどこにも置かない。
 
 | 起きたこと | PR の差分 |
 |---|---|
@@ -31,7 +35,7 @@ Lambda の Errors → CloudWatch アラーム → Slack
 
 **マージが承認**になる。
 問題がある変更なら、PR は開けたまま、そのリソースの管理者に AWS 側を直してもらう。
-直って main と差分がなくなれば、次の実行で Lambda が PR を閉じる。手で閉じる必要はない。
+直って main と差分がなくなれば、次の実行で PR を閉じる。手で閉じる必要はない。
 別の形の特権に直した場合は、PR が新しい中身で更新されるので、見直してマージする。
 直る前に手で閉じても、次の実行で PR がまた作られる。直るまで知らせ続けるので、それでいい。
 
@@ -43,11 +47,11 @@ PR を1本にまとめると、問題ないロールの変更と問題のある�
 同じリソースで PR が何本も立たないように、ブランチ名をリソースから一意に決める。
 
 - ブランチ名は `snapshot/role/<ロール名>`・`snapshot/user/<ユーザー名>`
-- Lambda は、そのブランチを head にした開いている PR を探し、あれば中身を更新し、なければ作る
+- ワークフローは、そのブランチを head にした開いている PR を `gh pr list --head` で探し、あれば中身を更新し、なければ `gh pr create` で作る
 - GitHub も、同じ head と base で開いている PR があると2本目の作成をエラーにする。実装を間違えても二重にはならない
 - IAM のロール名はパスが違ってもアカウント内で一意。ロールとユーザーは名前空間が別なので、`role/`・`user/` で分ける
 - 消して同じ名前で作り直しても、同じブランチ・同じ PR になる
-- Lambda の予約同時実行数を 1 にする。手動で実行したときなどに、2つの実行が同時に PR を作りにいくのを防ぐ
+- ワークフローに `concurrency` を付け、同時に1つしか動かないようにする。手動で実行したときなどに、2つの実行が同時に PR を作りにいくのを防ぐ
 
 ## 何を記録するか
 
@@ -111,14 +115,14 @@ IAM のポリシーシミュレーターは使わない。
 
 ## 必要なもの
 
-- Lambda の実行ロール。AWS 側の権限は `iam:List*` と `iam:Get*` だけ
-- **GitHub App**。インストール先を snapshot 用の private リポジトリだけにし、権限は `contents: write` と `pull_requests: write` だけにする。private key は Secrets Manager に置き、Lambda が実行のたびに短期のインストールトークンに換える。PAT は使わない
-- main のブランチ保護と CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする。GitHub App の鍵が漏れても、承認は偽れない
-- **Lambda の `Errors` に CloudWatch アラームを張り、Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
+- **AWS 側**：GitHub Actions から OIDC で入る読み取り専用のロール。権限は `iam:List*` と `iam:Get*` だけ。信頼ポリシーは、snapshot リポジトリの main ブランチのこのワークフローだけに絞る（`sub` を `repo:<owner>/<repo>:ref:refs/heads/main` で固定）
+- **GitHub 側**：ワークフローの `permissions` に `contents: write`・`pull-requests: write`・`id-token: write`。リポジトリの設定で、Actions に PR の作成を許可する
+- main のブランチ保護と CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする。ワークフローが乗っ取られても、承認は偽れない
+- **ジョブが失敗したら Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
 
 ## Slack の通知
 
-Lambda が GitHub API で PR を操作した結果で、通知するかを決める。
+PR を操作した結果で、通知するかを決める。
 
 | 結果 | 通知 |
 |---|---|
@@ -145,12 +149,18 @@ Lambda が GitHub API で PR を操作した結果で、通知するかを決め
 
 ## 即時にするなら（あとから足す）
 
-定期実行に加えて、IAM の変更をきっかけに起動する。
+IAM の変更をきっかけに、同じワークフローを起動する。
 
+```
+CloudTrail（IAM の変更）→ EventBridge のルール（us-east-1）→ API 送信先 → GitHub の workflow_dispatch
+```
+
+- EventBridge の API 送信先（API Destination）から、GitHub の `workflow_dispatch` API を直接呼ぶ。Lambda はいらない
+- 必要な GitHub の権限は **Actions の write だけ**。コードも PR も触れないので、漏れても main にある決まったワークフローを起動されるだけ
+- 連続したイベントは、ワークフローの `concurrency` でまとまる。同じグループでは実行中1つと待ち1つだけが残り、それ以外の待ちは取り消される。Terraform の apply 1回で何十件もイベントが出ても、実行は2回までに収まる
+- API 送信先には呼び出し回数の上限を設定できる。イベントが大量に来ても、GitHub に流れすぎない
 - EventBridge のルールは us-east-1 に置く。IAM はグローバルサービスで、イベントは us-east-1 に届く
 - 対象は特権が変わりうる操作だけにする（`AttachRolePolicy`・`PutRolePolicy`・`UpdateAssumeRolePolicy`・`CreatePolicyVersion`・`AddUserToGroup` など）。インスタンスプロファイルの付け外し・タグ付け・サービスリンクロールの作成は入れない
-- EventBridge と Lambda の間に SQS を挟み、数分まとめてから Lambda を同時実行 1 で動かす。Terraform の apply 1回で何十件も出るイベントが、1回の実行と1件の通知にまとまる
-- イベントのときは、変わったロールやユーザーだけを取り直す。毎回全件を取り直すと、ロールが多い環境で IAM の API の上限に当たる
 - Kubernetes のコントローラー（Karpenter・ACK・Crossplane など）がロールを高速に作ったり消したりする環境では、`userIdentity.arn` の `anything-but` でコントローラーの操作を外す。作られる側ではなく作る側を見張る。コントローラーのロールは `iam:CreateRole` と `iam:PassRole` を持つので、スナップショットに入る。作るロールにはアクセス許可の境界を必ず付けさせ（`iam:PermissionsBoundary` の条件付きでだけ `CreateRole` を許す）、定期実行でもそのパスやプレフィックスを除外する
 
 ## 除外条件に使っているロールについて
@@ -168,9 +178,10 @@ SCP やバケットポリシーで特定のロールを Deny から除外して�
 
 - **Terraform の `check` ブロックで、確認時点の JSON と比べる**：plan を実行しないと気づけない。見張るロールを手で列挙する必要がある。AWS 管理ポリシーの中身まで比べると、AWS の更新のたびに警告が出る
 - **AWS 管理ポリシーのバージョンを追う**：更新の大半は特権と関係ない。特権に当たるステートメントだけを記録すれば、追う必要がなくなる
-- **GitHub Actions で定期実行する**：`peter-evans/create-pull-request` で PR の操作は楽になる。一方で、GitHub から AWS に入る OIDC ロールが要る。公開リポジトリでは 60 日間動きがないと定期実行が止まる。IAM の変更をきっかけに即時に動かす拡張もしにくい
+- **EventBridge Scheduler と Lambda で実行し、Lambda から PR を作る**：snapshot リポジトリに書き込める GitHub App の private key を、AWS に常に置くことになる。PR を操作するコードも GitHub API で自分で書く必要がある。即時にするときも、連続したイベントをまとめるのに SQS と同時実行数の制御が要る
 - **AWS Config・Security Hub CSPM**：変更の記録や `*:*` の検出はできるが、「確認して OK を出した状態」を持てない
 
 ## 未確認
 
 - `aws:userid` を SCP の条件で使ったときに、上のとおりに動くか
+- `concurrency` で待ちが1つに絞られる動きが、`workflow_dispatch` で起動した実行にも同じように効くか
