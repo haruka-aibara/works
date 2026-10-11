@@ -37,7 +37,30 @@ Actions が Actions を呼び続ける無限ループを防ぐための仕様。
 ブランチ保護で「ステータスチェック必須」にすると、チェックが来ないのでマージもできなくなる。
 
 GitHub App のトークンで作った PR なら、ふつうに CI が動く。
-ワークフローの中で `actions/create-github-app-token` を使い、その場で1時間の短期トークンを発行して使う。
+
+App の private key（PEM）は、そのままでは `git push` や `gh` に使えない。
+PEM で署名した JWT は「この App である」ことの証明でしかなく、リポジトリは操作できない。
+JWT をインストールトークン（対象リポジトリと権限が決まった1時間のトークン）に換えて、初めて使える。
+この交換をするのが `actions/create-github-app-token`。
+
+```yaml
+- uses: actions/create-github-app-token@v2
+  id: app
+  with:
+    app-id: ${{ vars.SNAPSHOT_APP_ID }}
+    private-key: ${{ secrets.SNAPSHOT_APP_PRIVATE_KEY }}
+
+- uses: actions/checkout@v5
+  with:
+    token: ${{ steps.app.outputs.token }}   # git push を App で
+
+- run: ./snapshot.sh
+  env:
+    GH_TOKEN: ${{ steps.app.outputs.token }}   # gh pr create を App で
+```
+
+PEM はリポジトリシークレットではなく、main ブランチからだけ使える Environment のシークレットに置く。
+別のブランチでワークフローを書き換えて実行されても、PEM を読めない。
 
 - GitHub App はインストール先を snapshot リポジトリだけにし、権限は `contents: write` と `pull_requests: write` だけにする
 - PR の作成者は App の bot になる。自分が作成者ではないので、「レビュー必須」のブランチ保護でも自分の承認で通せる
@@ -150,7 +173,7 @@ IAM のポリシーシミュレーターは使わない。
 
 - **Lambda**：IAM を読んで判定し、スナップショットの JSON を返す。実行ロールの権限は `iam:List*` と `iam:Get*` だけ。コードと実行ロールは Terraform 側で管理する
 - **Actions が入るロール**：OIDC で入る。権限はその Lambda の ARN に対する `lambda:InvokeFunction` だけ。信頼ポリシーは、snapshot リポジトリの main ブランチのこのワークフローだけに絞る（`sub` を `repo:<owner>/<repo>:ref:refs/heads/main` で固定）
-- **GitHub 側**：snapshot リポジトリだけにインストールした GitHub App（`contents: write`・`pull_requests: write`）。App ID と private key を Actions のシークレットに置く。ワークフローの `permissions` は、OIDC 用の `id-token: write` と、読み取り用の `contents: read` だけ
+- **GitHub 側**：snapshot リポジトリだけにインストールした GitHub App（`contents: write`・`pull_requests: write`）。App ID は変数に、private key は main ブランチ限定の Environment のシークレットに置く。ワークフローの `permissions` は、OIDC 用の `id-token: write` と、読み取り用の `contents: read` だけ
 - main のブランチ保護と CODEOWNERS で、スナップショットの変更には自分のレビューを必須にする。ワークフローが乗っ取られても、承認は偽れない
 - **ジョブが失敗したら Slack に通知する。** 認証が切れたまま黙って止まると、変更がないのと見分けがつかない
 - Lambda の実行時間の上限は15分。ロールやユーザーが多い環境では、時間内に収まるかを見ておく
