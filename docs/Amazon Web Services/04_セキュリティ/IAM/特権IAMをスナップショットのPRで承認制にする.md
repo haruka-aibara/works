@@ -78,8 +78,26 @@ AWS の更新で特権に当たるステートメントが増えたときだけ�
 - `Condition`・`Resource` での絞り込みや `Deny` は考えない。多めに拾って、人が見て判断する
 - サービスリンクロール（パスが `/aws-service-role/`）は除く
 
-特権とみなす操作の一覧の例：
-`iam:AttachRolePolicy`・`iam:PutRolePolicy`・`iam:CreatePolicyVersion`・`iam:UpdateAssumeRolePolicy`・`iam:PassRole`・`iam:CreateAccessKey`・`iam:CreateLoginProfile`・`cloudtrail:StopLogging`・`guardduty:DeleteDetector`・`kms:ScheduleKeyDeletion`
+### 一覧は Cloudsplaining から作る
+
+特権とみなす操作の一覧は、[Cloudsplaining](https://github.com/salesforce/cloudsplaining)（Salesforce 発の OSS、MIT ライセンス）がかなりいい参考になる。
+`cloudsplaining/shared/constants.py` に、判定に使う一覧がそのまま置いてある。
+
+- `PRIVILEGE_ESCALATION_METHODS`：権限昇格の手口 59 件（Rhino Security Labs の調査が元）。単品で成立するもの 16 件と、複数の操作がそろって成立するもの 43 件
+- `ACTIONS_THAT_RETURN_CREDENTIALS`：認証情報を返す操作 45 件
+- `READ_ONLY_DATA_EXFILTRATION_ACTIONS`：持ち出しにつながる読み取り操作（S3・SSM パラメータストア・Secrets Manager）
+
+最初は単品の判定だけにして、手口ごとの中心の操作を一覧に入れる。
+
+- 組み合わせの手口のうち 24 件は `iam:PassRole` を含むので、`iam:PassRole` を一覧に入れれば単品の判定で拾える
+- 残りは、中心の操作（`lambda:UpdateFunctionCode`・`ec2:ModifyInstanceAttribute`・`cloudformation:ExecuteChangeSet` など）を単品として入れれば、多めに拾う側で拾える
+
+自分で思いつく範囲で一覧を作ると抜けが出る。
+たとえば `iam:AttachRolePolicy`・`iam:PassRole` などだけで作った一覧は、Cloudsplaining の 59 件のうち 19 件を拾えなかった。
+`iam:AttachUserPolicy`・`iam:AttachGroupPolicy`・`iam:PutUserPolicy`・`iam:PutGroupPolicy`・`iam:AddUserToGroup`・`iam:UpdateLoginProfile`・`iam:SetDefaultPolicyVersion`・`lambda:UpdateFunctionCode` などが抜けていた。
+
+これに、検知や証跡を止める操作（`cloudtrail:StopLogging`・`guardduty:DeleteDetector`・`kms:ScheduleKeyDeletion` など）を自分で足す。
+Cloudsplaining は権限昇格と持ち出しが中心で、検知を止める操作は扱っていない。
 
 IAM のポリシーシミュレーターは使わない。
 条件付きの許可は、条件の値を渡さないと「許可されない」と判定されて見逃す。
@@ -148,6 +166,7 @@ PR の作成者は App の bot になるので、「レビュー必須」のブ�
 
 - **即時の実行**：IAM の変更を EventBridge のルール（us-east-1）で拾い、API 送信先から `workflow_dispatch` を呼ぶ。GitHub の権限は Actions の write だけで済み、連続したイベントは `concurrency` でまとまる。Kubernetes のコントローラーのように高速にロールを作るものは、`userIdentity.arn` で除外し、作る側の権限とアクセス許可の境界で抑える
 - **大きくなったら**：Lambda のレスポンスは 6 MB まで。超えそうなら、Lambda が S3 に書いて場所だけ返す
+- **組み合わせの判定**：Cloudsplaining の手口のように「`iam:PassRole` と `ec2:RunInstances` の両方」で当たりにする。新しく拾うためではなく、本当に危ないものだけに絞って誤検知を減らすためのもの。単品の判定で PR が多すぎると感じてから足す
 - **初回の PR の数**：全部が新規になるので、1回で作る PR の数に上限を付ける
 - **除外条件に使っているロール**：SCP などで除外しているロールは、ほぼ確実に特権に当たるので、この仕組みで変化に気づける。除外は `aws:PrincipalArn` ではなく `aws:userid`（`AROA...:*`）で書くと、同じ名前で作り直されたロールに効かない
 
@@ -158,6 +177,7 @@ PR の作成者は App の bot になるので、「レビュー必須」のブ�
 - **全部 Lambda でやる**：Git との比較を Git の外からやることになり、API の上限や SHA の計算方法の一致など小細工が増える。PEM も AWS に置くことになる
 - **AWS 管理ポリシーのバージョンを追う**：更新の大半は特権と関係ない
 - **AWS Config・Security Hub CSPM**：「確認して OK を出した状態」を持てない
+- **既存の OSS・SaaS をそのまま使う**：Cloudsplaining・Prowler・ScoutSuite は検出まで。Cloudsplaining は OK にしたものを名前で除外するので、除外した後に中身が変わっても気づけない。CIEM の SaaS（Wiz・Orca など）は個人のアカウントには大きすぎる
 
 ## 未確認
 
