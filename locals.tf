@@ -25,6 +25,11 @@ locals {
     Project     = "bedrock-slack-ai-chatbot"
   })
 
+  # waydroid-ec2 モジュール専用の provider "aws" に入れるタグ。
+  waydroid_ec2_default_tags = merge(local.aws_default_tags, {
+    Project = "waydroid-ec2"
+  })
+
   # works の main へのマージに必須にするチェック。
   # ruff・pytest は paths で絞っていて走らない PR があるので入れない（入れると永久に待つ）。
   # Terraform Cloud/... は HCP Terraform の speculative plan。Actions が全部通っても
