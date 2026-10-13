@@ -41,16 +41,13 @@ auth key は Reusable / Ephemeral どちらも off でよい。
 
 手元の PC は Windows、Tailscale にログイン済み、`winget install Genymobile.scrcpy` で scrcpy（adb 同梱）を入れてある前提。
 
-```powershell
-# 起動。インスタンス ID はワークスペースの output waydroid_ec2.instance_id
-aws ec2 start-instances --region ap-northeast-1 --instance-ids <instance_id>
+起動・停止は、ルートの `module "waydroid_ec2"` の `running` を `true` / `false` にして main に merge する（HCP が apply する）。
+CLI の `aws ec2 start-instances` でも起動できるが、`running = false` のままだと、次に works が apply されたときに止まる。
 
-# 2〜3 分待って Android が上がったら繋ぐ
+```powershell
+# running = true の apply が終わってから 2〜3 分待って、Android が上がったら繋ぐ
 adb connect waydroid:5555
 scrcpy -s waydroid:5555 --no-audio --video-encoder=c2.android.avc.encoder --max-size 1280
-
-# 使い終わったら必ず止める
-aws ec2 stop-instances --region ap-northeast-1 --instance-ids <instance_id>
 ```
 
 `adb connect` が `failed to connect` なら、まだ Android が起動しきっていない。少し待ってやり直す。

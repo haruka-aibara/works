@@ -156,3 +156,10 @@ resource "aws_instance" "waydroid" {
 
   tags = { Name = "waydroid" }
 }
+
+# 起動・停止も Terraform で持つ。CLI で起動しても、running = false のまま
+# 次に works が apply されると止まる（止め忘れの保険にもなる）
+resource "aws_ec2_instance_state" "waydroid" {
+  instance_id = aws_instance.waydroid.id
+  state       = var.running ? "running" : "stopped"
+}

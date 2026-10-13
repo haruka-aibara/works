@@ -14,3 +14,9 @@ variable "ts_authkey_param" {
   type        = string
   default     = "/waydroid/ts_authkey"
 }
+
+variable "running" {
+  description = "false でインスタンスを止める。EBS（Android のデータ）は残る"
+  type        = bool
+  default     = true
+}
