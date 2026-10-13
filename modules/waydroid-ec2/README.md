@@ -23,7 +23,8 @@ Waydroid はコンテナ（LXC）なので、ネストした仮想化も metal �
 
 ## 事前準備
 
-Tailscale の auth key は tfstate に残さないため、Terraform では作らず SSM に手で入れる。
+Tailscale の auth key は state に残さないため、Terraform では作らず SSM に手で入れる。
+**main にマージする前に入れておく。** マージすると HCP Terraform がそのまま apply し、key が無いとインスタンスは立つが Tailscale に参加できない。
 
 ```bash
 aws ssm put-parameter --region ap-northeast-1 \
@@ -37,18 +38,13 @@ auth key は Reusable / Ephemeral どちらも off でよい。
 
 ## 使い方
 
-```bash
-terraform init
-terraform apply
-```
+初回は Waydroid のイメージ取得があるので、apply から 10〜15 分かかる。
+Tailscale の管理画面に `waydroid` が出てきたら、ワークスペースの output `waydroid_ec2.connect` のコマンドで繋ぐ。
 
-初回は Waydroid のイメージ取得があるので 10〜15 分かかる。
-Tailscale の管理画面に `waydroid` が出てきたら `terraform output -raw connect` のコマンドで繋ぐ。
-
-使い終わったら `terraform output -raw manual_stop | sh` で止める。
+起動・停止は Terraform を通さず、output の `manual_start` / `manual_stop` のコマンドを手元で叩く。
 止めている間も EBS（40GB で月 $4 弱）はかかる。
 `ignore_changes = [ami, user_data]` にしているのは、EBS 上の Android のデータ（アプリのログイン状態）を作り直しで消さないため。
-`terraform destroy` すると EBS ごと消える。
+ルートの `module "waydroid_ec2"` を外すと EBS ごと消える。
 
 ## 未検証のところ
 

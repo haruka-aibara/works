@@ -104,6 +104,21 @@ module "bedrock_slack_ai_chatbot_infra" {
 #   source = "./modules/aws-cost-allocation-tags"
 # }
 
+# Waydroid on EC2 (Graviton) — a cloud Android to drive from the PC with
+# scrcpy over Tailscale. Start/stop the instance by hand (module outputs).
+# The Tailscale auth key is put into SSM by hand so it never lands in state;
+# see modules/waydroid-ec2/README.md.
+module "waydroid_ec2" {
+  source = "./modules/waydroid-ec2"
+  providers = {
+    aws = aws.waydroid_ec2
+  }
+}
+
+output "waydroid_ec2" {
+  value = module.waydroid_ec2
+}
+
 # =========================================
 # My AWS Learning Repositories
 # =========================================

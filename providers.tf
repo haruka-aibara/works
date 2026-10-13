@@ -40,6 +40,15 @@ provider "aws" {
   }
 }
 
+# Same as above, with Project = "waydroid-ec2".
+provider "aws" {
+  alias  = "waydroid_ec2"
+  region = "ap-northeast-1"
+  default_tags {
+    tags = local.waydroid_ec2_default_tags
+  }
+}
+
 # For module "aws_budget_slack_notifier" in main.tf, which is commented out for
 # now. AWS Budgets is a us-east-1 service, so its SNS topic and KMS key live
 # there. Uncomment together with that module.

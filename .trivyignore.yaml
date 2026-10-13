@@ -7,5 +7,5 @@ misconfigurations:
     statement: Docker コンテナアクションは root で動かす前提（GitHub の仕様で USER を置けない）
   - id: AWS-0104
     paths:
-      - waydroid-ec2/main.tf
+      - modules/waydroid-ec2/main.tf
     statement: Waydroid のイメージ取得・Google Play・アプリの通信先が広く固定できないので egress は全開。インバウンドは全閉

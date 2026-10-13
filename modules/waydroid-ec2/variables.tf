@@ -1,8 +1,3 @@
-variable "region" {
-  type    = string
-  default = "ap-northeast-1"
-}
-
 variable "instance_type" {
   description = "重ければ c7g.2xlarge に上げる"
   type        = string

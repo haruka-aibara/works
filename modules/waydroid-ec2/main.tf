@@ -1,18 +1,6 @@
-terraform {
-  required_version = ">= 1.5"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.40"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-
 data "aws_caller_identity" "me" {}
+
+data "aws_region" "current" {}
 
 # Ubuntu 24.04 arm64（Graviton なので Android の ARM アプリを変換なしで動かせる）
 data "aws_ami" "ubuntu_arm" {
@@ -81,7 +69,7 @@ resource "aws_iam_role_policy" "read_ts_key" {
     Statement = [{
       Effect   = "Allow"
       Action   = "ssm:GetParameter"
-      Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.me.account_id}:parameter${var.ts_authkey_param}"
+      Resource = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.me.account_id}:parameter${var.ts_authkey_param}"
     }]
   })
 }
@@ -101,7 +89,7 @@ resource "aws_instance" "waydroid" {
   vpc_security_group_ids = [aws_security_group.waydroid.id]
 
   user_data = templatefile("${path.module}/user_data.sh", {
-    region   = var.region
+    region   = data.aws_region.current.region
     ts_param = var.ts_authkey_param
   })
 
