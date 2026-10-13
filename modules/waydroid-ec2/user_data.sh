@@ -129,17 +129,41 @@ EOF
 
 # ---------- Tailscale ----------
 curl -fsSL https://tailscale.com/install.sh | sh
-# set -x のままだと auth key が cloud-init のログとシリアルコンソール出力に残るので切る
-set +x
-TS_KEY=$(/snap/bin/aws ssm get-parameter --name "${ts_param}" --with-decryption \
-  --query Parameter.Value --output text --region "${region}")
-tailscale up --auth-key "$TS_KEY" --hostname waydroid
-unset TS_KEY
-set -x
+
+# SSM のパラメータは Terraform がダミー値で作り、本物の auth key は後から手で上書きする。
+# 本物が入るまで待って参加する。参加済みなら何もしない（auth key は1回使えば要らない）
+cat > /usr/local/bin/tailscale-join.sh <<'EOF'
+#!/bin/sh
+until tailscale ip -4 >/dev/null 2>&1; do
+  TS_KEY=$(/snap/bin/aws ssm get-parameter --name "${ts_param}" --with-decryption \
+    --query Parameter.Value --output text --region "${region}" 2>/dev/null)
+  case "$TS_KEY" in
+    tskey-*) tailscale up --auth-key "$TS_KEY" --hostname waydroid || sleep 60 ;;
+    *) echo "SSM ${ts_param} にまだ auth key が入っていない" >&2; sleep 60 ;;
+  esac
+done
+EOF
+chmod +x /usr/local/bin/tailscale-join.sh
+
+cat > /etc/systemd/system/tailscale-join.service <<'EOF'
+[Unit]
+Description=Join tailnet with the auth key in SSM
+After=tailscaled.service network-online.target
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/tailscale-join.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 # ---------- 有効化 ----------
 systemctl daemon-reload
 systemctl enable --now waydroid-container.service
 systemctl enable --now weston-headless.service
 systemctl enable --now waydroid-session.service
+systemctl enable --now tailscale-join.service
 systemctl enable --now waydroid-adb-forward.service

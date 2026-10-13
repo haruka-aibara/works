@@ -9,12 +9,6 @@ variable "volume_size" {
   default = 40
 }
 
-variable "subnet_id" {
-  description = "空ならデフォルト VPC のサブネットを1つ選ぶ。c7g が無い AZ に当たったら指定する"
-  type        = string
-  default     = ""
-}
-
 variable "ts_authkey_param" {
   description = "Tailscale auth key を入れた SSM パラメータ名（SecureString）"
   type        = string

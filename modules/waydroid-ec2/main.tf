@@ -1,5 +1,3 @@
-data "aws_caller_identity" "me" {}
-
 data "aws_region" "current" {}
 
 # Ubuntu 24.04 arm64（Graviton なので Android の ARM アプリを変換なしで動かせる）
@@ -12,26 +10,56 @@ data "aws_ami" "ubuntu_arm" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
+# ---------- ネットワーク ----------
+# 専用の VPC にパブリックサブネットを1つ。NAT ゲートウェイ（月 $45 前後）を置かず、
+# インスタンスにパブリック IP を付けて外へ出る。インバウンドは SG で全閉
+data "aws_ec2_instance_type_offerings" "az" {
+  location_type = "availability-zone-id"
+  filter {
+    name   = "instance-type"
+    values = [var.instance_type]
+  }
 }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+resource "aws_vpc" "waydroid" {
+  cidr_block           = "10.40.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  tags                 = { Name = "waydroid" }
+}
+
+resource "aws_internet_gateway" "waydroid" {
+  vpc_id = aws_vpc.waydroid.id
+  tags   = { Name = "waydroid" }
+}
+
+resource "aws_subnet" "waydroid" {
+  vpc_id     = aws_vpc.waydroid.id
+  cidr_block = "10.40.0.0/24"
+  # instance_type を置ける AZ から選ぶ。sort して並びが変わってもサブネットが作り直されないようにする
+  availability_zone_id = sort(data.aws_ec2_instance_type_offerings.az.locations)[0]
+  tags                 = { Name = "waydroid" }
+}
+
+resource "aws_route_table" "waydroid" {
+  vpc_id = aws_vpc.waydroid.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.waydroid.id
   }
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
-  }
+  tags = { Name = "waydroid" }
+}
+
+resource "aws_route_table_association" "waydroid" {
+  subnet_id      = aws_subnet.waydroid.id
+  route_table_id = aws_route_table.waydroid.id
 }
 
 # ---------- Security Group: インバウンドは全閉（接続は Tailscale 経由のみ） ----------
 resource "aws_security_group" "waydroid" {
   name        = "waydroid-no-ingress"
   description = "No inbound. Access via Tailscale only."
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.waydroid.id
 
   egress {
     description = "Waydroid image, Google Play, Tailscale DERP etc."
@@ -60,7 +88,20 @@ resource "aws_iam_role_policy_attachment" "ssm_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# Tailscale の auth key（SSM Parameter Store / SecureString）だけ読める
+# Tailscale の auth key の置き場所。中身はダミーで作り、本物はコンソールか CLI で上書きする。
+# Terraform が値を持つと state に残るので、value の変更は見ない
+resource "aws_ssm_parameter" "ts_authkey" {
+  name        = var.ts_authkey_param
+  description = "Tailscale auth key for waydroid-ec2. Overwrite the placeholder by hand."
+  type        = "SecureString"
+  value       = "placeholder"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+# Tailscale の auth key だけ読める
 resource "aws_iam_role_policy" "read_ts_key" {
   name = "read-tailscale-authkey"
   role = aws_iam_role.ec2.id
@@ -69,7 +110,7 @@ resource "aws_iam_role_policy" "read_ts_key" {
     Statement = [{
       Effect   = "Allow"
       Action   = "ssm:GetParameter"
-      Resource = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.me.account_id}:parameter${var.ts_authkey_param}"
+      Resource = aws_ssm_parameter.ts_authkey.arn
     }]
   })
 }
@@ -81,16 +122,16 @@ resource "aws_iam_instance_profile" "ec2" {
 
 # ---------- EC2 ----------
 resource "aws_instance" "waydroid" {
-  ami           = data.aws_ami.ubuntu_arm.id
-  instance_type = var.instance_type
-  # ids の並びは保証されないので sort する。並びが変わるとインスタンスごと作り直しになる
-  subnet_id              = var.subnet_id != "" ? var.subnet_id : sort(data.aws_subnets.default.ids)[0]
-  iam_instance_profile   = aws_iam_instance_profile.ec2.name
-  vpc_security_group_ids = [aws_security_group.waydroid.id]
+  ami                         = data.aws_ami.ubuntu_arm.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.waydroid.id
+  associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.ec2.name
+  vpc_security_group_ids      = [aws_security_group.waydroid.id]
 
   user_data = templatefile("${path.module}/user_data.sh", {
     region   = data.aws_region.current.region
-    ts_param = var.ts_authkey_param
+    ts_param = aws_ssm_parameter.ts_authkey.name
   })
 
   root_block_device {

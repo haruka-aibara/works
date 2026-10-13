@@ -23,11 +23,12 @@ Waydroid はコンテナ（LXC）なので、ネストした仮想化も metal �
 
 ## 事前準備
 
-Tailscale の auth key は state に残さないため、Terraform では作らず SSM に手で入れる。
-**main にマージする前に入れておく。** マージすると HCP Terraform がそのまま apply し、key が無いとインスタンスは立つが Tailscale に参加できない。
+Tailscale の auth key は state に残さないため、SSM パラメータ（`/waydroid/ts_authkey`）は Terraform がダミー値で作り、本物は手で上書きする。
+インスタンスは本物の key が入るまで 1 分おきに見に行き、入ったら Tailscale に参加する（`tailscale-join.service`）。
+apply の前後どちらで入れてもよい。
 
 ```bash
-aws ssm put-parameter --region ap-northeast-1 \
+aws ssm put-parameter --region ap-northeast-1 --overwrite \
   --name /waydroid/ts_authkey --type SecureString --value 'tskey-auth-xxxx'
 ```
 
@@ -60,7 +61,7 @@ SSM で入って順に見る。
 ```bash
 aws ssm start-session --target <instance_id>
 sudo tail -n 100 /var/log/cloud-init-output.log
-sudo systemctl status weston-headless waydroid-container waydroid-session waydroid-adb-forward
+sudo systemctl status tailscale-join weston-headless waydroid-container waydroid-session waydroid-adb-forward
 sudo waydroid status
 adb connect 192.168.240.112:5555 && adb devices   # インスタンス内から直接
 ```
