@@ -115,6 +115,8 @@ module "waydroid_ec2" {
   }
 
   instance_type = "c7g.2xlarge"
+  # 使うときだけ true にして merge する
+  running = false
 }
 
 output "waydroid_ec2" {
