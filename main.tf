@@ -113,6 +113,8 @@ module "waydroid_ec2" {
   providers = {
     aws = aws.waydroid_ec2
   }
+
+  instance_type = "c7g.2xlarge"
 }
 
 output "waydroid_ec2" {
