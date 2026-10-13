@@ -37,6 +37,9 @@ if not c.has_section("properties"):
     c.add_section("properties")
 c["properties"]["ro.hardware.gralloc"] = "default"
 c["properties"]["ro.hardware.egl"] = "swiftshader"
+# Waydroid のイメージは Codec2 を無効（0）にしていて、残る OMX のソフトウェアエンコーダは
+# Surface 入力で落ちる（scrcpy の映像が出ない）。Codec2 を有効にして c2.android.* を使わせる
+c["properties"]["debug.stagefright.ccodec"] = "4"
 with open(p, "w") as f:
     c.write(f)
 PY

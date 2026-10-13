@@ -3,7 +3,7 @@ output "instance_id" {
 }
 
 output "connect" {
-  value = "adb connect waydroid:5555 && scrcpy -s waydroid:5555 --video-bit-rate 4M --max-size 1280"
+  value = "adb connect waydroid:5555 && scrcpy -s waydroid:5555 --no-audio --video-encoder=c2.android.avc.encoder --max-size 1280"
 }
 
 output "manual_start" {
