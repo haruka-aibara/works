@@ -36,9 +36,14 @@ resource "aws_internet_gateway" "waydroid" {
 resource "aws_subnet" "waydroid" {
   vpc_id     = aws_vpc.waydroid.id
   cidr_block = "10.40.0.0/24"
-  # instance_type を置ける AZ から選ぶ。sort して並びが変わってもサブネットが作り直されないようにする
+  # instance_type を置ける AZ から選ぶ。あとで instance_type を変えて候補が変わっても
+  # サブネット（とインスタンス・EBS）が作り直されないよう、作ったあとは AZ を見ない
   availability_zone_id = sort(data.aws_ec2_instance_type_offerings.az.locations)[0]
   tags                 = { Name = "waydroid" }
+
+  lifecycle {
+    ignore_changes = [availability_zone_id]
+  }
 }
 
 resource "aws_route_table" "waydroid" {
