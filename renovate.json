@@ -3,8 +3,11 @@
   "extends": [
     "config:best-practices",
     "customManagers:dockerfileVersions",
-    "customManagers:githubActionsVersions"
+    "customManagers:githubActionsVersions",
+    "group:all"
   ],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["* 0-8 * * *"],
   "rebaseWhen": "behind-base-branch",
   "terraform": {
     "enabled": true
@@ -28,12 +31,10 @@
   "packageRules": [
     {
       "matchManagers": ["terraform"],
-      "groupName": "Terraform Provider updates",
       "labels": ["terraform", "infrastructure"]
     },
     {
       "matchPackageNames": ["/^hashicorp/aws$/"],
-      "groupName": "AWS Provider updates",
       "labels": ["terraform", "aws", "provider"]
     },
     {
@@ -43,14 +44,8 @@
       "enabled": false
     },
     {
-      "description": "Claude Code はほぼ毎日リリースされるので、週 1 回にする（公開から 3 日待つのは best-practices の npm 向け設定で入る）",
-      "matchPackageNames": ["@anthropic-ai/claude-code"],
-      "schedule": ["* 0-8 * * 1"]
-    },
-    {
-      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものを自動マージする。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出るが、automerge はここの設定が効く",
+      "description": "hands-on は動かさない学習用サンプルなので、公開から 3 日経ったものを自動マージ対象にする。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出るが、automerge はここの設定が効く",
       "matchFileNames": ["hands-on/**"],
-      "groupName": "hands-on",
       "minimumReleaseAge": "3 days",
       "automerge": true
     },
