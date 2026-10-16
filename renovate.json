@@ -55,9 +55,9 @@
       "minimumReleaseAge": "3 days"
     },
     {
-      "description": "lock file maintenance は公開日時を持たないので、minimumReleaseAge があると stability-days が永遠に pending になる。Renovate 公式の security:minimumReleaseAge* preset と同じく待ち期間を外す",
+      "description": "lock file maintenance と digest 更新は公開日時を持たないので、minimumReleaseAge があると stability-days が永遠に pending になり、その間ブランチも rebase されない。Renovate 公式の security:minimumReleaseAge* preset と同じく待ち期間を外す。ルートのワークフローの digest 更新は人が確認するので対象外",
       "matchFileNames": ["hands-on/**"],
-      "matchUpdateTypes": ["lockFileMaintenance"],
+      "matchUpdateTypes": ["lockFileMaintenance", "digest", "pinDigest"],
       "minimumReleaseAge": null
     },
     {
