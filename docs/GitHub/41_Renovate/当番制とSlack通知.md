@@ -23,6 +23,10 @@
 
 CODEOWNERS にはチーム（`@org/team`）ではなく個人を書く。
 Renovate はチームをアサインできない。
+`haruka-aibara` は Organization なので書いても誰にもアサインされない（個人アカウントは `haruka-aibara-dev`）。
+
+アサインに失敗しても、Renovate はデバッグログに残すだけで PR には何も出さない。
+Assignees が空なら、CODEOWNERS に書いた名前が個人アカウントか、リポジトリの write 権限があるかを確かめる。
 
 ## Slack のチャンネルに Renovate の PR を流す
 
