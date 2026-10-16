@@ -10,3 +10,4 @@
 - [bedrock-slack-ai-chatbot の state 統合](bedrock-slack-ai-chatbot-state-merge.md) — 旧ワークスペースの state を works に寄せたときの記録
 - [Claude の定期調整](claude-tuning.md) — 新モデルが出たとき、指示ファイル・スキル・Slack ボットのモデルを見直すとき
 - lint CI（yamllint / actionlint / zizmor / markdownlint）— なぜ入れたか、どこまで見るかは [ADR-0002](../decisions/0002-lint-ci-for-docs-and-config.md)
+- [Renovate の当番制と Slack 通知](../GitHub/41_Renovate/当番制とSlack通知.md) — 当番を足す・減らすとき、Slack のチャンネルに Renovate の PR を流すとき

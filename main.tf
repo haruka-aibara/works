@@ -108,20 +108,24 @@ module "bedrock_slack_ai_chatbot_infra" {
 # scrcpy over Tailscale. Start/stop the instance by hand (module outputs).
 # The Tailscale auth key is put into SSM by hand so it never lands in state;
 # see modules/waydroid-ec2/README.md.
-module "waydroid_ec2" {
-  source = "./modules/waydroid-ec2"
-  providers = {
-    aws = aws.waydroid_ec2
-  }
-
-  instance_type = "c7g.2xlarge"
-  # 使うときだけ true にして merge する
-  running = false
-}
-
-output "waydroid_ec2" {
-  value = module.waydroid_ec2
-}
+# Not needed right now, so the call is commented out (its AWS resources,
+# EBS included, are destroyed on apply). To enable it, uncomment this block
+# and the output below, plus provider "aws" { alias = "waydroid_ec2" } in
+# providers.tf and local.waydroid_ec2_default_tags in locals.tf.
+# module "waydroid_ec2" {
+#   source = "./modules/waydroid-ec2"
+#   providers = {
+#     aws = aws.waydroid_ec2
+#   }
+#
+#   instance_type = "c7g.2xlarge"
+#   # 使うときだけ true にして merge する
+#   running = false
+# }
+#
+# output "waydroid_ec2" {
+#   value = module.waydroid_ec2
+# }
 
 # =========================================
 # My AWS Learning Repositories

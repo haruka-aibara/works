@@ -1,0 +1,17 @@
+# Renovate の当番の母集団。
+# renovate.json の assigneesFromCodeOwners と assigneesSampleSize: 1 で、
+# ここに並べたメンバーから Renovate の PR ごとにランダムで 1 人がアサインされる。
+#
+# レビュー必須を意図したファイルではない。
+# ブランチ保護（modules/repository の github_branch_protection）や
+# ルールセットで「Require review from Code Owners」をオンにしないこと。
+# オンにすると、ここのメンバーの承認がないと全 PR がマージできなくなる。
+#
+# - Renovate はチームをアサインできないので、@org/team ではなく個人を並べる。
+#   haruka-aibara は Organization なので書かない（個人は haruka-aibara-dev）
+# - 当番を増やす・減らすときは下の行のユーザーを足し引きする
+# - CODEOWNERS があると GitHub は PR を開いたときにここの全員にレビューを依頼する。
+#   通知が多ければ各自の GitHub の通知設定で調整する
+# - 運用手順は docs/GitHub/41_Renovate/当番制とSlack通知.md
+
+* @haruka-aibara-dev

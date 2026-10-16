@@ -26,9 +26,10 @@ locals {
   })
 
   # waydroid-ec2 モジュール専用の provider "aws" に入れるタグ。
-  waydroid_ec2_default_tags = merge(local.aws_default_tags, {
-    Project = "waydroid-ec2"
-  })
+  # モジュールの呼び出しを止めているのでコメントアウト中。provider と一緒に戻す。
+  # waydroid_ec2_default_tags = merge(local.aws_default_tags, {
+  #   Project = "waydroid-ec2"
+  # })
 
   # works の main へのマージに必須にするチェック。
   # ruff・pytest は paths で絞っていて走らない PR があるので入れない（入れると永久に待つ）。
