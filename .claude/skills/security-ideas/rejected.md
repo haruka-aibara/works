@@ -68,3 +68,11 @@
 - 組み合わせ（監視の監視）：毎朝サンプルの finding を本番の経路に流し、届かなければ外部の死活監視で鳴らす
 - 後片付け：Lambda が自動で作るロググループは管理外で無期限に残るので、先に Terraform で作る
 - 仕組みの裏側：IAM ロールを replace すると、リソースポリシーの ARN が古い ID のままで権限が戻らない
+
+## 2026-10-16
+
+- 組み合わせ（コスト × 持ち出しの検知）：Cost Categories で外向き転送の使用タイプだけをまとめ、Cost Anomaly Detection の monitor を張る
+- 組み合わせ（IaC × 改ざん防止）：`ignore_changes` で外した属性（Lambda のコードなど）は drift 検知の死角なので、code signing などで別に守る
+- 組み合わせ（ID 連携 × 失効）：SCIM の無効化イベントで、SCP に `aws:userid` と `aws:TokenIssueTime` の Deny を足し、残ったセッションを切る
+- 生成 AI × 攻撃の手口：LLM の一次判定に、`userAgent` やタグからプロンプトインジェクションされる
+- 仕組みの裏側：S3 ライフサイクルの期限切れ削除は CloudTrail に残らず、`PutBucketLifecycle` 1 回でデータや証跡を消せる
