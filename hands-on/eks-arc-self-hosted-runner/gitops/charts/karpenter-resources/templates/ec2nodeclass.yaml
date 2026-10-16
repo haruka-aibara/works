@@ -1,0 +1,23 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: github-runner
+spec:
+  amiSelectorTerms:
+    - alias: al2023@latest
+  role: {{ .Values.nodeRoleName }}
+  # infra の Terraform が private subnet とノードの SG に付けたタグで探す。
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: {{ .Values.clusterName }}
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: {{ .Values.clusterName }}
+  # docker pull やビルドでルートボリュームを使うので、既定の 20GiB より増やす。
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 50Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true

@@ -9,3 +9,7 @@ rules:
     check-keys: false
   comments:
     min-spaces-from-content: 1
+
+# Helm chart のテンプレートは描画前だと YAML として読めないので見ない。
+ignore: |
+  hands-on/eks-arc-self-hosted-runner/gitops/**/templates/
