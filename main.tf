@@ -110,7 +110,8 @@ module "bedrock_slack_ai_chatbot_infra" {
 # see modules/waydroid-ec2/README.md.
 # Not needed right now, so the call is commented out (its AWS resources,
 # EBS included, are destroyed on apply). To enable it, uncomment this block
-# and the output below.
+# and the output below, plus provider "aws" { alias = "waydroid_ec2" } in
+# providers.tf and local.waydroid_ec2_default_tags in locals.tf.
 # module "waydroid_ec2" {
 #   source = "./modules/waydroid-ec2"
 #   providers = {
