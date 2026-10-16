@@ -41,6 +41,10 @@ provider "aws" {
 }
 
 # Same as above, with Project = "waydroid-ec2".
+# module "waydroid_ec2" in main.tf is commented out, but its resources in state
+# still name this provider, so it must stay until an apply destroys them.
+# Comment it out (and local.waydroid_ec2_default_tags) after that apply.
+# tflint-ignore: terraform_unused_declarations
 provider "aws" {
   alias  = "waydroid_ec2"
   region = "ap-northeast-1"

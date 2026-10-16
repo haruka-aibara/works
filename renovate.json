@@ -6,6 +6,10 @@
     "customManagers:githubActionsVersions"
   ],
   "rebaseWhen": "behind-base-branch",
+  "automerge": false,
+  "labels": ["renovate"],
+  "assigneesFromCodeOwners": true,
+  "assigneesSampleSize": 1,
   "terraform": {
     "enabled": true
   },
@@ -27,14 +31,11 @@
   ],
   "packageRules": [
     {
-      "matchManagers": ["terraform"],
-      "groupName": "Terraform Provider updates",
-      "labels": ["terraform", "infrastructure"]
-    },
-    {
-      "matchPackageNames": ["/^hashicorp/aws$/"],
-      "groupName": "AWS Provider updates",
-      "labels": ["terraform", "aws", "provider"]
+      "description": "Terraform 本体・Provider・tflint プラグインは、当番がレビューする PR をできるだけ減らすため 1 本にまとめる。メジャーも分けない。labels は上書きになるので addLabels で足す",
+      "matchManagers": ["terraform", "terraform-version", "tflint-plugin"],
+      "groupName": "Terraform",
+      "separateMajorMinor": false,
+      "addLabels": ["terraform"]
     },
     {
       "description": "ARG BASE_IMAGE は tag 無しなので dockerfile マネージャーだと latest（非 LTS）に寄せてしまう。customManagers 側で扱う",
@@ -48,11 +49,10 @@
       "schedule": ["* 0-8 * * 1"]
     },
     {
-      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものを自動マージする。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出るが、automerge はここの設定が効く",
+      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出る",
       "matchFileNames": ["hands-on/**"],
       "groupName": "hands-on",
-      "minimumReleaseAge": "3 days",
-      "automerge": true
+      "minimumReleaseAge": "3 days"
     },
     {
       "description": "lock file maintenance は公開日時を持たないので、minimumReleaseAge があると stability-days が永遠に pending になる。Renovate 公式の security:minimumReleaseAge* preset と同じく待ち期間を外す",
@@ -61,19 +61,17 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "ワークフローで使う action と lint ツールのバージョンは、minor と patch だけ公開から 3 日経ってから自動マージする。必須チェックが全部ワークフローに対して走るので、壊れたら赤くなって止まる。Terraform は main が auto apply なので対象にしない。リポジトリの Allow auto-merge は無効なので、GitHub の自動マージではなく次の Renovate の実行時に Renovate がマージする。方針は docs/GitHub/41_Renovate/オートマージ.md",
+      "description": "ワークフローで使う action と lint ツールのバージョンは、minor と patch だけ公開から 3 日経ってから出す。乗っ取られた直後のバージョンを当番がそのままマージする事故を減らすため。方針は docs/GitHub/41_Renovate/オートマージ.md",
       "matchFileNames": [".github/workflows/**"],
       "matchUpdateTypes": ["minor", "patch"],
-      "minimumReleaseAge": "3 days",
-      "automerge": true
+      "minimumReleaseAge": "3 days"
     },
     {
-      "description": "バージョンが同じままコミットだけ変わる digest 更新は、タグの付け替え（2026 年 3 月の trivy-action の侵害と同じ形）でも出る。日付は元のタグのままなので minimumReleaseAge も効かない。hands-on の中のワークフローは動かないので対象外。自動マージせず、PR に確認点を書く",
+      "description": "バージョンが同じままコミットだけ変わる digest 更新は、タグの付け替え（2026 年 3 月の trivy-action の侵害と同じ形）でも出る。日付は元のタグのままなので minimumReleaseAge も効かない。hands-on の中のワークフローは動かないので対象外。PR に確認点を書く",
       "matchFileNames": [".github/workflows/**"],
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["digest"],
-      "automerge": false,
-      "labels": ["security"],
+      "addLabels": ["security"],
       "prBodyNotes": [
         "⚠️ バージョンが同じままコミットだけ変わっています。メンテナがタグを付け直したのか、乗っ取られたタグなのか（trivy-action の侵害と同じ形）を、リリースノートやアドバイザリで確かめてからマージしてください。"
       ]
