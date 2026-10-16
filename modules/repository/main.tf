@@ -84,6 +84,8 @@ resource "github_branch_protection" "this" {
     }
   }
 
+  # require_code_owner_reviews is intentionally left off: .github/CODEOWNERS
+  # only lists the Renovate on-call pool, not required reviewers.
   dynamic "required_pull_request_reviews" {
     for_each = var.require_pull_request_reviews ? [1] : []
     content {
