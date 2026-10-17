@@ -3,7 +3,6 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
 
 # zip の出力先は source_dir の外（.build/）に置く。中に置くと前回の zip が次の zip に入り込む。
 data "archive_file" "lambda" {
@@ -32,10 +31,6 @@ resource "aws_lambda_function" "this" {
     system_log_level      = "WARN"
   }
 
-  tracing_config {
-    mode = "Active"
-  }
-
   # ロールにポリシーが付く前に関数ができると、最初の呼び出しが権限不足で落ちる。
   depends_on = [aws_iam_role_policy.this]
 }
@@ -43,62 +38,6 @@ resource "aws_lambda_function" "this" {
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/aws/lambda/${local.function_name}"
   retention_in_days = 30
-  kms_key_id        = aws_kms_key.logs.arn
-}
-
-# =========================================
-# KMS（ロググループの暗号化）
-# =========================================
-
-resource "aws_kms_key" "logs" {
-  description             = "${local.function_name} log group"
-  enable_key_rotation     = true
-  deletion_window_in_days = 7
-  policy                  = data.aws_iam_policy_document.kms_logs.json
-}
-
-resource "aws_kms_alias" "logs" {
-  name          = "alias/${local.function_name}-logs"
-  target_key_id = aws_kms_key.logs.key_id
-}
-
-data "aws_iam_policy_document" "kms_logs" {
-  statement {
-    sid       = "AccountAdmin"
-    effect    = "Allow"
-    actions   = ["kms:*"]
-    resources = ["*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-  }
-
-  # CloudWatch Logs が使えるのは、このロググループの暗号化に限る。
-  statement {
-    sid    = "CloudWatchLogs"
-    effect = "Allow"
-    actions = [
-      "kms:Encrypt*",
-      "kms:Decrypt*",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:Describe*",
-    ]
-    resources = ["*"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["logs.${data.aws_region.current.region}.amazonaws.com"]
-    }
-
-    condition {
-      test     = "ArnEquals"
-      variable = "kms:EncryptionContext:aws:logs:arn"
-      values   = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.function_name}"]
-    }
-  }
 }
 
 # =========================================
@@ -150,17 +89,6 @@ data "aws_iam_policy_document" "this" {
       "logs:PutLogEvents",
     ]
     resources = ["${aws_cloudwatch_log_group.this.arn}:*"]
-  }
-
-  # X-Ray もリソースレベルの権限がない。
-  statement {
-    sid    = "XRay"
-    effect = "Allow"
-    actions = [
-      "xray:PutTraceSegments",
-      "xray:PutTelemetryRecords",
-    ]
-    resources = ["*"]
   }
 }
 

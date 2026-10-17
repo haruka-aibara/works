@@ -142,7 +142,7 @@ module "bedrock_slack_ai_chatbot_infra" {
 #   source = "./modules/aws-config-custodian"
 # }
 
-# Amazon Translate を呼ぶだけの Lambda（JSON ログ・X-Ray・KMS 暗号化つき）。試し終わったらコメントアウトする。
+# Amazon Translate を呼ぶだけの Lambda（JSON ログつき）。試し終わったらコメントアウトする。
 module "amazon_translate_lambda" {
   source = "./modules/amazon-translate-lambda"
 }
