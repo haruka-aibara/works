@@ -142,10 +142,12 @@ module "bedrock_slack_ai_chatbot_infra" {
 #   source = "./modules/aws-config-custodian"
 # }
 
-# Amazon Translate を呼ぶだけの最小の Lambda。試し終わったらコメントアウトする。
-module "amazon_translate_lambda" {
-  source = "./modules/amazon-translate-lambda"
-}
+# Amazon Translate を呼ぶだけの最小の Lambda。
+# Tried once; not needed right now, so the call is commented out. To enable it,
+# uncomment this block.
+# module "amazon_translate_lambda" {
+#   source = "./modules/amazon-translate-lambda"
+# }
 
 # IAM Access Analyzer Policy Generate — infrastructure.
 # Absorbed from the standalone iam-access-analyzer-policy-generate repository
