@@ -15,9 +15,7 @@ AWS の回答は「範囲とストリームを絞れ」という回避策だけ�
 ## どうするか
 
 - 読み出し API で取れないときは、Logs Insights で同じ範囲を検索してみる
-- 届いているかの監視には、読み出し API を使わない
-  - ロググループ単位：`AWS/Logs` の `IncomingLogEvents` にアラームを張り、`treat_missing_data = breaching` にする
-  - ストリーム単位：組み込みのメトリクスはないので、Lambda から Logs Insights で `stats count(*) by @logStream` を流し、届くべき一覧と突き合わせる
+- 届いているかの監視の組み立ては [ideas](../ideas/2026-10-17-ログが届いているかはFilterとLogs_Insightsのどちらかで取れればよしとする.md) に書いた
 
 Get / Filter で取れないのがバグなのか結果整合性なのか、Logs Insights なら必ず取れるのかは未確認。
 
