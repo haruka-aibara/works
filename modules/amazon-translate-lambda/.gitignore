@@ -1,0 +1,2 @@
+# archive_file が plan/apply のたびに作る Lambda の zip
+.build/
