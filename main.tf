@@ -246,7 +246,7 @@ resource "tfe_workspace" "works" {
   file_triggers_enabled         = false
   queue_all_runs                = false
   structured_run_output_enabled = false
-  terraform_version             = "~> 1.16.0"
+  terraform_version             = "~> 1.17.0"
 
   vcs_repo {
     identifier         = "${local.github_owner}/works"
