@@ -1,4 +1,4 @@
-FROM node:24@sha256:14078204b6bb268c107ceff6d3c43f45a888105e5c2b18b14c32b3409d93a1b0 AS base
+FROM node:24@sha256:7b559cf7f77d837192392499a850abb1a3d1f49fbc2bd0692d54b212c9e38f6d AS base
 CMD [ "bash" ]
 
 # Build
@@ -10,7 +10,7 @@ RUN npm ci && npm run test && npm run build
 
 # Hosting in nginx (non-root). Port 80 needs net.ipv4.ip_unprivileged_port_start=0,
 # which Docker sets by default and .aws/task-definition.json sets on ECS.
-FROM nginxinc/nginx-unprivileged:latest@sha256:94193d5c4c5df716f412bb08eb97956d98fe6b59886f0bc57d6d3a3402a88a02 AS production
+FROM nginxinc/nginx-unprivileged:latest@sha256:09b0d3eda2aa592d2487f284519419015cab010d7df16cd0fe224b585fc60eb6 AS production
 COPY --from=test-and-build /workspace/build /var/www
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 USER 101
