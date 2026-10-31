@@ -63,7 +63,7 @@ WORKDIR /home/vscode
 # Checksums match the claude binary in the official npm platform packages (@anthropic-ai/claude-code-linux-*).
 # Renovate bumps the version; .github/workflows/devcontainer-checksums.yaml then rewrites the SHA256s.
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_VERSION=2.1.296
+ARG CLAUDE_VERSION=2.1.312
 ARG CLAUDE_SHA256_AMD64=24972e3bc859fab2b46ed4c1e51f7d6130f06d3bd550811a114640de3370d0de
 ARG CLAUDE_SHA256_ARM64=f1f6e96e0d8342b9dbf41d7e88255397a6a52ce3d8736ad6a4c6b59c9b62fefa
 ARG TARGETARCH
