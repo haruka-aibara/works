@@ -12,6 +12,16 @@ variable "bedrock_slack_ai_chatbot_slack_signing_secret" {
   ephemeral   = true
 }
 
+# Set in the UI; see tfe_variable.hcp_vault_tfe_bootstrap_team_token in main.tf.
+# The default keeps speculative plans working before that variable exists.
+variable "hcp_vault_tfe_bootstrap_team_token" {
+  description = "Team token of the vault-root team for module hcp_vault_tfe_secrets"
+  type        = string
+  sensitive   = true
+  ephemeral   = true
+  default     = null
+}
+
 # The short-cycle verification in docs/runbooks/tfe-token-rotation.md sets these
 # as workspace Terraform variables, so they stay declared at the root. Left
 # unset (null), module "tfe_team_token_rotation" falls back to its own defaults.

@@ -164,18 +164,27 @@ module "bedrock_slack_ai_chatbot_infra" {
 
 # HCP Vault Dedicated — infrastructure.
 # Absorbed from the standalone deploy-hcp-vault-dedicated-with-terraform
-# repository with its history (git log -- modules/hcp-vault). Not needed right
-# now, so the call is commented out. To enable it, uncomment this block and the
-# aws.us-west-2 / hcp providers in providers.tf, add hashicorp/hcp to
-# required_providers in terraform.tf, then set HCP_CLIENT_ID /
-# HCP_CLIENT_SECRET on the works workspace.
-# module "hcp_vault" {
-#   source = "./modules/hcp-vault"
-#
-#   providers = {
-#     aws = aws.us-west-2
-#   }
-# }
+# repository with its history (git log -- modules/hcp-vault). Reached only
+# through its public endpoint, so the AWS VPC peering is off. HCP_CLIENT_ID /
+# HCP_CLIENT_SECRET are set on the works workspace in the UI.
+module "hcp_vault" {
+  source = "./modules/hcp-vault"
+
+  vpc_peering = false
+}
+
+# HCP Terraform secrets engine on that cluster, whose root token is a team token
+# that Vault rotates itself. Flip configure_secrets_engine to true only after
+# the bootstrap token is set in the UI -- see
+# docs/runbooks/hcp-vault-tfe-secrets.md.
+module "hcp_vault_tfe_secrets" {
+  source = "./modules/hcp-vault-tfe-secrets"
+
+  organization = local.tfe_organization
+
+  configure_secrets_engine = false
+  bootstrap_team_token     = var.hcp_vault_tfe_bootstrap_team_token
+}
 
 # =========================================
 # My Google Cloud Learning Repositories
@@ -351,6 +360,22 @@ resource "tfe_variable" "bedrock_slack_ai_chatbot_slack_signing_secret" {
   lifecycle {
     ignore_changes = [value]
   }
+}
+
+# =========================================
+# hcp_vault_tfe_secrets module bootstrap token
+# =========================================
+# Same reasoning as the GitHub App variables above. The team token behind it is
+# rotated away by Vault right after it is handed over, so the value left here
+# afterwards is dead and harmless.
+
+resource "tfe_variable" "hcp_vault_tfe_bootstrap_team_token" {
+  workspace_id = tfe_workspace.works.id
+  key          = "hcp_vault_tfe_bootstrap_team_token"
+  value        = "set-in-ui"
+  category     = "terraform"
+  sensitive    = true
+  description  = "Team token of the vault-root team, handed to Vault once. Set this value in the UI."
 }
 
 # =========================================
