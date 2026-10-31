@@ -39,3 +39,9 @@ variable "tier" {
   type        = string
   default     = "dev"
 }
+
+variable "vpc_peering" {
+  description = "Whether to create the peer VPC on AWS and peer it with the HVN. Clients that reach the cluster only through its public endpoint don't need it."
+  type        = bool
+  default     = true
+}
