@@ -21,7 +21,7 @@ jobs:
       PORT: 8080
     services:
       mongodb:
-        image: mongo:latest@sha256:f90507905ce6e52e4a63d0ff8964fc254fa4d37ccbe56c56f4bc0186eb02edea
+        image: mongo:latest@sha256:452bdaf2127b8ff851e31410a267809b9829eded219979f2210e7c7efb85a058
         ports:
           - 27017:27017
         env:
