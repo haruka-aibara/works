@@ -9,7 +9,7 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: 24
+          node-version: 26
       - name: install eslint
         run: npm install eslint --save-dev
       - name: lint
@@ -23,7 +23,7 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: 24
+          node-version: 26
       - name: install eslint
         run: npm install eslint --save-dev
       - name: test
@@ -37,7 +37,7 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: 24
+          node-version: 26
       - name: install eslint
         run: npm install eslint --save-dev
       - name: build
