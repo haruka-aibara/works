@@ -17,7 +17,7 @@ permissions:
 jobs:
   web-test-build-image:
     name: Web Container - Test and Build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     defaults:
       run:
@@ -51,7 +51,7 @@ jobs:
 
   api-test-build-image:
     name: API Container - Test and Build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     defaults:
       run:
@@ -85,7 +85,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [web-test-build-image, api-test-build-image]
 
     steps:
