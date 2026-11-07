@@ -308,6 +308,30 @@ resource "tfe_variable" "github_app_pem_file" {
 }
 
 # =========================================
+# Minimal refresh (works)
+# =========================================
+# Terraform 1.17's -minimal-refresh refreshes only the resources the first plan
+# shows changing, so a plan stops reading every repository and AWS resource.
+# HCP Terraform offers it per run only (CLI flag or the UI run type), with no
+# workspace setting, so it is passed through TF_CLI_ARGS_plan instead.
+#
+# The HCP Terraform docs say VCS-triggered runs always use a full refresh, so
+# this may change nothing for merges to main. Health assessments always do a
+# full refresh regardless, and that is where drift is caught.
+#
+# Since this applies to every plan: a "Refresh state" run fails, because
+# -minimal-refresh cannot be combined with -refresh-only, and a destroy plan
+# does not refresh managed resources at all. Delete this variable for either.
+
+resource "tfe_variable" "tf_cli_args_plan" {
+  workspace_id = tfe_workspace.works.id
+  key          = "TF_CLI_ARGS_plan"
+  value        = "-minimal-refresh"
+  category     = "env"
+  description  = "Run every plan with -minimal-refresh. See main.tf."
+}
+
+# =========================================
 # bedrock-slack-ai-chatbot module credentials
 # =========================================
 # Same reasoning as the GitHub App variables above: HCP Terraform never
