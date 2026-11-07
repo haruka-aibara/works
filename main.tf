@@ -246,7 +246,7 @@ resource "tfe_workspace" "works" {
   file_triggers_enabled         = false
   queue_all_runs                = false
   structured_run_output_enabled = false
-  terraform_version             = "~> 1.16.0"
+  terraform_version             = "~> 1.17.0"
 
   vcs_repo {
     identifier         = "${local.github_owner}/works"
@@ -305,6 +305,47 @@ resource "tfe_variable" "github_app_pem_file" {
   category     = "env"
   sensitive    = true
   description  = "GitHub App private key (PEM). Set this value in the UI."
+}
+
+# =========================================
+# Minimal refresh (works)
+# =========================================
+# Sources (quoted lines below are verbatim from these):
+#   [docs] https://developer.hashicorp.com/terraform/cloud-docs/workspaces/run/modes-and-options
+#          (section "Minimal refresh", added by hashicorp/web-unified-docs#3757)
+#   [cli]  https://developer.hashicorp.com/terraform/cli/config/environment-variables
+#   [pr]   https://github.com/hashicorp/terraform/pull/39310
+#
+# What it does, per [docs]: Terraform plans from the existing state, then
+# refreshes and re-plans only the resources that plan shows changing. The
+# trade-off it names: it "doesn't let Terraform check unchanged resources for
+# drift". [docs] also: "Minimal refresh requires a workspace using at least
+# Terraform CLI v1.17.0."
+#
+# [docs] offers it per run only (the -minimal-refresh flag, or "Minimal
+# refresh" as the run type in the UI) and names no workspace setting, so it is
+# passed here through TF_CLI_ARGS_plan, the variable [cli] describes for adding
+# arguments to `terraform plan`. That combination is our own choice: no source
+# above documents it for minimal refresh.
+#
+# Limits, per [docs]:
+#   "VCS-triggered runs always use a full refresh." -- so this may change
+#     nothing for merges to main (our inference; verify on a run's details).
+#   Health assessments "also always perform a full refresh and do not reflect
+#     minimal refresh runs." -- drift is still caught there.
+#   "Terraform does not refresh managed resources during destroy operations."
+#   "You can't combine -minimal-refresh and -refresh=false"
+# And per [pr], -minimal-refresh with -refresh-only is rejected when the
+# arguments are parsed, so a "Refresh state" run would fail.
+#
+# Delete this variable before a destroy or a "Refresh state" run.
+
+resource "tfe_variable" "tf_cli_args_plan" {
+  workspace_id = tfe_workspace.works.id
+  key          = "TF_CLI_ARGS_plan"
+  value        = "-minimal-refresh"
+  category     = "env"
+  description  = "Run every plan with -minimal-refresh. See main.tf."
 }
 
 # =========================================
