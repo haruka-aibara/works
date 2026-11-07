@@ -5,6 +5,9 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
+  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、packageRules で 1 本にまとめる。脆弱性修正はスケジュールを無視してすぐ出る",
+  "timezone": "Asia/Tokyo",
+  "schedule": ["* 0-8 * * *"],
   "rebaseWhen": "behind-base-branch",
   "automerge": false,
   "labels": ["renovate"],
@@ -31,6 +34,12 @@
   ],
   "packageRules": [
     {
+      "description": "PR ごとに HCP Terraform の speculative plan が走り、strict な branch protection で他 PR の rebase のたびにも走るので、workspace の run が詰まる。PR の数そのものを減らすため、全部 1 本にまとめる。メジャーは separateMajorMinor（既定）で別 PR になる。後ろのルールの groupName が優先されるので、Terraform だけは別 PR",
+      "matchPackageNames": ["*"],
+      "groupName": "all dependencies",
+      "groupSlug": "all"
+    },
+    {
       "description": "Terraform 本体・Provider・tflint プラグインは、当番がレビューする PR をできるだけ減らすため 1 本にまとめる。メジャーも分けない。labels は上書きになるので addLabels で足す",
       "matchManagers": ["terraform", "terraform-version", "tflint-plugin"],
       "groupName": "Terraform",
@@ -44,14 +53,8 @@
       "enabled": false
     },
     {
-      "description": "Claude Code はほぼ毎日リリースされるので、週 1 回にする（公開から 3 日待つのは best-practices の npm 向け設定で入る）",
-      "matchPackageNames": ["@anthropic-ai/claude-code"],
-      "schedule": ["* 0-8 * * 1"]
-    },
-    {
-      "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出る",
+      "description": "hands-on は動かさない学習用サンプルなので、公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出る",
       "matchFileNames": ["hands-on/**"],
-      "groupName": "hands-on",
       "minimumReleaseAge": "3 days"
     },
     {
