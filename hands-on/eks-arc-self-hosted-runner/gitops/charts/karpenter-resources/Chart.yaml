@@ -1,0 +1,4 @@
+apiVersion: v2
+name: karpenter-resources
+description: runner 用ノードの NodePool と EC2NodeClass
+version: 0.1.0

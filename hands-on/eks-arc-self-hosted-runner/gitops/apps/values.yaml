@@ -1,0 +1,21 @@
+# 空の値は、bootstrap の Terraform が root Application の valuesObject で渡す。
+gitops:
+  repoURL: ""
+  targetRevision: ""
+region: ""
+clusterName: ""
+karpenter:
+  interruptionQueue: ""
+  nodeRoleName: ""
+github:
+  configUrl: ""
+  appSecretName: ""
+maxRunners: 3
+
+chartPath: hands-on/eks-arc-self-hosted-runner/gitops/charts
+
+versions:
+  karpenter: 1.14.1
+  externalSecrets: 2.11.0
+  arc: 0.14.2
+  runnerImage: 2.337.0

@@ -1,0 +1,43 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: github-runner
+spec:
+  template:
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: github-runner
+      # runner 以外の Pod がこのノードに載らないようにする。
+      taints:
+        - key: github-runner
+          value: "true"
+          effect: NoSchedule
+      requirements:
+        # GitHub-hosted runner（ubuntu-latest）と同じ x86_64 に揃える。
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        # Spot を優先し、在庫がなければ On-Demand にフォールバックする。
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot", "on-demand"]
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m"]
+        - key: karpenter.k8s.aws/instance-cpu
+          operator: In
+          values: ["2", "4", "8"]
+        - key: karpenter.k8s.aws/instance-generation
+          operator: Gt
+          values: ["5"]
+      expireAfter: 24h
+  # runner が暴走しても、これ以上のノードは立てない。
+  limits:
+    cpu: "16"
+  disruption:
+    # 実行中のジョブを止めないよう、空いたノードだけを消す。
+    # 続けてジョブが来たときにノードを使い回せるよう、空いてから少し待つ。
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 5m
