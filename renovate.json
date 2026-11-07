@@ -5,6 +5,9 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
+  "description": "PR が多すぎて当番が追いつかないので、ブランチ作成・PR 作成は週 1 回（月曜 0〜8 時 JST）にまとめる。脆弱性修正はスケジュールを無視してすぐ出る",
+  "timezone": "Asia/Tokyo",
+  "schedule": ["* 0-8 * * 1"],
   "rebaseWhen": "behind-base-branch",
   "automerge": false,
   "labels": ["renovate"],
@@ -42,11 +45,6 @@
       "matchManagers": ["dockerfile"],
       "matchDepNames": ["mcr.microsoft.com/devcontainers/base"],
       "enabled": false
-    },
-    {
-      "description": "Claude Code はほぼ毎日リリースされるので、週 1 回にする（公開から 3 日待つのは best-practices の npm 向け設定で入る）",
-      "matchPackageNames": ["@anthropic-ai/claude-code"],
-      "schedule": ["* 0-8 * * 1"]
     },
     {
       "description": "hands-on は動かさない学習用サンプルなので、1 本にまとめて公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出る",
