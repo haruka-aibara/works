@@ -2,13 +2,13 @@
 
 WSL には最小限の apt パッケージだけを入れる。
 開発ツールはリポジトリごとの `mise.toml` / `mise.lock` で揃える。
-Claude Code は sandbox の中で動かし、許可したドメインにだけ通信させる。
+Claude Code は sandbox の中で動かし、Bash は許可したドメインにだけ通信させ、認証情報は読ませない。
 
 | 層 | 入るもの | 更新のしかた |
 |---|---|---|
-| WSL（apt） | git・curl・bubblewrap・socat・mise 本体 | unattended-upgrades が自動で当てる |
+| WSL（apt） | git・curl・jq・bubblewrap・socat・mise 本体 | unattended-upgrades が自動で当てる |
 | mise（リポジトリごと） | terraform・aws-cli・gh・tflint・trivy など | `mise.toml` / `mise.lock` を PR で更新する |
-| Claude Code | sandbox の中で動く | sandbox の外（ホーム配下）には書き込めない。ツールを足すときも `mise.toml` の diff として出てくる |
+| Claude Code | sandbox の中で動く | 作業ディレクトリの外には書き込めず、認証情報は読めない。ツールを足すときも `mise.toml` の diff として出てくる |
 
 ## 1. Windows 側：WSL2 の Ubuntu を入れる
 
@@ -30,10 +30,10 @@ sandbox は WSL1 では動かない（`Sandboxing requires WSL2` と出る）。
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl ca-certificates bubblewrap socat
+sudo apt install -y git curl ca-certificates jq bubblewrap socat
 ```
 
-bubblewrap と socat は Claude Code の sandbox が使う。
+bubblewrap と socat は Claude Code の sandbox が、jq は Claude Code の hook が使う。
 ほかの開発ツールは apt では入れない。
 
 ### systemd と自動更新
@@ -189,13 +189,35 @@ claude --version
 ネイティブ版は自動で更新される。
 sandbox の設定まわりは版によって挙動が変わるので、古い版のまま使わない。
 
-## 6. Claude Code の sandbox 設定
+## 6. Claude Code の設定
 
-`~/.claude/settings.json`（ユーザー設定）に書く。
+### 考え方
+
+プロンプトインジェクションは防げない前提で組む。
+注入で実害が出るのは、次の 3 つが同じセッションに揃ったときだけなので、どれかを欠く。
+
+1. 信用できない内容を読む（WebFetch・clone したリポジトリ・Issue）
+2. 秘密に触れる（`~/.aws`・gh のトークン・`.env`）
+3. 外へ送れる（Bash の通信・WebFetch・許可済みドメインへの push）
+
+| 足 | どうするか |
+|---|---|
+| 1. 信用できない内容 | 止めない。止め切れないし、止めると仕事にならない |
+| 2. 秘密 | **一番固くする。** 認証情報は Claude から読めなくする |
+| 3. 外への送信 | Bash は許可ドメインだけに絞る。WebFetch は数が膨らむので絞らず、2 を断つことで逃がす |
+
+これは Simon Willison の「lethal trifecta」と、Meta の「Agents Rule of Two」の考え方そのもの。
+設定は Trail of Bits の [claude-code-config](https://github.com/trailofbits/claude-code-config) を下敷きにして、WSL 向けに足している。
+
+### `~/.claude/settings.json`
+
+ユーザー設定に書く。
 `strictAllowlist` はユーザー設定か管理者設定にしか効かないので、リポジトリの `.claude/settings.json` には書かない。
 
 ```json
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enableAllProjectMcpServers": false,
   "sandbox": {
     "enabled": true,
     "failIfUnavailable": true,
@@ -217,11 +239,54 @@ sandbox の設定まわりは版によって挙動が変わるので、古い版
   "permissions": {
     "deny": [
       "WebSearch",
-      "Bash(sudo *)"
+
+      "Bash(sudo *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -fr *)",
+      "Bash(git push --force*)",
+      "Bash(git push *--force*)",
+      "Bash(git reset --hard*)",
+
+      "Edit(~/.bashrc)",
+      "Edit(~/.profile)",
+      "Edit(~/.ssh/**)",
+
+      "Read(~/.ssh/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.azure/**)",
+      "Read(~/.kube/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.npmrc)",
+      "Read(~/.pypirc)",
+      "Read(//mnt/c/**)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command'); if echo \"$CMD\" | grep -qE 'git[[:space:]]+push.*(main|master)'; then echo 'BLOCKED: main への直接 push は禁止。ブランチを切って PR にする' >&2; exit 2; fi"
+          }
+        ]
+      }
     ]
   }
 }
 ```
+
+hook は手順 2 で入れた `jq` を使う。
+
+### 各設定の意味
+
+**sandbox（Bash を閉じ込める）**
 
 | キー | 効果 |
 |---|---|
@@ -230,22 +295,64 @@ sandbox の設定まわりは版によって挙動が変わるので、古い版
 | `allowUnsandboxedCommands: false` | 失敗したコマンドを「sandbox の外でやり直す」抜け道を閉じる |
 | `autoAllowBashIfSandboxed` | sandbox の中のコマンドは確認なしで実行させる。外に出られないので確認を省ける |
 | `network.strictAllowlist` | 許可リストにないドメインは、確認を出さずに拒否する |
-| `network.allowedDomains` | 通信してよいドメイン。既定は空 |
-| `permissions.deny` | sandbox の外で動くツール（WebSearch）と sudo を止める |
+| `network.allowedDomains` | Bash から通信してよいドメイン。既定は空 |
 
 `sandbox.excludedCommands` は書かない。
 ここに書いたコマンドは sandbox の外で動くので、抜け道になる。
 
-### WebFetch について
+**`Read(...)` の deny（秘密を読ませない）**
 
-WebFetch は Bash ではなく Claude Code のツールなので、sandbox のネットワーク制限とは別に権限で決まる。
-既定では、ドメインごとに確認を求められる。
-「今後も聞かない」を選ぶと `WebFetch(domain:...)` の許可ルールがローカル設定に保存される。
-完全に止めたいなら、`permissions.deny` に `"WebFetch"` も足す。
+sandbox の既定では、読み取りは自由で `~/.aws` も `~/.ssh` も読める。
+`Read(...)` の deny は Claude の Read ツールを止めるだけでなく、sandbox が有効なら OS のレベルで Bash の読み取りにも効く。
+sandbox が無いと Bash からは素通りするので、必ず両方を使う。
+
+WSL で特に効くのが `Read(//mnt/c/**)`。
+WSL からは Windows 側のドライブがそのまま見えるので、`C:\Users\<名前>\.aws` などを読まれないように丸ごと塞ぐ。
+`//` で始めると絶対パスになる。
+
+**`Edit(...)` の deny（バックドアを仕込ませない）**
+
+`~/.bashrc` や `~/.profile` に 1 行足されると、次に開いたシェルで sandbox の外で実行される。
+sandbox は Bash からの書き込みを止めるが、Claude の Edit ツールで作業ディレクトリの外を書こうとすると確認が出るだけなので、deny で確認なしに止める。
+
+**`Bash(...)` の deny と hook（うっかりを止める）**
+
+この 2 つはコマンドの文字列で判定するので、書き方を変えれば抜けられる。
+注入への防御ではなく、事故防止のガードレールとして入れている。
+本当の防御は、sandbox と `Read` の deny が担う。
+
+**`enableAllProjectMcpServers: false`**
+
+リポジトリの `.mcp.json` に書かれた MCP サーバーを、自動で有効にしない。
+clone したリポジトリが、悪意のある MCP サーバーを持ち込めないようにする。
+既定値だが、うっかり変えないように明示しておく。
+
+### WebFetch は絞らない
+
+WebFetch は Bash ではなく Claude Code のツールなので、sandbox のネットワーク制限は効かない。
+ただし見に行くサイトは際限なく増えるので、許可リストで管理し切るのは現実的ではない。
+
+そこで、秘密を読めない状態にしたうえで、WebFetch は既定の動き（新しいドメインでは確認が出る）のまま使う。
+
+- 確認には「Yes（このセッションだけ）」で答える。同じセッションで同じドメインは二度聞かれない
+- URL に見覚えのないクエリが付いているときは「No」にする。データを持ち出そうとしている形
+- 「今後も聞かない」は、よく使うドキュメントのサイト以外では選ばない
+
+秘密を断っていれば、注入されても漏れうるのは作業中のコードくらいになる。
+公開リポジトリだけで使うなら、`"allow": ["WebFetch"]` で確認自体をなくしてもよい。
+
+### aws と gh
+
+`~/.aws` と `~/.config/gh` を読めなくしているので、sandbox の中の Claude は aws と gh を認証付きでは使えない。
+これは意図どおり。
+
+- `aws login`・`gh auth login`・`git push` は自分で、Claude の外のターミナルで実行する
+- Claude に AWS を触らせたいリポジトリだけ、読み取り専用ロールの短命な認証情報を別に用意する。普段使いの認証情報は渡さない
+- Claude に push させたいなら、対象リポジトリだけに絞った fine-grained token を使い、main はブランチ保護で守る
 
 ### リポジトリごとにドメインを足す
 
-AWS を触るリポジトリなど、そのリポジトリだけで要るドメインは、リポジトリの `.claude/settings.json` に書く。
+そのリポジトリだけで要るドメインは、リポジトリの `.claude/settings.json` に書く。
 リスト型の設定はユーザー設定と結合される。
 
 ```json
@@ -259,7 +366,7 @@ AWS を触るリポジトリなど、そのリポジトリだけで要るドメ�
 ```
 
 裏返すと、clone したリポジトリの `.claude/settings.json` が許可ドメインを広げられる。
-他人のリポジトリで Claude Code を起動する前に、`.claude/settings.json` を見ておく。
+他人のリポジトリで Claude Code を起動する前に、`.claude/settings.json` と `.mcp.json` を見ておく。
 
 ## 7. 動作確認
 
@@ -268,11 +375,14 @@ AWS を触るリポジトリなど、そのリポジトリだけで要るドメ�
 
 | 実行させるコマンド | 期待する結果 |
 |---|---|
-| `git status` / `git diff` | 動く |
+| `git status` / `git diff` / `git commit` | 動く |
 | `terraform version` / `aws --version` | 動く（mise で入れたものが使われる） |
 | `touch ~/sandbox-test` | 失敗する（作業ディレクトリの外） |
+| `cat ~/.aws/config` | 失敗する（`Read` の deny） |
+| `ls /mnt/c/Users` | 失敗する（`Read` の deny） |
 | `curl -sS https://example.com` | 失敗する（許可リストにない） |
 | `curl -sS https://api.github.com` | 動く |
+| `git push origin main` | hook で止まる |
 | `mise install` | 失敗する（`~/.local/share/mise` に書けない） |
 
 最後の `mise install` が失敗するのは想定どおり。
@@ -282,7 +392,16 @@ Claude にできるのは `mise.toml` を書き換えるところまでで、実
 
 | 症状 | 原因と対処 |
 |---|---|
-| `git push` が通らない | SSH は通りにくい。HTTPS + `gh auth login` に寄せる。署名付きコミットや SSH が必要なら、push は自分で実行する |
+| `git push` が通らない | 認証情報を読めないので想定どおり。push は自分で実行する |
 | `terraform init` がプロバイダーを落とせない | `registry.terraform.io` と `releases.hashicorp.com` を許可しているか確認する。`~/.terraform.d` のプラグインキャッシュには書けないので、`.terraform/` に毎回落ちる |
-| aws コマンドが認証エラーになる | ログインは自分で sandbox の外で実行する（`aws login`）。トークンの更新で `~/.aws` 配下に書けずに失敗するなら、`sandbox.filesystem.allowWrite` に必要なディレクトリだけ足す |
+| aws コマンドが認証エラーになる | `~/.aws` を読めないので想定どおり。Claude に使わせるなら、上の「aws と gh」のとおり専用の認証情報を用意する |
 | `git config --global` が失敗する | `~/.gitconfig` は作業ディレクトリの外。自分で設定する |
+| Windows 側のファイルを読ませたい | `Read(//mnt/c/**)` で塞いでいる。必要なファイルだけ WSL 側のリポジトリにコピーする |
+
+## 参考
+
+- [Simon Willison: lethal trifecta](https://simonwillison.net/tags/lethal-trifecta)
+- [Meta: Agents Rule of Two](https://ai.meta.com/blog/practical-ai-agent-security/)
+- [Anthropic: Beyond permission prompts](https://www.anthropic.com/engineering/claude-code-sandboxing)
+- [Claude Code: Sandboxing](https://code.claude.com/docs/en/sandboxing)
+- [trailofbits/claude-code-config](https://github.com/trailofbits/claude-code-config)
