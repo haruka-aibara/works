@@ -9,9 +9,7 @@ locals {
   # ポリシー YAML に name と mode を足しただけのもの。mode は全ポリシー共通なのでここで固定する。
   policy_configs = {
     for name, policy in local.policies : name => jsonencode({
-      # 一致した（= NON_COMPLIANT の）リソース数を CloudWatch の CloudMaid/ResourceCount に書かせる。
-      # main_kpi.tf のダッシュボードはこれをルールをまたいで合計する。
-      "execution-options" = { metrics_enabled = true }
+      "execution-options" = {}
       policies = [merge(policy, {
         name = name
         mode = {
