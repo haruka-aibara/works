@@ -14,3 +14,9 @@ variable "log_retention_in_days" {
   type        = number
   default     = 30
 }
+
+variable "kpi_extra_rule_names" {
+  description = "KPI の合計に含める、このモジュール以外の Config ルール名（マネージドルールなど）"
+  type        = list(string)
+  default     = []
+}
