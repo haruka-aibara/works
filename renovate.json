@@ -5,7 +5,7 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
-  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、メジャーも Terraform も脆弱性修正も含めて 1 本にまとめる。lock file maintenance だけは Renovate がグループ化に対応していないので別 PR になる",
+  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、メジャーも Terraform も脆弱性修正も含めて 1 本にまとめる。方針は「PR は種類を問わず 1 日最大 1 本。Renovate の仕様でまとめられないものだけ別 PR を許す」で、今の例外は lock file maintenance だけ（グループ化に非対応）。例外を増やすときは仕様の根拠を書く",
   "timezone": "Asia/Tokyo",
   "schedule": ["* 0-8 * * *"],
   "rebaseWhen": "behind-base-branch",
