@@ -5,10 +5,11 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
-  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、packageRules で 1 本にまとめる。脆弱性修正はスケジュールを無視してすぐ出る",
+  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、メジャーも Terraform も含めて 1 本にまとめる。脆弱性修正はスケジュールを無視してすぐ出る",
   "timezone": "Asia/Tokyo",
   "schedule": ["* 0-8 * * *"],
   "rebaseWhen": "behind-base-branch",
+  "separateMajorMinor": false,
   "automerge": false,
   "labels": ["renovate"],
   "assigneesFromCodeOwners": true,
@@ -17,6 +18,10 @@
     "enabled": true
   },
   "devcontainer": {
+    "enabled": false
+  },
+  "lockFileMaintenance": {
+    "description": "lock file maintenance はグループにまとめられず必ず別 PR になる。lock file があるのは動かさない hands-on だけで、脆弱性修正は別途すぐ出るので止める",
     "enabled": false
   },
   "gitIgnoredAuthors": [
@@ -34,16 +39,14 @@
   ],
   "packageRules": [
     {
-      "description": "PR ごとに HCP Terraform の speculative plan が走り、strict な branch protection で他 PR の rebase のたびにも走るので、workspace の run が詰まる。PR の数そのものを減らすため、全部 1 本にまとめる。メジャーは separateMajorMinor（既定）で別 PR になる。後ろのルールの groupName が優先されるので、Terraform だけは別 PR",
+      "description": "PR ごとに HCP Terraform の speculative plan が走り、strict な branch protection で他 PR の rebase のたびにも走るので、workspace の run が詰まる。PR の数そのものを減らすため、メジャーも Terraform も全部 1 本にまとめる",
       "matchPackageNames": ["*"],
       "groupName": "all dependencies",
       "groupSlug": "all"
     },
     {
-      "description": "Terraform 本体・Provider・tflint プラグインは、当番がレビューする PR をできるだけ減らすため 1 本にまとめる。メジャーも分けない。labels は上書きになるので addLabels で足す",
+      "description": "Terraform 本体・Provider・tflint プラグインの更新を含む PR には terraform ラベルを付ける。labels は上書きになるので addLabels で足す",
       "matchManagers": ["terraform", "terraform-version", "tflint-plugin"],
-      "groupName": "Terraform",
-      "separateMajorMinor": false,
       "addLabels": ["terraform"]
     },
     {
