@@ -20,6 +20,10 @@
   "devcontainer": {
     "enabled": false
   },
+  "lockFileMaintenance": {
+    "description": "Renovate がグループ化に対応していないので別 PR になる。既定の週 1 回（月曜 4 時前）ではなく、他の更新と同じ 1 日 1 回にそろえる",
+    "schedule": ["* 0-8 * * *"]
+  },
   "vulnerabilityAlerts": {
     "description": "既定では脆弱性修正は groupName: null・schedule: [] で、グループとスケジュールを無視して個別 PR がすぐ出る。PR を 1 日 1 本に抑えるため、通常の更新と同じ PR・同じスケジュールに乗せる",
     "groupName": "all dependencies",
