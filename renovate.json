@@ -20,10 +20,6 @@
   "devcontainer": {
     "enabled": false
   },
-  "lockFileMaintenance": {
-    "description": "lock file maintenance はグループにまとめられず必ず別 PR になる。lock file があるのは動かさない hands-on だけで、脆弱性修正は別途すぐ出るので止める",
-    "enabled": false
-  },
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
   ],
