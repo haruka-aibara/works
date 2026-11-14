@@ -1,4 +1,4 @@
-FROM node:24@sha256:e7add2a490bb17d97b485b8641bd88455fff7839ade0f5eba493c3508124d413
+FROM node:26@sha256:e18c3ccdf7d71619990b0e85639f506e2028a95410999cab24cc373cbd10e0ac
 
 # this is just demo code, so we don't need to worry about security
 ENV MONGODB_CONNECTION_PROTOCOL mongodb+srv
