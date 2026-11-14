@@ -30,6 +30,7 @@ jobs:
 
       # このコミットの author は renovate.json の gitIgnoredAuthors に入れてあるので、Renovate は引き続きブランチを更新する。
       # GITHUB_TOKEN の push では PR の CI が承認待ちで止まるので、必須チェックは workflow_dispatch で起動する。
+      # 承認待ちの pull_request の run は重複で、残すと PR に「workflows awaiting approval」が出続けるので消す。
       - name: Commit, push and run required checks
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,4 +43,11 @@ jobs:
           git push
           for workflow in terraform-fmt tflint trivy yamllint actionlint zizmor markdownlint; do
             gh workflow run "$workflow.yml" --ref "$BRANCH"
+          done
+          # 承認待ちの run は push から少し遅れて作られるので、何度か見て消す。
+          sha=$(git rev-parse HEAD)
+          for _ in 1 2 3 4 5 6; do
+            sleep 10
+            gh run list --commit "$sha" --event pull_request --status action_required \
+              --json databaseId --jq '.[].databaseId' | xargs -r -n1 gh run delete
           done
