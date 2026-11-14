@@ -10,3 +10,9 @@ resource "hcp_vault_cluster" "learn_hcp_vault" {
   tier            = var.tier
   public_endpoint = true
 }
+
+# For the root vault provider. The token lasts 6 hours; the hcp provider issues a
+# new one on the first refresh after that, so every plan gets a live one.
+resource "hcp_vault_cluster_admin_token" "this" {
+  cluster_id = hcp_vault_cluster.learn_hcp_vault.cluster_id
+}

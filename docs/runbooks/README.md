@@ -7,6 +7,7 @@
 - [devcontainer テンプレートのモノレポ統合](devcontainer-template-monorepo-migration.md) — 旧リポジトリを畳むとき、ghcr の package を作り直すとき
 - [TFE_TOKEN 自動ローテーション](tfe-token-rotation.md) — 初回のブートストラップ、漏洩時の手順、文鎮化からの復旧
   - 設計の判断は [ADR-0001](../decisions/0001-tfe-team-token-rotation.md)
+- [HCP Vault の HCP Terraform secrets engine](hcp-vault-tfe-secrets.md) — 立ち上げ（PR 2 本）、rotate-root の確かめ方、片付け
 - [bedrock-slack-ai-chatbot の state 統合](bedrock-slack-ai-chatbot-state-merge.md) — 旧ワークスペースの state を works に寄せたときの記録
 - [Claude の定期調整](claude-tuning.md) — 新モデルが出たとき、指示ファイル・スキル・Slack ボットのモデルを見直すとき
 - lint CI（yamllint / actionlint / zizmor / markdownlint）— なぜ入れたか、どこまで見るかは [ADR-0002](../decisions/0002-lint-ci-for-docs-and-config.md)

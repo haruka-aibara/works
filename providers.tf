@@ -59,15 +59,19 @@ provider "aws" {
 #   region = "us-east-1"
 # }
 
-# For module "hcp_vault" in main.tf, which is commented out for now. The HVN
-# and the peer VPC must share a region, and the module's default is us-west-2.
-# Uncomment together with that module.
-# provider "aws" {
-#   alias  = "us-west-2"
-#   region = "us-west-2"
-# }
-#
-# provider "hcp" {}
+# For module "hcp_vault" in main.tf. Credentials come from the HCP_CLIENT_ID /
+# HCP_CLIENT_SECRET environment variables on the works workspace.
+provider "hcp" {}
+
+# The HCP Vault cluster from module "hcp_vault". HCP Vault Dedicated puts
+# everything under the admin namespace. The provider only connects when a vault
+# resource needs it, so it is fine that the address and token are unknown on
+# the run that creates the cluster.
+provider "vault" {
+  address   = module.hcp_vault.vault_public_endpoint_url
+  token     = module.hcp_vault.admin_token
+  namespace = "admin"
+}
 
 # For module "google_cloud_hands_on" in main.tf, which is commented out for
 # now. Credentials come from the GOOGLE_CREDENTIALS environment variable on the
