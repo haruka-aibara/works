@@ -19,7 +19,7 @@ terraform {
     }
     tfe = {
       source  = "hashicorp/tfe"
-      version = "~> 0.83"
+      version = "~> 0.84"
     }
     time = {
       source  = "hashicorp/time"
@@ -27,7 +27,7 @@ terraform {
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.72.0"
+      version = "~> 6.73.0"
     }
     archive = {
       source  = "hashicorp/archive"
