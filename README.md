@@ -37,7 +37,9 @@ echo 'eval "$(mise activate bash)"' >> ~/.bashrc && exec bash
 # https://docs.github.com/ja/repositories/creating-and-managing-repositories/cloning-a-repository
 git clone https://github.com/haruka-aibara/works ~/src/works
 
-# 「どこでも使うツールの一覧」として、このリポジトリのファイルを mise に読ませる
+# aws や gh のように、どのディレクトリでも使いたいツールの一覧（devenv/mise.toml）を mise に教える
+# mise は ~/.config/mise/config.toml をどこにいても読むので、そこにこのリポジトリのファイルをつなぐ
+# コピーではなくつなぐので、git pull で版の更新（Renovate の PR）がそのまま手元に届く
 # https://mise.jdx.dev/configuration.html#global-config
 mkdir -p ~/.config/mise
 ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
