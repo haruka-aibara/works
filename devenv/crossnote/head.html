@@ -1,0 +1,19 @@
+<!-- Markdown Preview Enhanced の Mermaid で、logos アイコン（AWS など）を使えるようにする。 -->
+<!-- ~/.local/state/crossnote/head.html に置く。参考: https://qiita.com/take_me/items/83769d32c35e99b85ec8 -->
+<script type="text/javascript">
+  const configureMermaidIconPacks = () => {
+    window["mermaid"].registerIconPacks([
+      {
+        name: "logos",
+        loader: () =>
+          fetch("https://unpkg.com/@iconify-json/logos/icons.json").then((res) => res.json()),
+      },
+    ]);
+  };
+
+  if (document.readyState !== "loading") {
+    configureMermaidIconPacks();
+  } else {
+    document.addEventListener("DOMContentLoaded", configureMermaidIconPacks);
+  }
+</script>

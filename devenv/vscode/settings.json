@@ -1,0 +1,47 @@
+{
+  "files.insertFinalNewline": true,
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "markdown.copyFiles.destination": {
+    "**/*.md": "assets/${documentBaseName}/"
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file"
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file"
+  },
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "ruff.lineLength": 120,
+  "ruff.lint.ignore": ["F401"],
+  "ruff.lint.preview": true,
+  "ruff.lint.select": ["C", "E", "F", "W", "I"],
+  "ruff.nativeServer": "on",
+  "aws.suppressPrompts": {
+    "fileViewerEdit": true
+  },
+  "explorer.confirmDragAndDrop": false,
+  "python.analysis.typeCheckingMode": "strict",
+  "redhat.telemetry.enabled": false,
+  "prettier.enable": true,
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "darkriszty.markdown-table-prettify"
+  }
+}
