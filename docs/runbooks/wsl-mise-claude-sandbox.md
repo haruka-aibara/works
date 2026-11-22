@@ -6,12 +6,12 @@ Claude Code は sandbox の中で動かし、Bash は許可したドメインに
 
 | 層 | 入るもの | 置き場所 | 更新のしかた |
 |---|---|---|---|
-| WSL（apt） | git・curl・jq・bubblewrap など | この手順書 | unattended-upgrades が自動で当てる |
+| WSL（apt） | git・curl・bubblewrap・socat・mise 本体など | この手順書 | unattended-upgrades が自動で当てる |
 | mise | terraform・aws-cli・gh・python まわりなど、そのリポジトリで使うもの | 各リポジトリの `mise.toml` | Renovate の PR |
 | Claude Code | sandbox の設定 | 各リポジトリの `.claude/settings.json` | 手で直す |
 
 以前は devcontainer テンプレートを ghcr に公開して同じことをしていた。
-入れていたツールはこのリポジトリの `mise.toml` に、VS Code の設定などは `devenv/` に移してある（gcloud・docker・Claude Code 本体を除く）。
+入れていたツールはこのリポジトリの `mise.toml` に、VS Code の設定などは `devenv/` に移してある（docker を除く）。Claude Code 本体と gcloud も mise で入れる。
 コマンドはこのリポジトリの中で打つので、どこでも使えるようにする設定（mise のグローバル設定）は使わない。
 
 ## 1. Windows 側：WSL2 の Ubuntu を入れる
@@ -34,11 +34,11 @@ sandbox は WSL1 では動かない（`Sandboxing requires WSL2` と出る）。
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl wget ca-certificates jq unzip zip htop tree bubblewrap socat
+sudo apt install -y git curl wget ca-certificates unzip zip htop tree bubblewrap socat
 ```
 
-bubblewrap と socat は Claude Code の sandbox が、jq は Claude Code の hook が使う。
-ほかの開発ツールは apt では入れない。
+bubblewrap と socat は Claude Code の sandbox が使う。
+ほかの開発ツールは apt では入れない（jq・gcloud・Claude Code も mise）。
 
 ### systemd と自動更新
 
@@ -103,17 +103,12 @@ git clone https://github.com/haruka-aibara/works ~/src/works
 
 | ツール | 入れ方 | mise にしない理由 |
 |---|---|---|
-| gcloud | Google 公式の apt リポジトリ（下のコマンド） | mise では vfox プラグイン（任意のコードを実行する方式）しかない |
-| docker | Docker Desktop の「Settings → Resources → WSL integration」で有効にする | デーモンが要るので、ツールの版管理の対象ではない |
-| Claude Code | 手順 7 のネイティブインストーラー | 自分で自動更新する |
+| docker | Docker Desktop の「Settings → Resources → WSL integration」で有効にする | デーモンが動いて初めて使える。mise で入るのはコマンドだけ |
+| bubblewrap・socat | 手順 2 の apt | mise に登録が無い。sandbox が OS の部品として使う |
+| mise 本体 | 手順 3 の apt | mise を入れるための mise は無い |
 
-```bash
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-sudo apt update && sudo apt install -y google-cloud-cli
-```
-
-apt で入れたものは、手順 2 の unattended-upgrades の対象になる。
+gcloud は mise の vfox プラグイン（mise の作者が作っているもの）で入る。
+aqua バックエンドと違い、配布元のチェックサムや署名の確認はない。
 
 ## 5. VS Code の拡張機能と設定
 
@@ -189,17 +184,16 @@ mise 自身も、公開から 24 時間たっていない版は入れない（`m
 aqua バックエンドのツールは、Renovate のドキュメントで「追加の設定が要る場合がある」扱いになっている。
 新しいツールを足したら、Renovate の Dependency Dashboard に載ったかを一度確かめる。
 
-## 7. Claude Code を入れる
+## 7. Claude Code
 
-公式のネイティブインストーラーで入れる。
+Claude Code も `mise.toml` に書いてあり、このリポジトリで `claude` と打てば入る。
+npm 版（`npm:@anthropic-ai/claude-code`）で入れている。npm 版は公式の入れ方の 1 つで、中身はネイティブ版と同じバイナリ（[Claude Code: Setup](https://code.claude.com/docs/en/setup)）。
+リポジトリの外では起動しない。
 
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-claude --version
-```
-
-ネイティブ版は自動で更新される。
-sandbox の設定まわりは版によって挙動が変わるので、古い版のまま使わない。
+Claude Code の自動更新は、`.claude/settings.json` の `env` に `DISABLE_UPDATES` を入れて止めている。
+止めないと、mise で固定した版と実際に動く版がずれる。
+版の更新は、ほかのツールと同じく Renovate の PR で行う。
+sandbox の設定まわりは版によって挙動が変わるので、Renovate の PR は溜めずにマージする。
 
 ## 8. Claude Code の設定
 

@@ -16,10 +16,9 @@
 WSL2 の Ubuntu で、最初に 1 回だけ実行する。
 
 ```bash
-# Claude Code を囲いの中で動かすための部品（bubblewrap・socat）と、hook が使う jq を入れる
+# Claude Code を囲いの中で動かすための部品（bubblewrap・socat）を入れる
 # https://code.claude.com/docs/en/sandboxing#set-up-linux-and-wsl2
-# https://code.claude.com/docs/en/hooks
-sudo apt install -y jq bubblewrap socat
+sudo apt update && sudo apt install -y bubblewrap socat
 
 # mise（ツールをまとめて入れてくれる道具）を入れる
 # Ubuntu の標準には無いので、配布元を登録してから入れる

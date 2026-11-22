@@ -2,7 +2,7 @@
 # https://mise.jdx.dev/configuration.html
 # 版は範囲や latest にせず、正確に固定する。Renovate が mise.toml と mise.lock を書き換える PR を出す。
 # https://docs.renovatebot.com/modules/manager/mise/
-# gcloud・docker・Claude Code は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
+# docker・bubblewrap・socat は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
 [tools]
 # terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
 terraform = "1.17.1"
@@ -15,6 +15,13 @@ minikube = "1.39.0"
 node = "26.13.1"
 python = "3.15.2"
 uv = "0.13.9"
+jq = "1.8.2"
+# gcloud は mise では vfox プラグインしかない（配布元のチェックサム・署名の確認はない）
+# https://github.com/mise-plugins/vfox-gcloud
+gcloud = "594.0.0"
+# Claude Code は公式の npm 版で入れる。自動更新は .claude/settings.json の DISABLE_UPDATES で止め、版は Renovate で上げる
+# https://code.claude.com/docs/en/setup
+"npm:@anthropic-ai/claude-code" = "2.1.323"
 # Python 製のツールは pypi バックエンドで入れる（uv で入れる）
 # https://mise.jdx.dev/dev-tools/backends/pypi.html
 "pypi:flake8" = "7.5.0"
