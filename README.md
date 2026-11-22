@@ -16,10 +16,9 @@
 WSL2 の Ubuntu で、最初に 1 回だけ実行する。
 
 ```bash
-# Claude Code を囲いの中で動かすための部品（bubblewrap・socat）と、hook が使う jq を入れる
+# Claude Code を囲いの中で動かすための部品（bubblewrap・socat）を入れる
 # https://code.claude.com/docs/en/sandboxing#set-up-linux-and-wsl2
-# https://code.claude.com/docs/en/hooks
-sudo apt install -y jq bubblewrap socat
+sudo apt update && sudo apt install -y bubblewrap socat
 
 # mise（ツールをまとめて入れてくれる道具）を入れる
 # Ubuntu の標準には無いので、配布元を登録してから入れる
@@ -45,11 +44,19 @@ cd ~/src/works
 # terraform が入っていなくても、ここで自動で入ってから動く
 # https://mise.jdx.dev/configuration/settings.html#not_found_auto_install
 terraform plan
+
+# Claude Code も同じ。入っていなければ、ここで入ってから起動する
+# https://code.claude.com/docs/en/setup
+claude
 ```
 
 - ツールと版は `mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
 - Claude Code は、このリポジトリの `.claude/settings.json` の設定で sandbox の中で動く（コピーなどの準備は要らない）。ツールのインストールと、`~/.aws` などの認証情報の読み取りはできない。許可していないサイトと通信するときは確認が出る
 - apt の自動更新・gcloud・VS Code の設定など、細かい手順と理由は [開発環境の手順書](docs/runbooks/wsl-mise-claude-sandbox.md)
+
+### 入るもの
+
+入るツールと版は [`mise.toml`](mise.toml)、mise では入らないもの（docker など）は [開発環境の手順書](docs/runbooks/wsl-mise-claude-sandbox.md) に書いてある。
 
 ## main へのマージで起きること
 
