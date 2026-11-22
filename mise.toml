@@ -21,7 +21,10 @@ jq = "1.8.2"
 gcloud = "594.0.0"
 # Claude Code は公式の npm 版で入れる。自動更新は .claude/settings.json の DISABLE_UPDATES で止め、版は Renovate で上げる
 # https://code.claude.com/docs/en/setup
-"npm:@anthropic-ai/claude-code" = "2.1.323"
+# mise は npm パッケージのスクリプトを既定で実行しないが、Claude Code は postinstall で本体のバイナリをつなぐので、Claude Code 自身のスクリプトだけ許可する
+# 本体は版が固定された別パッケージ（@anthropic-ai/claude-code-linux-x64 など）から入る
+# https://mise.jdx.dev/dev-tools/backends/npm.html
+"npm:@anthropic-ai/claude-code" = { version = "2.1.323", allow_builds = ["@anthropic-ai/claude-code"] }
 # Python 製のツールは pypi バックエンドで入れる（uv で入れる）
 # https://mise.jdx.dev/dev-tools/backends/pypi.html
 "pypi:flake8" = "7.5.0"

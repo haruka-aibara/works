@@ -190,6 +190,9 @@ aqua バックエンドのツールは、Renovate のドキュメントで「追
 
 Claude Code も `mise.toml` に書いてあり、このリポジトリで `claude` と打てば入る。
 npm 版（`npm:@anthropic-ai/claude-code`）で入れている。npm 版は公式の入れ方の 1 つで、中身はネイティブ版と同じバイナリ（[Claude Code: Setup](https://code.claude.com/docs/en/setup)）。
+mise は npm パッケージのスクリプトを既定で実行しないが、Claude Code は `postinstall` で本体のバイナリをつなぐので、`mise.toml` の `allow_builds` で Claude Code 自身のスクリプトだけ許可している（[mise: npm backend](https://mise.jdx.dev/dev-tools/backends/npm.html)）。
+これが無いと、`claude` を打ったときに `claude native binary not installed` と出る。
+本体は版が固定された別パッケージ（`@anthropic-ai/claude-code-linux-x64` など）から入るので、スクリプトが最新版を取ってくることはない。
 リポジトリの外では起動しない。
 
 Claude Code の自動更新は、`.claude/settings.json` の `env` に `DISABLE_UPDATES` を入れて止めている。
