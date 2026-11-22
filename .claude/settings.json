@@ -21,6 +21,7 @@
     }
   },
   "permissions": {
+    "defaultMode": "default",
     "deny": [
       "WebSearch",
       "Bash(sudo *)",
