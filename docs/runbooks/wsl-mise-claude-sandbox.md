@@ -34,10 +34,11 @@ sandbox は WSL1 では動かない（`Sandboxing requires WSL2` と出る）。
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl wget ca-certificates unzip zip htop tree bubblewrap socat
+sudo apt install -y git curl wget ca-certificates unzip zip htop tree bubblewrap socat libatomic1
 ```
 
 bubblewrap と socat は Claude Code の sandbox が使う。
+libatomic1 は mise で入れる node が使う。WSL の Ubuntu には最初から入っておらず、無いと node（と、それを使う Claude Code）の `mise install` が失敗する。
 ほかの開発ツールは apt では入れない（jq・gcloud・Claude Code も mise）。
 
 ### systemd と自動更新
@@ -194,6 +195,8 @@ npm 版（`npm:@anthropic-ai/claude-code`）で入れている。npm 版は公�
 Claude Code の自動更新は、`.claude/settings.json` の `env` に `DISABLE_UPDATES` を入れて止めている。
 止めないと、mise で固定した版と実際に動く版がずれる。
 版の更新は、ほかのツールと同じく Renovate の PR で行う。
+Claude Code はほぼ毎日リリースされるので、Renovate は npm の `stable` の印が付いた版だけを PR にする（`renovate.json` の `followTag`）。
+stable は、だいたい 1 週間前の版で、大きな不具合のある版は飛ばされる（[Claude Code: Setup](https://code.claude.com/docs/en/setup)）。
 sandbox の設定まわりは版によって挙動が変わるので、Renovate の PR は溜めずにマージする。
 
 ## 8. Claude Code の設定
@@ -372,6 +375,7 @@ Claude にできるのは `mise.toml` を書き換えるところまでで、実
 | 症状 | 原因と対処 |
 |---|---|
 | Claude Code が起動しない（sandbox が使えない） | `/sandbox` の Dependencies タブに出ているものを入れる。AppArmor の制限と出たら [公式の手順](https://code.claude.com/docs/en/sandboxing#add-an-apparmor-profile-for-bubblewrap) どおりにする |
+| PR に必須チェックの `Terraform Cloud/...` が付かず、マージできない | HCP Terraform と GitHub の連携が切れている。HCP Terraform で GitHub の連携を再認証してから、PR に push し直す |
 | `git push` が通らない | 認証情報を読めないので想定どおり。push は自分で実行する |
 | `terraform init` がプロバイダーを落とせない | `registry.terraform.io` と `releases.hashicorp.com` を許可しているか確認する。`~/.terraform.d` のプラグインキャッシュには書けないので、`.terraform/` に毎回落ちる |
 | aws コマンドが認証エラーになる | `~/.aws` を読めないので想定どおり。Claude に使わせるなら、上の「aws と gh」のとおり専用の認証情報を用意する |
