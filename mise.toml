@@ -1,5 +1,7 @@
 # このリポジトリの作業で使うツール。
+# https://mise.jdx.dev/configuration.html
 # terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
+# https://docs.renovatebot.com/modules/manager/mise/
 [tools]
 terraform = "1.17.1"
 tflint = "0.66.0"

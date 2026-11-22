@@ -1,9 +1,15 @@
 # どのリポジトリでも使う個人のツール。~/.config/mise/config.toml からシンボリックリンクで参照する。
+# https://mise.jdx.dev/configuration.html#global-config
 # 旧 devcontainer テンプレート（Features・Dockerfile・post-create.sh）で入れていたものを移した。
 # 版は範囲や latest にせず、正確に固定する。Renovate が mise.toml ごと書き換える PR を出す。
+# https://docs.renovatebot.com/modules/manager/mise/
 # gcloud・docker・Claude Code は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
 [settings]
+# どのリポジトリでも mise.lock を作って更新する
+# https://mise.jdx.dev/dev-tools/mise-lock.html
 lockfile = true
+# 公開から 3 日たっていない版は入れない
+# https://mise.jdx.dev/configuration/settings.html#minimum_release_age
 minimum_release_age = "3d"
 
 [tools]
@@ -15,9 +21,11 @@ minikube = "1.39.0"
 node = "26.13.1"
 python = "3.15.2"
 uv = "0.13.9"
-"pipx:flake8" = "7.5.0"
-"pipx:pylint" = "4.1.4"
-"pipx:pyre-check" = "0.10.0"
-"pipx:pytest" = "9.2.0"
-"pipx:ansible-core" = "2.22.0"
-"pipx:ansible-lint" = "26.11.0"
+# Python 製のツールは pypi バックエンドで入れる（uv で入れる）
+# https://mise.jdx.dev/dev-tools/backends/pypi.html
+"pypi:flake8" = "7.5.0"
+"pypi:pylint" = "4.1.4"
+"pypi:pyre-check" = "0.10.0"
+"pypi:pytest" = "9.2.0"
+"pypi:ansible-core" = "2.22.0"
+"pypi:ansible-lint" = "26.11.0"
