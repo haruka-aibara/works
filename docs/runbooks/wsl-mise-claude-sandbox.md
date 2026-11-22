@@ -408,6 +408,7 @@ Claude にできるのは `mise.toml` を書き換えるところまでで、実
 
 | 症状 | 原因と対処 |
 |---|---|
+| Claude Code が起動しない（sandbox が使えない） | `/sandbox` の Dependencies タブに出ているものを入れる。AppArmor の制限と出たら [公式の手順](https://code.claude.com/docs/en/sandboxing#add-an-apparmor-profile-for-bubblewrap) どおりにする |
 | `git push` が通らない | 認証情報を読めないので想定どおり。push は自分で実行する |
 | `terraform init` がプロバイダーを落とせない | `registry.terraform.io` と `releases.hashicorp.com` を許可しているか確認する。`~/.terraform.d` のプラグインキャッシュには書けないので、`.terraform/` に毎回落ちる |
 | aws コマンドが認証エラーになる | `~/.aws` を読めないので想定どおり。Claude に使わせるなら、上の「aws と gh」のとおり専用の認証情報を用意する |
