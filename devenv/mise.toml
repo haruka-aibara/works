@@ -1,0 +1,22 @@
+# どのリポジトリでも使う個人のツール。~/.config/mise/config.toml からシンボリックリンクで参照する。
+# 旧 devcontainer テンプレート（Features・Dockerfile・post-create.sh）で入れていたものを移した。
+# gcloud・docker・Claude Code は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
+[settings]
+lockfile = true
+minimum_release_age = "3d"
+
+[tools]
+aws-cli = "2"
+gh = "2"
+kubectl = "1"
+helm = "4"
+minikube = "1"
+node = "lts"
+python = "3"
+uv = "0"
+"pipx:flake8" = "latest"
+"pipx:pylint" = "latest"
+"pipx:pyre-check" = "latest"
+"pipx:pytest" = "latest"
+"pipx:ansible-core" = "latest"
+"pipx:ansible-lint" = "latest"

@@ -1,14 +1,18 @@
 # WSL + mise + Claude Code sandbox の開発環境
 
 WSL には最小限の apt パッケージだけを入れる。
-開発ツールはリポジトリごとの `mise.toml` / `mise.lock` で揃える。
+開発ツールは mise で入れ、版はファイルに書いておく。
 Claude Code は sandbox の中で動かし、Bash は許可したドメインにだけ通信させ、認証情報は読ませない。
 
-| 層 | 入るもの | 更新のしかた |
-|---|---|---|
-| WSL（apt） | git・curl・jq・bubblewrap・socat・mise 本体 | unattended-upgrades が自動で当てる |
-| mise（リポジトリごと） | terraform・aws-cli・gh・tflint・trivy など | `mise.toml` / `mise.lock` を PR で更新する |
-| Claude Code | sandbox の中で動く | 作業ディレクトリの外には書き込めず、認証情報は読めない。ツールを足すときも `mise.toml` の diff として出てくる |
+| 層 | 入るもの | 置き場所 | 更新のしかた |
+|---|---|---|---|
+| WSL（apt） | git・curl・jq・bubblewrap など | この手順書 | unattended-upgrades が自動で当てる |
+| mise（共通） | aws-cli・gh・kubectl・python まわりなど、どのリポジトリでも使うもの | `devenv/mise.toml` | Renovate の PR |
+| mise（リポジトリごと） | terraform・tflint など、そのリポジトリで使うもの | 各リポジトリの `mise.toml` | Renovate の PR |
+| Claude Code | sandbox の設定 | `devenv/claude/settings.json` | 手で直す |
+
+以前は devcontainer テンプレートを ghcr に公開して同じことをしていた。
+入れていたツールと設定は、gcloud・docker・Claude Code 本体を除いて `devenv/` に移してある。
 
 ## 1. Windows 側：WSL2 の Ubuntu を入れる
 
@@ -30,7 +34,7 @@ sandbox は WSL1 では動かない（`Sandboxing requires WSL2` と出る）。
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl ca-certificates jq bubblewrap socat
+sudo apt install -y git curl wget ca-certificates jq unzip zip htop tree bubblewrap socat
 ```
 
 bubblewrap と socat は Claude Code の sandbox が、jq は Claude Code の hook が使う。
@@ -83,101 +87,135 @@ sudo apt install -y extrepo
 sudo extrepo enable mise
 sudo apt update
 sudo apt install -y mise
-```
-
-シェルに組み込む。
-
-```bash
 echo 'eval "$(mise activate bash)"' >> ~/.bashrc
 exec bash
-mise --version
 ```
 
-### グローバル設定
+## 4. 共通のツールを入れる
+
+このリポジトリの `devenv/mise.toml` を、mise のグローバル設定としてつなぐ。
 
 ```bash
-mise settings minimum_release_age=3d
+git clone https://github.com/haruka-aibara/works ~/src/works
+mkdir -p ~/.config/mise
+ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
 ```
 
-公開から 3 日たっていない版は入れない。
-乗っ取られたリリースを掴みにくくするための設定で、mise の既定値は 24h。
+`devenv/mise.lock` がまだリポジトリに無ければ、作ってコミットする。
+グローバル設定のロックは、`devenv/` の中で `--global` を付けて作る。
 
-## 4. リポジトリに `mise.toml` / `mise.lock` を置く
+```bash
+cd ~/src/works/devenv
+mise lock --global --platform linux-x64,linux-arm64,macos-arm64
+git add mise.lock && git commit -m "devenv の mise.lock を作る"
+```
 
-リポジトリのルートで、使うツールをバージョンを固定して足す。
+ロックもつないで、入れる。
+
+```bash
+ln -s ~/src/works/devenv/mise.lock ~/.config/mise/mise.lock
+mise install
+```
+
+`devenv/mise.toml` の `[settings]` で、次の 2 つを全リポジトリに効かせている。
+
+| 設定 | 効果 |
+|---|---|
+| `lockfile = true` | どのリポジトリでも、`mise install` のたびに `mise.lock` を作って更新する |
+| `minimum_release_age = "3d"` | 公開から 3 日たっていない版は入れない。乗っ取られたリリースを掴みにくくする |
+
+### mise で入れないもの
+
+| ツール | 入れ方 | mise にしない理由 |
+|---|---|---|
+| gcloud | Google 公式の apt リポジトリ（下のコマンド） | mise では vfox プラグイン（任意のコードを実行する方式）しかない |
+| docker | Docker Desktop の「Settings → Resources → WSL integration」で有効にする | デーモンが要るので、ツールの版管理の対象ではない |
+| Claude Code | 手順 7 のネイティブインストーラー | 自分で自動更新する |
+
+```bash
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+sudo apt update && sudo apt install -y google-cloud-cli
+```
+
+apt で入れたものは、手順 2 の unattended-upgrades の対象になる。
+
+## 5. VS Code の拡張機能と設定
+
+VS Code の WSL 拡張でつないだターミナルで実行する。
+
+```bash
+xargs -n1 code --install-extension < ~/src/works/devenv/vscode/extensions.txt
+mkdir -p ~/.local/state/crossnote
+cp ~/src/works/devenv/crossnote/head.html ~/.local/state/crossnote/
+```
+
+`head.html` は、Markdown Preview Enhanced の Mermaid で AWS などのアイコンを使うための設定。
+
+エディタの設定は `devenv/vscode/settings.json` にある。
+コマンドパレットの「Preferences: Open User Settings (JSON)」を開き、中身をマージする。
+
+## 6. リポジトリにツールを固定する
+
+使うツールを、リポジトリのルートの `mise.toml` に書く。
 
 ```bash
 cd ~/src/<リポジトリ>
-mise use terraform@1.17.1 aws-cli@2 gh@2 tflint@0 trivy@0
+mise use terraform@1.17.1 tflint@0.66.0
 ```
 
-`mise.toml` が作られる。
-`aws-cli@2` のようにメジャーだけ書いた場合、実際のバージョンは `mise.lock` で固定される。
+`mise.toml` には `[tools]` だけを書く。
+`[settings]` などを書くと、clone した人が最初に `mise trust` を求められる。
+ロックの設定は手順 4 のグローバル設定で効いているので、ここには要らない。
 
-ロックの設定を `mise.toml` に足す。
-
-```toml
-[settings]
-lockfile = true  # install / upgrade のたびに mise.lock を更新する
-locked = true    # mise.lock にないバージョン・URL は入れない
-```
-
-ロックファイルを作る。
+`mise use` を実行した時点で `mise.lock` もできる。
+WSL 以外（Mac・CI）でも使うなら、プラットフォームを足しておく。
 
 ```bash
 mise lock --platform linux-x64,linux-arm64,macos-arm64
+git add mise.toml mise.lock
+git commit -m "mise でツールのバージョンを固定する"
 ```
 
-`mise.lock` には、プラットフォームごとにダウンロード URL とチェックサムが記録される。
-WSL 以外（Mac・CI）でも使うなら、そのプラットフォームも `--platform` に並べる。
-
+`.mise/locks/` ができていたら、それもコミットする。
 個人用の上書きはコミットしない。
 
 ```bash
 printf 'mise.local.toml\nmise.local.lock\n.mise/locks/mise.local/\n' >> .gitignore
 ```
 
-コミットする。
-
-```bash
-git add mise.toml mise.lock .gitignore
-git commit -m "mise でツールのバージョンを固定する"
-```
-
-`.mise/locks/` ができていたら、それもコミットする。
-
 ### 使う側
 
-clone したら、リポジトリのルートで次を実行する。
+clone したら、何も意識せずにコマンドを打てばよい。
 
 ```bash
-mise install --locked
+cd ~/src/<リポジトリ>
+terraform plan   # 入っていなければ、mise.lock の版がここで入ってから実行される
 ```
 
-`mise.lock` に書かれたバージョンが、チェックサムを確かめたうえで入る。
-terraform・aws-cli・gh・tflint・trivy は、mise の標準の aqua バックエンドで入る。
-aqua バックエンドは、配布元が出しているチェックサム・GitHub の attestation・cosign・SLSA を検証する。
+mise を有効にしたシェルでは、見つからないコマンドが `mise.toml` に書かれたツールなら、その場で入れてから実行する（mise の `not_found_auto_install`、既定で有効）。
+`mise.toml` に無いツールは入らない。
 
-ディレクトリに入ると、そのリポジトリのバージョンに自動で切り替わる。
+入れるときは、配布元が出しているチェックサム・GitHub の attestation・cosign・SLSA を確かめる（mise の aqua バックエンド）。
+`mise.lock` にあるハッシュと合わなければ入らない。
 
-```bash
-which terraform   # ~/.local/share/mise/installs/terraform/1.17.1/... を指す
-terraform version
-```
+### バージョンの更新
 
-### バージョンを上げる
+Renovate が `mise.toml` と `mise.lock` を同じ PR で更新する。
+人がやるのは PR を見てマージすることだけで、次にコマンドを打ったときに新しい版が入る。
 
-```bash
-mise use terraform@1.18.0   # 固定しているバージョンを変える
-mise lock --bump aws-cli    # aws-cli@2 の範囲で最新にする（mise.toml はそのまま）
-mise install --locked
-```
+| `mise.toml` の書き方 | Renovate の PR |
+|---|---|
+| `terraform = "1.17.1"`（版を固定） | `mise.toml` ごと書き換える |
+| `aws-cli = "2"`（範囲で指定） | `mise.toml` はそのままで、`mise.lock` の版だけ上げる |
 
-`mise.toml` と `mise.lock` の diff を PR に出す。
-Renovate は `mise.toml` を読めるが、`mise.lock` を一緒に直すかは設定次第。
-Renovate の PR で `mise.lock` が古いままなら、手元で `mise lock` を実行して追いコミットする。
+`renovate.json` で、mise のツールは公開から 3 日たったものだけ出すようにしている。
+mise の `minimum_release_age` は Renovate が読まないので、別に指定が要る。
 
-## 5. Claude Code を入れる
+aqua バックエンドのツールは、Renovate のドキュメントで「追加の設定が要る場合がある」扱いになっている。
+新しいツールを足したら、Renovate の Dependency Dashboard に載ったかを一度確かめる。
+
+## 7. Claude Code を入れる
 
 公式のネイティブインストーラーで入れる。
 
@@ -189,7 +227,7 @@ claude --version
 ネイティブ版は自動で更新される。
 sandbox の設定まわりは版によって挙動が変わるので、古い版のまま使わない。
 
-## 6. Claude Code の設定
+## 8. Claude Code の設定
 
 ### 考え方
 
@@ -197,92 +235,30 @@ sandbox の設定まわりは版によって挙動が変わるので、古い版
 注入で実害が出るのは、次の 3 つが同じセッションに揃ったときだけなので、どれかを欠く。
 
 1. 信用できない内容を読む（WebFetch・clone したリポジトリ・Issue）
-2. 秘密に触れる（`~/.aws`・gh のトークン・`.env`）
+2. 秘密に触れる（`~/.aws`・gh のトークン・`.env`、プライベートリポジトリならコードそのもの）
 3. 外へ送れる（Bash の通信・WebFetch・許可済みドメインへの push）
 
 | 足 | どうするか |
 |---|---|
-| 1. 信用できない内容 | 止めない。止め切れないし、止めると仕事にならない |
+| 1. 信用できない内容 | 基本は止めない。止め切れないし、止めると仕事にならない |
 | 2. 秘密 | **一番固くする。** 認証情報は Claude から読めなくする |
-| 3. 外への送信 | Bash は許可ドメインだけに絞る。WebFetch は数が膨らむので絞らず、2 を断つことで逃がす |
+| 3. 外への送信 | Bash は許可ドメインだけに絞る。WebFetch は公開リポジトリなら絞らず、プライベートリポジトリでは止める |
 
 これは Simon Willison の「lethal trifecta」と、Meta の「Agents Rule of Two」の考え方そのもの。
 設定は Trail of Bits の [claude-code-config](https://github.com/trailofbits/claude-code-config) を下敷きにして、WSL 向けに足している。
 
-### `~/.claude/settings.json`
+### 設定ファイルを置く
 
-ユーザー設定に書く。
-`strictAllowlist` はユーザー設定か管理者設定にしか効かないので、リポジトリの `.claude/settings.json` には書かない。
-
-```json
-{
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "enableAllProjectMcpServers": false,
-  "sandbox": {
-    "enabled": true,
-    "failIfUnavailable": true,
-    "allowUnsandboxedCommands": false,
-    "autoAllowBashIfSandboxed": true,
-    "network": {
-      "strictAllowlist": true,
-      "allowedDomains": [
-        "github.com",
-        "api.github.com",
-        "codeload.github.com",
-        "objects.githubusercontent.com",
-        "release-assets.githubusercontent.com",
-        "registry.terraform.io",
-        "releases.hashicorp.com"
-      ]
-    }
-  },
-  "permissions": {
-    "deny": [
-      "WebSearch",
-
-      "Bash(sudo *)",
-      "Bash(rm -rf *)",
-      "Bash(rm -fr *)",
-      "Bash(git push --force*)",
-      "Bash(git push *--force*)",
-      "Bash(git reset --hard*)",
-
-      "Edit(~/.bashrc)",
-      "Edit(~/.profile)",
-      "Edit(~/.ssh/**)",
-
-      "Read(~/.ssh/**)",
-      "Read(~/.gnupg/**)",
-      "Read(~/.aws/**)",
-      "Read(~/.azure/**)",
-      "Read(~/.kube/**)",
-      "Read(~/.config/gh/**)",
-      "Read(~/.git-credentials)",
-      "Read(~/.docker/config.json)",
-      "Read(~/.npmrc)",
-      "Read(~/.pypirc)",
-      "Read(//mnt/c/**)",
-      "Read(./.env)",
-      "Read(./.env.*)"
-    ]
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "CMD=$(jq -r '.tool_input.command'); if echo \"$CMD\" | grep -qE 'git[[:space:]]+push.*(main|master)'; then echo 'BLOCKED: main への直接 push は禁止。ブランチを切って PR にする' >&2; exit 2; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
+```bash
+mkdir -p ~/.claude
+cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
 ```
 
-hook は手順 2 で入れた `jq` を使う。
+シンボリックリンクにせずコピーする。
+Claude Code は `~/.claude/settings.json` を自分で書き換えることがあり、リンクだとそれがこのリポジトリに入ってしまう。
+`devenv/claude/settings.json` を直したら、もう一度コピーする。
+
+`strictAllowlist` はユーザー設定か管理者設定にしか効かないので、リポジトリの `.claude/settings.json` には書かない。
 
 ### 各設定の意味
 
@@ -327,19 +303,59 @@ sandbox は Bash からの書き込みを止めるが、Claude の Edit ツー�
 clone したリポジトリが、悪意のある MCP サーバーを持ち込めないようにする。
 既定値だが、うっかり変えないように明示しておく。
 
-### WebFetch は絞らない
+### WebFetch（公開リポジトリ）
 
 WebFetch は Bash ではなく Claude Code のツールなので、sandbox のネットワーク制限は効かない。
 ただし見に行くサイトは際限なく増えるので、許可リストで管理し切るのは現実的ではない。
 
-そこで、秘密を読めない状態にしたうえで、WebFetch は既定の動き（新しいドメインでは確認が出る）のまま使う。
+公開リポジトリでは、秘密を読めない状態にしたうえで、WebFetch は既定の動き（新しいドメインでは確認が出る）のまま使う。
 
 - 確認には「Yes（このセッションだけ）」で答える。同じセッションで同じドメインは二度聞かれない
 - URL に見覚えのないクエリが付いているときは「No」にする。データを持ち出そうとしている形
 - 「今後も聞かない」は、よく使うドキュメントのサイト以外では選ばない
 
-秘密を断っていれば、注入されても漏れうるのは作業中のコードくらいになる。
-公開リポジトリだけで使うなら、`"allow": ["WebFetch"]` で確認自体をなくしてもよい。
+注入されても漏れうるのは作業中のコードくらいで、それはもともと公開されている。
+
+### プライベートリポジトリ
+
+プライベートリポジトリでは、コードそのものが秘密になる。
+Claude はコードを読まないと仕事にならないので、「秘密を断つ」が使えない。
+代わりに「外への送信」を断つ。
+
+リポジトリの `.claude/settings.json` で WebFetch を止める。
+deny はユーザー設定と結合され、allow より優先される。
+
+```json
+{
+  "permissions": {
+    "deny": ["WebFetch"]
+  }
+}
+```
+
+公式ドキュメントくらいは読ませたいなら、deny の代わりに、使うサイトだけを許可する。
+1 つのリポジトリで要るサイトは数個なので、リポジトリ単位なら管理できる。
+それ以外のドメインでは確認が出るので、そこで止める。
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.aws.amazon.com)",
+      "WebFetch(domain:developer.hashicorp.com)"
+    ]
+  }
+}
+```
+
+Web の調べものは、リポジトリを開いていない空のディレクトリで起動した別の Claude にやらせ、結論だけを持ち込む。
+1 つのセッションで持つ性質を 2 つまでにする、Rule of Two の形。
+
+Bash の許可ドメインにワイルドカードを使わない。
+`*.amazonaws.com` を許可すると、攻撃者の S3 バケットへの署名付き URL に PUT されれば、コードを持ち出せる。
+`sts.ap-northeast-1.amazonaws.com` のように、使うエンドポイントだけを書く。
+
+`github.com` と `api.github.com` は、認証情報を読めない状態なら書き込み（push・gist の作成）に使えないので、許可したままでよい。
 
 ### aws と gh
 
@@ -359,7 +375,7 @@ WebFetch は Bash ではなく Claude Code のツールなので、sandbox の�
 {
   "sandbox": {
     "network": {
-      "allowedDomains": ["*.amazonaws.com"]
+      "allowedDomains": ["sts.ap-northeast-1.amazonaws.com"]
     }
   }
 }
@@ -368,7 +384,7 @@ WebFetch は Bash ではなく Claude Code のツールなので、sandbox の�
 裏返すと、clone したリポジトリの `.claude/settings.json` が許可ドメインを広げられる。
 他人のリポジトリで Claude Code を起動する前に、`.claude/settings.json` と `.mcp.json` を見ておく。
 
-## 7. 動作確認
+## 9. 動作確認
 
 リポジトリのルートで `claude` を起動し、`/sandbox` で有効になっていることを確認する。
 そのうえで、Claude に次のコマンドを実行させる。
@@ -386,7 +402,8 @@ WebFetch は Bash ではなく Claude Code のツールなので、sandbox の�
 | `mise install` | 失敗する（`~/.local/share/mise` に書けない） |
 
 最後の `mise install` が失敗するのは想定どおり。
-Claude にできるのは `mise.toml` を書き換えるところまでで、実際に入れるのは自分が sandbox の外で `mise install --locked` を実行したときだけになる。
+Claude にできるのは `mise.toml` を書き換えるところまでで、実際に入れるのは自分のシェルでコマンドを打ったときだけになる。
+新しく clone したリポジトリでは、Claude を起動する前に自分のシェルで `mise install` しておく。
 
 ## sandbox の中で詰まりやすいところ
 
@@ -404,4 +421,6 @@ Claude にできるのは `mise.toml` を書き換えるところまでで、実
 - [Meta: Agents Rule of Two](https://ai.meta.com/blog/practical-ai-agent-security/)
 - [Anthropic: Beyond permission prompts](https://www.anthropic.com/engineering/claude-code-sandboxing)
 - [Claude Code: Sandboxing](https://code.claude.com/docs/en/sandboxing)
+- [mise: Lockfile](https://mise.jdx.dev/dev-tools/mise-lock.html)
+- [Renovate: mise manager](https://docs.renovatebot.com/modules/manager/mise/)
 - [trailofbits/claude-code-config](https://github.com/trailofbits/claude-code-config)

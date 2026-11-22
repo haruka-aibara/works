@@ -9,10 +9,10 @@ module "haruka-aibara" {
   source = "./modules/repository"
 
   repository_name = "works"
-  description     = "Personal monorepo: Terraform for GitHub repos, HCP Terraform and AWS (Slack/Bedrock bots etc.), shared CI, 1000+ learning notes on GitHub Pages, and devcontainer templates"
+  description     = "Personal monorepo: Terraform for GitHub repos, HCP Terraform and AWS (Slack/Bedrock bots etc.), shared CI, 1000+ learning notes on GitHub Pages, and dev environment config"
   homepage_url    = "https://haruka-aibara.github.io/works/"
 
-  topics = ["terraform", "github", "iac", "aws", "github-actions", "devcontainer"]
+  topics = ["terraform", "github", "iac", "aws", "github-actions", "mise"]
 
   # docs/ absorbed the old standalone "docs" repository, .nojekyll included, so
   # Pages now publishes straight from this branch/folder instead of a separate repo.

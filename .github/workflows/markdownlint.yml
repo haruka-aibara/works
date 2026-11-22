@@ -7,8 +7,6 @@ on:
   pull_request:
   push:
     branches: [main]
-  # devcontainer-checksums.yaml の追いコミットに対して起動する。
-  workflow_dispatch:
 
 permissions:
   contents: read
