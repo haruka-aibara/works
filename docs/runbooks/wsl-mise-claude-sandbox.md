@@ -257,7 +257,18 @@ cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
 Claude Code は `~/.claude/settings.json` を自分で書き換えることがあり、リンクだとそれがこのリポジトリに入ってしまう。
 `devenv/claude/settings.json` を直したら、もう一度コピーする。
 
-`strictAllowlist` はユーザー設定か管理者設定にしか効かないので、リポジトリの `.claude/settings.json` には書かない。
+このリポジトリ自身の `.claude/settings.json` にも、同じ sandbox・許可ドメイン・deny・hook を書いてある。
+clone して Claude Code を起動すれば、ユーザー設定をコピーする前から効く。
+
+ただし、次の 2 つはリポジトリの `.claude/settings.json` には書いていない。
+
+| 設定 | 書いていない理由 |
+|---|---|
+| `network.strictAllowlist` | ユーザー設定か管理者設定でしか効かない（[Claude Code: Settings](https://code.claude.com/docs/en/settings)） |
+| `failIfUnavailable` | bubblewrap が無いクラウドの Claude Code でこのリポジトリを開くと、セッションが起動しなくなる |
+
+リポジトリ側だけだと、許可していないドメインへの通信は拒否ではなく確認になり、sandbox が使えない環境では sandbox なしで動く。
+この 2 つを効かせるために、ユーザー設定にもコピーする。
 
 ### 各設定の意味
 
