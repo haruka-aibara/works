@@ -41,12 +41,6 @@ git clone https://github.com/haruka-aibara/works ~/src/works
 # https://mise.jdx.dev/configuration.html#global-config
 mkdir -p ~/.config/mise
 ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
-
-# Claude Code の「やっていいこと・だめなこと」の設定を置く
-# このリポジトリの中では .claude/settings.json が効くので、これはほかのリポジトリでも同じにするため
-# https://code.claude.com/docs/en/settings
-mkdir -p ~/.claude
-cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
 ```
 
 あとは、このリポジトリに入ってふだんどおりコマンドを打つだけ。
@@ -59,7 +53,7 @@ terraform plan
 ```
 
 - ツールと版は、このリポジトリで使うものを `mise.toml`、どこでも使うもの（aws-cli・gh など）を `devenv/mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
-- Claude Code は sandbox の中で動く。ツールのインストール、`~/.aws` などの認証情報の読み取り、許可していないサイトとの通信はできない
+- Claude Code は、このリポジトリの `.claude/settings.json` の設定で sandbox の中で動く（コピーなどの準備は要らない）。ツールのインストール、`~/.aws` などの認証情報の読み取り、許可していないサイトとの通信はできない
 - apt の自動更新・gcloud・VS Code の設定など、細かい手順と理由は [開発環境の手順書](docs/runbooks/wsl-mise-claude-sandbox.md)
 
 ## main へのマージで起きること

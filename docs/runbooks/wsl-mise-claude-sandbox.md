@@ -9,7 +9,7 @@ Claude Code は sandbox の中で動かし、Bash は許可したドメインに
 | WSL（apt） | git・curl・jq・bubblewrap など | この手順書 | unattended-upgrades が自動で当てる |
 | mise（共通） | aws-cli・gh・kubectl・python まわりなど、どのリポジトリでも使うもの | `devenv/mise.toml` | Renovate の PR |
 | mise（リポジトリごと） | terraform・tflint など、そのリポジトリで使うもの | 各リポジトリの `mise.toml` | Renovate の PR |
-| Claude Code | sandbox の設定 | `devenv/claude/settings.json` | 手で直す |
+| Claude Code | sandbox の設定 | 各リポジトリの `.claude/settings.json` | 手で直す |
 
 以前は devcontainer テンプレートを ghcr に公開して同じことをしていた。
 入れていたツールと設定は、gcloud・docker・Claude Code 本体を除いて `devenv/` に移してある。
@@ -246,20 +246,14 @@ sandbox の設定まわりは版によって挙動が変わるので、古い版
 これは Simon Willison の「lethal trifecta」と、Meta の「Agents Rule of Two」の考え方そのもの。
 設定は Trail of Bits の [claude-code-config](https://github.com/trailofbits/claude-code-config) を下敷きにして、WSL 向けに足している。
 
-### 設定ファイルを置く
+### 設定ファイルの置き場所
 
-```bash
-mkdir -p ~/.claude
-cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
-```
+設定は、このリポジトリの `.claude/settings.json` に書いてある。
+clone して Claude Code を起動すれば、それだけで効く。
 
-シンボリックリンクにせずコピーする。
-Claude Code は `~/.claude/settings.json` を自分で書き換えることがあり、リンクだとそれがこのリポジトリに入ってしまう。
-`devenv/claude/settings.json` を直したら、もう一度コピーする。
-
-このリポジトリ自身の `.claude/settings.json` にも、同じ sandbox・許可ドメイン・deny・hook を書いてある。
-clone して Claude Code を起動すれば、ユーザー設定をコピーする前から効く。
-ユーザー設定にもコピーするのは、ほかのリポジトリでも同じにするため。
+ほかのリポジトリでも同じにしたいときは、このファイルをそのリポジトリの `.claude/settings.json` にコピーする（`language` は好みで消す）。
+ユーザー設定（`~/.claude/settings.json`）には置かない。
+置き場所を 1 つにして、どのリポジトリで何が効いているかを、そのリポジトリを見れば分かるようにするため。
 
 ### 各設定の意味
 
@@ -300,12 +294,6 @@ sandbox は Bash からの書き込みを止めるが、Claude の Edit ツー�
 この 2 つはコマンドの文字列で判定するので、書き方を変えれば抜けられる。
 注入への防御ではなく、事故防止のガードレールとして入れている。
 本当の防御は、sandbox と `Read` の deny が担う。
-
-**`enableAllProjectMcpServers: false`**
-
-リポジトリの `.mcp.json` に書かれた MCP サーバーを、自動で有効にしない。
-clone したリポジトリが、悪意のある MCP サーバーを持ち込めないようにする。
-既定値だが、うっかり変えないように明示しておく。
 
 ### WebFetch（公開リポジトリ）
 
