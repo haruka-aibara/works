@@ -164,6 +164,9 @@ cd ~/src/<リポジトリ>
 mise use terraform@1.17.1 tflint@0.66.0
 ```
 
+版は `"2"` や `"latest"` のような範囲にせず、正確に固定する。
+範囲で書くと、実際の版は `mise.lock` を見ないと分からず、メジャー更新も `mise.lock` の差分に埋もれる。
+
 `mise.toml` には `[tools]` だけを書く。
 `[settings]` などを書くと、clone した人が最初に `mise trust` を求められる。
 ロックの設定は手順 4 のグローバル設定で効いているので、ここには要らない。
@@ -202,12 +205,8 @@ mise を有効にしたシェルでは、見つからないコマンドが `mise
 ### バージョンの更新
 
 Renovate が `mise.toml` と `mise.lock` を同じ PR で更新する。
+版を固定しているので、どの版からどの版に上がるかが `mise.toml` の差分で見える。
 人がやるのは PR を見てマージすることだけで、次にコマンドを打ったときに新しい版が入る。
-
-| `mise.toml` の書き方 | Renovate の PR |
-|---|---|
-| `terraform = "1.17.1"`（版を固定） | `mise.toml` ごと書き換える |
-| `aws-cli = "2"`（範囲で指定） | `mise.toml` はそのままで、`mise.lock` の版だけ上げる |
 
 `renovate.json` で、mise のツールは公開から 3 日たったものだけ出すようにしている。
 mise の `minimum_release_age` は Renovate が読まないので、別に指定が要る。
