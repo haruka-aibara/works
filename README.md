@@ -52,17 +52,7 @@ terraform plan
 
 ### 入るもの
 
-- mise で入る（版は `mise.toml` で固定）
-  - インフラ：terraform 1.17.1、tflint 0.66.0
-  - クラウド・GitHub：aws-cli 2.41.2、gcloud 594.0.0、gh 2.105.0
-  - Kubernetes：kubectl 1.37.2、helm 4.3.2、minikube 1.39.0
-  - 言語：node 26.13.1、python 3.15.2、uv 0.13.9
-  - Python 製ツール：flake8 7.5.0、pylint 4.1.4、pyre-check 0.10.0、pytest 9.2.0、ansible-core 2.22.0、ansible-lint 26.11.0
-  - その他：jq 1.8.2、Claude Code 2.1.323
-- mise では入らない
-  - bubblewrap・socat：apt で入れる（Claude Code の sandbox の部品。mise に無い）
-  - mise 本体：apt で入れる
-  - docker：Docker Desktop の WSL 連携で使う（デーモンが要るので mise では入らない）
+入るツールと版は [`mise.toml`](mise.toml)、mise では入らないもの（docker など）は [開発環境の手順書](docs/runbooks/wsl-mise-claude-sandbox.md) に書いてある。
 
 ## main へのマージで起きること
 
