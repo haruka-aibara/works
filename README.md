@@ -44,6 +44,10 @@ cd ~/src/works
 # terraform が入っていなくても、ここで自動で入ってから動く
 # https://mise.jdx.dev/configuration/settings.html#not_found_auto_install
 terraform plan
+
+# Claude Code も同じ。入っていなければ、ここで入ってから起動する
+# https://code.claude.com/docs/en/setup
+claude
 ```
 
 - ツールと版は `mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
