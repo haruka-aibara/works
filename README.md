@@ -16,13 +16,26 @@
 WSL2 の Ubuntu で、最初に 1 回だけ実行する。
 
 ```bash
-sudo apt install -y extrepo jq bubblewrap socat && sudo extrepo enable mise
+# Claude Code を囲いの中で動かすための部品を入れる
+sudo apt install -y jq bubblewrap socat
+
+# mise（ツールをまとめて入れてくれる道具）を入れる
+# Ubuntu の標準には無いので、配布元を登録してから入れる
+sudo apt install -y extrepo && sudo extrepo enable mise
 sudo apt update && sudo apt install -y mise
+
+# ターミナルを開くたびに mise が働くようにする
 echo 'eval "$(mise activate bash)"' >> ~/.bashrc && exec bash
 
+# このリポジトリを手元に持ってくる
 git clone https://github.com/haruka-aibara/works ~/src/works
-mkdir -p ~/.config/mise ~/.claude
+
+# 「どこでも使うツールの一覧」として、このリポジトリのファイルを mise に読ませる
+mkdir -p ~/.config/mise
 ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
+
+# Claude Code の「やっていいこと・だめなこと」の設定を置く
+mkdir -p ~/.claude
 cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
 ```
 
@@ -30,7 +43,7 @@ cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
 
 ```bash
 cd ~/src/works
-terraform plan   # 入っていなければ、mise.toml の版がここで入ってから動く
+terraform plan   # terraform が入っていなくても、ここで自動で入ってから動く
 ```
 
 - ツールと版は、このリポジトリで使うものを `mise.toml`、どこでも使うもの（aws-cli・gh など）を `devenv/mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
