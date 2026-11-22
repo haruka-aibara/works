@@ -195,6 +195,8 @@ npm 版（`npm:@anthropic-ai/claude-code`）で入れている。npm 版は公�
 Claude Code の自動更新は、`.claude/settings.json` の `env` に `DISABLE_UPDATES` を入れて止めている。
 止めないと、mise で固定した版と実際に動く版がずれる。
 版の更新は、ほかのツールと同じく Renovate の PR で行う。
+Claude Code はほぼ毎日リリースされるので、Renovate は npm の `stable` の印が付いた版だけを PR にする（`renovate.json` の `followTag`）。
+stable は、だいたい 1 週間前の版で、大きな不具合のある版は飛ばされる（[Claude Code: Setup](https://code.claude.com/docs/en/setup)）。
 sandbox の設定まわりは版によって挙動が変わるので、Renovate の PR は溜めずにマージする。
 
 ## 8. Claude Code の設定

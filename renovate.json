@@ -49,6 +49,12 @@
       "minimumReleaseAge": "3 days"
     },
     {
+      "description": "Claude Code はほぼ毎日リリースされるので、Anthropic が stable の dist-tag を付けた版（だいたい 1 週間前の版で、大きな不具合のある版は飛ばされる）だけ追う。https://code.claude.com/docs/en/setup の Configure release channel",
+      "matchManagers": ["mise"],
+      "matchPackageNames": ["@anthropic-ai/claude-code"],
+      "followTag": "stable"
+    },
+    {
       "description": "hands-on は動かさない学習用サンプルなので、公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正は待ち期間を無視する",
       "matchFileNames": ["hands-on/**"],
       "minimumReleaseAge": "3 days"
