@@ -34,10 +34,11 @@ sandbox は WSL1 では動かない（`Sandboxing requires WSL2` と出る）。
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
-sudo apt install -y git curl wget ca-certificates unzip zip htop tree bubblewrap socat
+sudo apt install -y git curl wget ca-certificates unzip zip htop tree bubblewrap socat libatomic1
 ```
 
 bubblewrap と socat は Claude Code の sandbox が使う。
+libatomic1 は mise で入れる node が使う。WSL の Ubuntu には最初から入っておらず、無いと node（と、それを使う Claude Code）の `mise install` が失敗する。
 ほかの開発ツールは apt では入れない（jq・gcloud・Claude Code も mise）。
 
 ### systemd と自動更新

@@ -20,6 +20,10 @@ WSL2 の Ubuntu で、最初に 1 回だけ実行する。
 # https://code.claude.com/docs/en/sandboxing#set-up-linux-and-wsl2
 sudo apt update && sudo apt install -y bubblewrap socat
 
+# node（mise で入れる）が動くのに要る部品を入れる。WSL の Ubuntu には最初から入っていない
+# https://packages.ubuntu.com/noble/libatomic1
+sudo apt install -y libatomic1
+
 # mise（ツールをまとめて入れてくれる道具）を入れる
 # Ubuntu の標準には無いので、配布元を登録してから入れる
 # https://mise.jdx.dev/installing-mise.html#apt
