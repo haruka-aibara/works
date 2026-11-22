@@ -159,15 +159,16 @@ printf 'mise.local.toml\nmise.local.lock\n.mise/locks/mise.local/\n' >> .gitigno
 
 ### 使う側
 
-clone したら、何も意識せずにコマンドを打てばよい。
+clone したときと `git pull` したときに、`mise install` を打つ。
 
 ```bash
 cd ~/src/<リポジトリ>
-terraform plan   # 入っていなければ、mise.lock の版がここで入ってから実行される
+git pull && mise install
 ```
 
-mise を有効にしたシェルでは、見つからないコマンドが `mise.toml` に書かれたツールなら、その場で入れてから実行する（mise の `not_found_auto_install`、既定で有効）。
-`mise.toml` に無いツールは入らない。
+mise を有効にしたシェルでは、見つからないコマンドが mise の一覧にあるツールなら、その場で入れてから実行もする（`not_found_auto_install`、既定で有効）。
+ただし、`npm:` や `pypi:` で書いたツール（Claude Code・Python 製のツール）は一度入れるまで対象にならず、版が上がったときも古い版が入っていれば入れ直さない。
+なので `mise install` を打つ前提にしている。
 
 入れるときは、配布元が出しているチェックサム・GitHub の attestation・cosign・SLSA を確かめる（mise の aqua バックエンド）。
 `mise.lock` にあるハッシュと合わなければ入らない。
