@@ -259,16 +259,7 @@ Claude Code は `~/.claude/settings.json` を自分で書き換えることが�
 
 このリポジトリ自身の `.claude/settings.json` にも、同じ sandbox・許可ドメイン・deny・hook を書いてある。
 clone して Claude Code を起動すれば、ユーザー設定をコピーする前から効く。
-
-ただし、次の 2 つはリポジトリの `.claude/settings.json` には書いていない。
-
-| 設定 | 書いていない理由 |
-|---|---|
-| `network.strictAllowlist` | ユーザー設定か管理者設定でしか効かない（[Claude Code: Settings](https://code.claude.com/docs/en/settings)） |
-| `failIfUnavailable` | bubblewrap が無いクラウドの Claude Code でこのリポジトリを開くと、セッションが起動しなくなる |
-
-リポジトリ側だけだと、許可していないドメインへの通信は拒否ではなく確認になり、sandbox が使えない環境では sandbox なしで動く。
-この 2 つを効かせるために、ユーザー設定にもコピーする。
+ユーザー設定にもコピーするのは、ほかのリポジトリでも同じにするため。
 
 ### 各設定の意味
 
@@ -277,11 +268,14 @@ clone して Claude Code を起動すれば、ユーザー設定をコピーす�
 | キー | 効果 |
 |---|---|
 | `enabled` | Bash を sandbox の中で動かす。書き込めるのは作業ディレクトリの中だけになる |
-| `failIfUnavailable` | bubblewrap が無いなどで sandbox が使えないとき、sandbox なしで動かさずに起動を止める |
 | `allowUnsandboxedCommands: false` | 失敗したコマンドを「sandbox の外でやり直す」抜け道を閉じる |
 | `autoAllowBashIfSandboxed` | sandbox の中のコマンドは確認なしで実行させる。外に出られないので確認を省ける |
-| `network.strictAllowlist` | 許可リストにないドメインは、確認を出さずに拒否する |
-| `network.allowedDomains` | Bash から通信してよいドメイン。既定は空 |
+| `network.allowedDomains` | Bash から確認なしで通信してよいドメイン。既定は空 |
+
+許可リストにないドメインへの通信は、拒否ではなく確認が出る。
+確認に「Yes」と答えると、そのセッションの間はそのドメインに確認なしで通信できる。
+「Yes, and don't ask again」を選ぶと許可ルールが保存され、次のセッションからも確認が出なくなるので、選ばない（[Claude Code: Sandboxing](https://code.claude.com/docs/en/sandboxing)）。
+毎回必ず確認を出す設定は無い。
 
 `sandbox.excludedCommands` は書かない。
 ここに書いたコマンドは sandbox の外で動くので、抜け道になる。
@@ -406,7 +400,7 @@ Bash の許可ドメインにワイルドカードを使わない。
 | `touch ~/sandbox-test` | 失敗する（作業ディレクトリの外） |
 | `cat ~/.aws/config` | 失敗する（`Read` の deny） |
 | `ls /mnt/c/Users` | 失敗する（`Read` の deny） |
-| `curl -sS https://example.com` | 失敗する（許可リストにない） |
+| `curl -sS https://example.com` | 確認が出る（許可リストにない）。「No」で止まる |
 | `curl -sS https://api.github.com` | 動く |
 | `git push origin main` | hook で止まる |
 | `mise install` | 失敗する（`~/.local/share/mise` に書けない） |

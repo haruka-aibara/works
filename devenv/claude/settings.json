@@ -3,11 +3,9 @@
   "enableAllProjectMcpServers": false,
   "sandbox": {
     "enabled": true,
-    "failIfUnavailable": true,
     "allowUnsandboxedCommands": false,
     "autoAllowBashIfSandboxed": true,
     "network": {
-      "strictAllowlist": true,
       "allowedDomains": [
         "github.com",
         "api.github.com",
@@ -22,18 +20,15 @@
   "permissions": {
     "deny": [
       "WebSearch",
-
       "Bash(sudo *)",
       "Bash(rm -rf *)",
       "Bash(rm -fr *)",
       "Bash(git push --force*)",
       "Bash(git push *--force*)",
       "Bash(git reset --hard*)",
-
       "Edit(~/.bashrc)",
       "Edit(~/.profile)",
       "Edit(~/.ssh/**)",
-
       "Read(~/.ssh/**)",
       "Read(~/.gnupg/**)",
       "Read(~/.aws/**)",

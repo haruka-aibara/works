@@ -44,7 +44,6 @@ ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
 
 # Claude Code の「やっていいこと・だめなこと」の設定を置く
 # このリポジトリの中では .claude/settings.json が効くので、これはほかのリポジトリでも同じにするため
-# 「許可していないサイトは確認なしで拒否」「sandbox が使えなければ起動しない」は、この置き場所でしか効かない
 # https://code.claude.com/docs/en/settings
 mkdir -p ~/.claude
 cp ~/src/works/devenv/claude/settings.json ~/.claude/settings.json
