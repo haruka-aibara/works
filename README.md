@@ -28,6 +28,8 @@ sudo apt install -y extrepo && sudo extrepo enable mise
 sudo apt update && sudo apt install -y mise
 
 # ターミナルを開くたびに mise が働くようにする
+# これがあると、terraform と打つだけで、いるディレクトリの mise.toml の版が使われる（無ければその場で入る）
+# これが無いと、毎回 mise exec -- terraform のように mise を通して打つことになる
 # https://mise.jdx.dev/getting-started.html#activate-mise
 echo 'eval "$(mise activate bash)"' >> ~/.bashrc && exec bash
 
