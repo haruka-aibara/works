@@ -5,10 +5,12 @@
     "customManagers:dockerfileVersions",
     "customManagers:githubActionsVersions"
   ],
-  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、PR 作成は 1 日 1 回（0〜8 時 JST）にし、packageRules で 1 本にまとめる。脆弱性修正はスケジュールを無視してすぐ出る",
+  "description": "PR が出るたびに HCP Terraform の run が積まれてマージが進まないので、Renovate が PR を作る・更新するのは毎日 0 時台（JST）の 1 時間だけにし（schedule は時間帯の指定で本数の上限ではないので、幅を 1 時間にして 1 日 1 回にする。updateNotScheduled: false で、それ以外の時間は既存の PR も更新させない）、メジャーも Terraform も脆弱性修正も含めて 1 本にまとめる。方針は「PR は種類を問わず 1 日最大 1 本。Renovate の仕様でまとめられないものだけ別 PR を許す」で、今の例外は lock file maintenance だけ（グループ化に非対応）。例外を増やすときは仕様の根拠を書く",
   "timezone": "Asia/Tokyo",
-  "schedule": ["* 0-8 * * *"],
+  "schedule": ["* 0 * * *"],
   "rebaseWhen": "behind-base-branch",
+  "updateNotScheduled": false,
+  "separateMajorMinor": false,
   "automerge": false,
   "labels": ["renovate"],
   "assigneesFromCodeOwners": true,
@@ -18,6 +20,16 @@
   },
   "devcontainer": {
     "enabled": false
+  },
+  "lockFileMaintenance": {
+    "description": "Renovate がグループ化に対応していないので別 PR になる。既定の週 1 回（月曜 4 時前）ではなく、他の更新と同じ時間帯にそろえる",
+    "schedule": ["* 0 * * *"]
+  },
+  "vulnerabilityAlerts": {
+    "description": "既定では脆弱性修正は groupName: null・schedule: [] で、グループとスケジュールを無視して個別 PR がすぐ出る。PR を 1 日 1 本に抑えるため、通常の更新と同じ PR・同じスケジュールに乗せる",
+    "groupName": "all dependencies",
+    "groupSlug": "all",
+    "schedule": ["* 0 * * *"]
   },
   "gitIgnoredAuthors": [
     "41898282+github-actions[bot]@users.noreply.github.com"
@@ -34,16 +46,14 @@
   ],
   "packageRules": [
     {
-      "description": "PR ごとに HCP Terraform の speculative plan が走り、strict な branch protection で他 PR の rebase のたびにも走るので、workspace の run が詰まる。PR の数そのものを減らすため、全部 1 本にまとめる。メジャーは separateMajorMinor（既定）で別 PR になる。後ろのルールの groupName が優先されるので、Terraform だけは別 PR",
+      "description": "PR ごとに HCP Terraform の speculative plan が走り、strict な branch protection で他 PR の rebase のたびにも走るので、workspace の run が詰まる。PR の数そのものを減らすため、メジャーも Terraform も全部 1 本にまとめる",
       "matchPackageNames": ["*"],
       "groupName": "all dependencies",
       "groupSlug": "all"
     },
     {
-      "description": "Terraform 本体・Provider・tflint プラグインは、当番がレビューする PR をできるだけ減らすため 1 本にまとめる。メジャーも分けない。labels は上書きになるので addLabels で足す",
+      "description": "Terraform 本体・Provider・tflint プラグインの更新を含む PR には terraform ラベルを付ける。labels は上書きになるので addLabels で足す",
       "matchManagers": ["terraform", "terraform-version", "tflint-plugin"],
-      "groupName": "Terraform",
-      "separateMajorMinor": false,
       "addLabels": ["terraform"]
     },
     {
@@ -53,7 +63,7 @@
       "enabled": false
     },
     {
-      "description": "hands-on は動かさない学習用サンプルなので、公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正 PR は group と待ち期間を無視して個別にすぐ出る",
+      "description": "hands-on は動かさない学習用サンプルなので、公開から 3 日経ったものだけ出す。best-practices の 3 日待ちは npm だけなので、pip の依存にも効くようここで指定する。脆弱性修正は待ち期間を無視する",
       "matchFileNames": ["hands-on/**"],
       "minimumReleaseAge": "3 days"
     },
