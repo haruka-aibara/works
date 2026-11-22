@@ -1,7 +1,25 @@
-# このリポジトリの作業で使うツール。
+# このリポジトリの作業で使うツール。このリポジトリでコマンドを打つと、入っていなければここの版が入る。
 # https://mise.jdx.dev/configuration.html
-# terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
+# 版は範囲や latest にせず、正確に固定する。Renovate が mise.toml と mise.lock を書き換える PR を出す。
 # https://docs.renovatebot.com/modules/manager/mise/
+# gcloud・docker・Claude Code は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
 [tools]
+# terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
 terraform = "1.17.1"
 tflint = "0.66.0"
+aws-cli = "2.41.2"
+gh = "2.105.0"
+kubectl = "1.37.2"
+helm = "4.3.2"
+minikube = "1.39.0"
+node = "26.13.1"
+python = "3.15.2"
+uv = "0.13.9"
+# Python 製のツールは pypi バックエンドで入れる（uv で入れる）
+# https://mise.jdx.dev/dev-tools/backends/pypi.html
+"pypi:flake8" = "7.5.0"
+"pypi:pylint" = "4.1.4"
+"pypi:pyre-check" = "0.10.0"
+"pypi:pytest" = "9.2.0"
+"pypi:ansible-core" = "2.22.0"
+"pypi:ansible-lint" = "26.11.0"

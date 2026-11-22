@@ -7,7 +7,7 @@
 - **GitHub もクラウドも Terraform で持つ。** 手で作らず、このリポジトリから apply する
 - **アプリのコードは、それを動かすインフラと同じモジュールに置く。**
 - **学んだことは記事にして公開する。** `docs/` に書き、[GitHub Pages](https://haruka-aibara.github.io/works/) で読めるようにする。書き方は [`docs/reference/README.md`](docs/reference/README.md)
-- **開発環境はファイルに書いておく。** このリポジトリで使うツールは `mise.toml`、どのリポジトリでも使うツールと Claude Code の設定は `devenv/` に置く
+- **開発環境はファイルに書いておく。** ツールは `mise.toml`、Claude Code の設定は `.claude/settings.json`、VS Code の設定などは `devenv/` に置く
 - **ハンズオンで試しただけのものも、リポジトリを切らずに `hands-on/` に置く。** 1つにつき1ディレクトリで、apply もデプロイもしない
 - **使わなくなったものは消さずに止める。** モジュールは残し、`main.tf` の呼び出しをコメントアウトしておく
 
@@ -36,13 +36,6 @@ echo 'eval "$(mise activate bash)"' >> ~/.bashrc && exec bash
 # このリポジトリを手元に持ってくる
 # https://docs.github.com/ja/repositories/creating-and-managing-repositories/cloning-a-repository
 git clone https://github.com/haruka-aibara/works ~/src/works
-
-# aws や gh のように、どのディレクトリでも使いたいツールの一覧（devenv/mise.toml）を mise に教える
-# mise は ~/.config/mise/config.toml をどこにいても読むので、そこにこのリポジトリのファイルをつなぐ
-# コピーではなくつなぐので、git pull で版の更新（Renovate の PR）がそのまま手元に届く
-# https://mise.jdx.dev/configuration.html#global-config
-mkdir -p ~/.config/mise
-ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
 ```
 
 あとは、このリポジトリに入ってふだんどおりコマンドを打つだけ。
@@ -54,8 +47,8 @@ cd ~/src/works
 terraform plan
 ```
 
-- ツールと版は、このリポジトリで使うものを `mise.toml`、どこでも使うもの（aws-cli・gh など）を `devenv/mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
-- Claude Code は、このリポジトリの `.claude/settings.json` の設定で sandbox の中で動く（コピーなどの準備は要らない）。ツールのインストール、`~/.aws` などの認証情報の読み取り、許可していないサイトとの通信はできない
+- ツールと版は `mise.toml` に書いてある。更新は Renovate の PR をマージするだけ
+- Claude Code は、このリポジトリの `.claude/settings.json` の設定で sandbox の中で動く（コピーなどの準備は要らない）。ツールのインストールと、`~/.aws` などの認証情報の読み取りはできない。許可していないサイトと通信するときは確認が出る
 - apt の自動更新・gcloud・VS Code の設定など、細かい手順と理由は [開発環境の手順書](docs/runbooks/wsl-mise-claude-sandbox.md)
 
 ## main へのマージで起きること

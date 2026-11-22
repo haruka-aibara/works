@@ -7,12 +7,12 @@ Claude Code は sandbox の中で動かし、Bash は許可したドメインに
 | 層 | 入るもの | 置き場所 | 更新のしかた |
 |---|---|---|---|
 | WSL（apt） | git・curl・jq・bubblewrap など | この手順書 | unattended-upgrades が自動で当てる |
-| mise（共通） | aws-cli・gh・kubectl・python まわりなど、どのリポジトリでも使うもの | `devenv/mise.toml` | Renovate の PR |
-| mise（リポジトリごと） | terraform・tflint など、そのリポジトリで使うもの | 各リポジトリの `mise.toml` | Renovate の PR |
+| mise | terraform・aws-cli・gh・python まわりなど、そのリポジトリで使うもの | 各リポジトリの `mise.toml` | Renovate の PR |
 | Claude Code | sandbox の設定 | 各リポジトリの `.claude/settings.json` | 手で直す |
 
 以前は devcontainer テンプレートを ghcr に公開して同じことをしていた。
-入れていたツールと設定は、gcloud・docker・Claude Code 本体を除いて `devenv/` に移してある。
+入れていたツールはこのリポジトリの `mise.toml` に、VS Code の設定などは `devenv/` に移してある（gcloud・docker・Claude Code 本体を除く）。
+コマンドはこのリポジトリの中で打つので、どこでも使えるようにする設定（mise のグローバル設定）は使わない。
 
 ## 1. Windows 側：WSL2 の Ubuntu を入れる
 
@@ -91,38 +91,13 @@ echo 'eval "$(mise activate bash)"' >> ~/.bashrc
 exec bash
 ```
 
-## 4. 共通のツールを入れる
-
-このリポジトリの `devenv/mise.toml` を、mise のグローバル設定としてつなぐ。
+## 4. このリポジトリを clone する
 
 ```bash
 git clone https://github.com/haruka-aibara/works ~/src/works
-mkdir -p ~/.config/mise
-ln -s ~/src/works/devenv/mise.toml ~/.config/mise/config.toml
 ```
 
-`devenv/mise.lock` がまだリポジトリに無ければ、作ってコミットする。
-グローバル設定のロックは、`devenv/` の中で `--global` を付けて作る。
-
-```bash
-cd ~/src/works/devenv
-mise lock --global --platform linux-x64,linux-arm64,macos-arm64
-git add mise.lock && git commit -m "devenv の mise.lock を作る"
-```
-
-ロックもつないで、入れる。
-
-```bash
-ln -s ~/src/works/devenv/mise.lock ~/.config/mise/mise.lock
-mise install
-```
-
-`devenv/mise.toml` の `[settings]` で、次の 2 つを全リポジトリに効かせている。
-
-| 設定 | 効果 |
-|---|---|
-| `lockfile = true` | どのリポジトリでも、`mise install` のたびに `mise.lock` を作って更新する |
-| `minimum_release_age = "3d"` | 公開から 3 日たっていない版は入れない。乗っ取られたリリースを掴みにくくする |
+ツールは、このリポジトリに入ってコマンドを打ったときに入る（手順 6 の「使う側」）。
 
 ### mise で入れないもの
 
@@ -169,9 +144,9 @@ mise use terraform@1.17.1 tflint@0.66.0
 
 `mise.toml` には `[tools]` だけを書く。
 `[settings]` などを書くと、clone した人が最初に `mise trust` を求められる。
-ロックの設定は手順 4 のグローバル設定で効いているので、ここには要らない。
 
-`mise use` を実行した時点で `mise.lock` もできる。
+`mise.lock` は自動ではできないので、最初の 1 回だけ `mise lock` で作る。
+一度できれば、以後は mise と Renovate が更新する。
 WSL 以外（Mac・CI）でも使うなら、プラットフォームを足しておく。
 
 ```bash
@@ -209,7 +184,7 @@ Renovate が `mise.toml` と `mise.lock` を同じ PR で更新する。
 人がやるのは PR を見てマージすることだけで、次にコマンドを打ったときに新しい版が入る。
 
 `renovate.json` で、mise のツールは公開から 3 日たったものだけ出すようにしている。
-mise の `minimum_release_age` は Renovate が読まないので、別に指定が要る。
+mise 自身も、公開から 24 時間たっていない版は入れない（`minimum_release_age` の既定値）。
 
 aqua バックエンドのツールは、Renovate のドキュメントで「追加の設定が要る場合がある」扱いになっている。
 新しいツールを足したら、Renovate の Dependency Dashboard に載ったかを一度確かめる。
