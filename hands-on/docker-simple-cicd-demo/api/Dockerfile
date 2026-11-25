@@ -1,4 +1,4 @@
-FROM gradle:9@sha256:39d599d8df1777d73b00b5bf928254ecd121802d518577fe08d41a3cf86aa45f AS base
+FROM gradle:9@sha256:a16370cdf4fab2bdec80810ba7f7d577fc2ce86eb1332b067031fcc19d947ed5 AS base
 CMD ["bash"]
 
 # test-and-build

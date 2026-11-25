@@ -5,7 +5,7 @@
 # docker・bubblewrap・socat は mise で入れない。理由と入れ方は docs/runbooks/wsl-mise-claude-sandbox.md。
 [tools]
 # terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
-terraform = "1.17.1"
+terraform = "1.17.2"
 tflint = "0.66.0"
 aws-cli = "2.41.2"
 gh = "2.105.0"
