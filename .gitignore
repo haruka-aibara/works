@@ -43,6 +43,3 @@ terraform.rc
 # archive_file の zip に入り、source_code_hash が変わって無用な再デプロイになる。
 __pycache__/
 *.pyc
-
-# mise がツールを入れている間だけ使う一時ロック
-/.mise/
