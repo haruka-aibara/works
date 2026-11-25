@@ -32,9 +32,10 @@ jobs:
         with:
           persist-credentials: false
       # git 管理下のファイルだけを見るので、手元の仮想環境は数えない。
+      # .mise/locks/ は mise が置く依存 lock で、テスト対象ではない。
       - id: find
         run: |
-          projects=$(git ls-files '*pyproject.toml' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
+          projects=$(git ls-files '*pyproject.toml' ':!:.mise/**' | xargs -r -n1 dirname | jq -Rsc 'split("\n") | map(select(. != ""))')
           echo "projects=$projects" >> "$GITHUB_OUTPUT"
 
   test:
