@@ -175,7 +175,7 @@ uv = { path = ".mise/locks/pypi-ansible-core/2.22.0", digest = "sha256:5273dbe59
 version = "26.11.0"
 backend = "pypi:ansible-lint"
 specifiers = ["26.11.0"]
-uv = { path = ".mise/locks/pypi-ansible-lint/26.11.0", digest = "sha256:e2c4c684bc9dfb09d51621ac2340d48328d885174757daa1f3504d385d21ef87" }
+uv = { path = ".mise/locks/pypi-ansible-lint/26.11.0", digest = "sha256:bd716d8b53a9000586e27cf86722aa91147c35dffddc573be5fa4311f0e6a10a" }
 
 [[tools."pypi:flake8"]]
 version = "7.5.0"
