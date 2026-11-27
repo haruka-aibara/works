@@ -1,0 +1,101 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@anthropic-ai/claude-code':
+        specifier: 2.1.326
+        version: 2.1.326
+
+packages:
+
+  '@anthropic-ai/claude-code-darwin-arm64@2.1.326':
+    resolution: {integrity: sha512-u6Gk/xJdrSVbnJ4LsObftgY8/oAWv0YNkWmIirPtLrf80ocIve1VeJeoQTLJ5IkgQOSEIHMTt5V5McY/25cdPg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@anthropic-ai/claude-code-darwin-x64@2.1.326':
+    resolution: {integrity: sha512-QmyjV6F2YQftZgsnal4aOwCFMtc99B3Czgtq2o5bVRP4DXMvjfSf8mQeKyCGsHX7d/CRCDdbva+z7HpriqCwdg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@anthropic-ai/claude-code-linux-arm64-musl@2.1.326':
+    resolution: {integrity: sha512-IB793mtG7aA1m4WxwQabigUD4sHDEcXu9lRltZITLQCPzBdGFlWINxdSCnk9TVWAv0Bb5eyirxyPI9WMER0wiA==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@anthropic-ai/claude-code-linux-arm64@2.1.326':
+    resolution: {integrity: sha512-lZCCWXarB/1IeHkotI937eEdN4BCbVdWDdmejtlkbUO9M29rHjITtXW9BWCDFlxvo0GXsFogN0SFIJWgMelKLw==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@anthropic-ai/claude-code-linux-x64-musl@2.1.326':
+    resolution: {integrity: sha512-Gnd/9lghe4q2CX9mzPgz8db9GngP6KHx/q1V6wepDM2CG1pQSwgrvzrs8M5Z8KmbSrun1Fgd1d6InedeZeMZ/w==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@anthropic-ai/claude-code-linux-x64@2.1.326':
+    resolution: {integrity: sha512-RvNuaeMGfPGUyUGttVvhHgVUZ3B2L+Pgf336ImZLsPP2UQHYblewi47CPFLObqz+K6D++PLP1eAsDBLYko3w+g==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@anthropic-ai/claude-code-win32-arm64@2.1.326':
+    resolution: {integrity: sha512-73fuRE8WAHjViGnJJ6ARPL5euT1uR5gGvfTksyesMjStIYQvwb0cO2mYRX0+UnogQ0+6U5+VoUNpAI2SLPPBBw==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@anthropic-ai/claude-code-win32-x64@2.1.326':
+    resolution: {integrity: sha512-ahXmZQfQ3VEU1hvIa+c0Oy3IzhYNErLAhYDGwfemotx+1Zc2QCHurynu6qTu2dnAM02fe9uaX8Gx8TrABt6jvA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@anthropic-ai/claude-code@2.1.326':
+    resolution: {integrity: sha512-F7OqxXKogQYUs+RN1903IWlXGuxn8iwAykx+umRbDKvoBeK0Xm6cdgQx9auu5dtsB+DczN58/EFrlaU8pLfgJg==}
+    engines: {node: '>=22.0.0'}
+    hasBin: true
+
+snapshots:
+
+  '@anthropic-ai/claude-code-darwin-arm64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-darwin-x64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-linux-arm64-musl@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-linux-arm64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-linux-x64-musl@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-linux-x64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-win32-arm64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code-win32-x64@2.1.326':
+    optional: true
+
+  '@anthropic-ai/claude-code@2.1.326':
+    optionalDependencies:
+      '@anthropic-ai/claude-code-darwin-arm64': 2.1.326
+      '@anthropic-ai/claude-code-darwin-x64': 2.1.326
+      '@anthropic-ai/claude-code-linux-arm64': 2.1.326
+      '@anthropic-ai/claude-code-linux-arm64-musl': 2.1.326
+      '@anthropic-ai/claude-code-linux-x64': 2.1.326
+      '@anthropic-ai/claude-code-linux-x64-musl': 2.1.326
+      '@anthropic-ai/claude-code-win32-arm64': 2.1.326
+      '@anthropic-ai/claude-code-win32-x64': 2.1.326

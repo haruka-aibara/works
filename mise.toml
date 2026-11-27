@@ -7,7 +7,7 @@
 # terraform の版は .terraform-version（CI と HCP Terraform が読む）とそろえる。Renovate が両方を同じ PR で上げる。
 terraform = "1.17.2"
 tflint = "0.66.0"
-aws-cli = "2.41.2"
+aws-cli = "2.42.2"
 gh = "2.105.0"
 kubectl = "1.37.2"
 helm = "4.3.2"
@@ -24,7 +24,7 @@ gcloud = "594.0.0"
 # mise は npm パッケージのスクリプトを既定で実行しないが、Claude Code は postinstall で本体のバイナリをつなぐので、Claude Code 自身のスクリプトだけ許可する
 # 本体は版が固定された別パッケージ（@anthropic-ai/claude-code-linux-x64 など）から入る
 # https://mise.jdx.dev/dev-tools/backends/npm.html
-"npm:@anthropic-ai/claude-code" = { version = "2.1.323", allow_builds = ["@anthropic-ai/claude-code"] }
+"npm:@anthropic-ai/claude-code" = { version = "2.1.326", allow_builds = ["@anthropic-ai/claude-code"] }
 # Python 製のツールは pypi バックエンドで入れる（uv で入れる）
 # https://mise.jdx.dev/dev-tools/backends/pypi.html
 "pypi:flake8" = "7.5.0"
